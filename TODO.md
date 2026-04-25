@@ -4,8 +4,7 @@ For every change consider the `design-guide.md` before implementing a todo.
 
 ## Wave 2 — High Delight, Manageable Scope
 
-- [ ] **Lotti live** — wire the existing Lotti assistant to a real LLM API (OpenAI / local Ollama). Keep mock as fallback. System prompt: patient, warm, Swiss German assistant.
-- [ ] **Grokipedia for real** — replace the stub with curated explainers for common questions (news terms, health terms, government forms, scams, travel words).
+- [ ] **Meteo Swiss** - Weather
 - [ ] **Nachbarn for real** — turn the social stub into a private family/caregiver timeline with photos, short updates, and clear read/unread state.
 - [ ] **Ferien polish** — persist trips, allow caregiver-prepared suggestions, and make the travel flow resumable without losing progress.
 - [ ] **Music player** — curated playlist per user (stored in DB), large play/pause/next, volume. Stream from server or local files. No library browser for now.
