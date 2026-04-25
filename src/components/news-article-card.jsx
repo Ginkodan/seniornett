@@ -14,8 +14,7 @@ function getImageSrc(imageUrl) {
   if (!imageUrl) {
     return '';
   }
-
-  return `/api/news-image?url=${encodeURIComponent(imageUrl)}`;
+  return imageUrl;
 }
 
 export function NewsArticleCard({ article }) {
@@ -24,9 +23,9 @@ export function NewsArticleCard({ article }) {
       <div className="news-article-body">
         <div className="news-article-source">{article.source}</div>
         <h2>{article.title}</h2>
-        {article.image && (
+        {getImageSrc(article.imageDataUrl || article.image) && (
           <div className="news-article-image">
-            <img src={getImageSrc(article.image)} alt="" loading="lazy" />
+            <img src={getImageSrc(article.imageDataUrl || article.image)} alt="" loading="lazy" />
           </div>
         )}
         <div className="news-article-content">

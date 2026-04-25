@@ -40,14 +40,7 @@ export function TopBar() {
   return (
     <div className="topbar">
       <Link className="logo logo-btn" href="/" aria-label="Zur Startseite">
-        <div className="logo-mark" aria-hidden />
-        <div className="logo-copy">
-          <div className="logo-brand">
-            <span>SeniorNett</span>
-            <span style={{ fontWeight: 500, color: 'var(--ink-3)', marginLeft: 6, fontSize: 'var(--fs-sm)' }}>.ch</span>
-          </div>
-          <div className="logo-home-label">Zur Startseite</div>
-        </div>
+        Zur Startseite
       </Link>
 
       <div className="a11y">

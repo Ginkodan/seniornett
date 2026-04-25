@@ -1,6 +1,7 @@
 "use server";
 
 const REMOTE_FETCH_TIMEOUT_MS = 12000;
+const MAX_IMAGE_BYTES = 1_500_000;
 
 const NEWS_SOURCES = [
   { name: "SRF", url: "https://www.srf.ch/news/bnf/rss/1646" },
@@ -87,6 +88,7 @@ function parseFeed(xmlText: string, sourceName: string) {
         source: sourceName,
         publishedAt: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString(),
         image: normalizeUrl(extractImage(item) || "", normalizedLink || sourceName),
+        imageDataUrl: null,
       };
     })
     .filter((item) => item.title);
@@ -188,6 +190,56 @@ async function fetchRemoteText(url: string) {
   }
 }
 
+async function fetchImageDataUrl(url: string | null) {
+  if (!url) {
+    return null;
+  }
+
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    return null;
+  }
+
+  if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+    return null;
+  }
+
+  const abortController = new AbortController();
+  const timeout = setTimeout(() => abortController.abort(), REMOTE_FETCH_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(parsedUrl.toString(), {
+      signal: abortController.signal,
+      cache: "no-store",
+      redirect: "follow",
+      headers: {
+        "User-Agent": "SeniorNett/0.1 (+https://seniornett.local)",
+        "Accept-Language": "de-CH,de;q=0.9,en;q=0.7",
+        Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+      },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const contentType = response.headers.get("content-type") || "image/jpeg";
+    const arrayBuffer = await response.arrayBuffer();
+
+    if (!arrayBuffer.byteLength || arrayBuffer.byteLength > MAX_IMAGE_BYTES) {
+      return null;
+    }
+
+    return `data:${contentType};base64,${Buffer.from(arrayBuffer).toString("base64")}`;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 export async function loadNewsAction() {
   const responses = await Promise.all(
     NEWS_SOURCES.map(async (source) => {
@@ -219,6 +271,7 @@ export async function loadNewsAction() {
       if (!article.link) {
         return {
           ...article,
+          imageDataUrl: null,
           content: article.summary,
         };
       }
@@ -226,10 +279,13 @@ export async function loadNewsAction() {
       const htmlText = await fetchRemoteText(article.link);
       const content = htmlText ? extractArticleContent(htmlText) : "";
       const image = htmlText ? extractMetaImage(htmlText, article.link) : null;
+      const finalImage = image || article.image;
+      const imageDataUrl = await fetchImageDataUrl(finalImage);
 
       return {
         ...article,
-        image: image || article.image,
+        image: finalImage,
+        imageDataUrl,
         content: content || article.summary,
       };
     })
