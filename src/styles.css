@@ -178,6 +178,35 @@ body {
   width: 1px; height: 28px; background: var(--ink);
   opacity: 0.3;
 }
+.topbar .spacer {
+  margin-left: auto;
+}
+.whoami-chip {
+  border: var(--border-thin);
+  background: var(--paper-2);
+  border-radius: 999px;
+  padding: 8px 14px;
+  min-width: 340px;
+}
+.whoami-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  font-weight: 700;
+  line-height: 1.1;
+}
+.whoami-main {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.whoami-sub {
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+  line-height: 1.1;
+}
 
 /* A11y controls in top bar */
 .a11y {

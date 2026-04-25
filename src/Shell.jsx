@@ -1,7 +1,7 @@
 import React from 'react';
 import { Icon } from './icons.jsx';
 
-export function TopBar({ textSize, onTextSize, contrast, onContrast, onRead }) {
+export function TopBar({ textSize, onTextSize, contrast, onContrast, onRead, identity }) {
   const time = new Date();
   const dateStr = time.toLocaleDateString('de-CH', { weekday: 'long', day: 'numeric', month: 'long' });
   const timeStr = time.toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' });
@@ -42,6 +42,16 @@ export function TopBar({ textSize, onTextSize, contrast, onContrast, onRead }) {
       </div>
 
       <div className="spacer" />
+
+      <div className="whoami-chip" aria-live="polite">
+        <div className="whoami-title">Wer bin ich?</div>
+        <div className="whoami-main">
+          {identity?.loading ? 'Wird geladen ...' : `${identity?.userName || 'Unbekannt'} (${identity?.role || '-'})`}
+        </div>
+        <div className="whoami-sub">
+          {identity?.deviceId || 'unbekannt'} · {identity?.vpnIp || '-'}
+        </div>
+      </div>
 
       <div className="time">{dateStr} · {timeStr}</div>
     </div>

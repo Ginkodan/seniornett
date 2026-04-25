@@ -29,6 +29,14 @@ export default function App() {
   const [layout, setLayout] = React.useState('grid');
   const [textSize, setTextSize] = React.useState(1);
   const [contrast, setContrast] = React.useState(false);
+  const [identity, setIdentity] = React.useState({
+    loading: true,
+    userName: 'Unbekannt',
+    deviceId: 'unbekannt',
+    vpnIp: '-',
+    role: '-',
+    source: 'loading',
+  });
 
   const [screen, setScreen] = React.useState('home');
   const [assistantOpen, setAssistantOpen] = React.useState(false);
@@ -50,6 +58,43 @@ export default function App() {
     fit();
     window.addEventListener('resize', fit);
     return () => window.removeEventListener('resize', fit);
+  }, []);
+
+  React.useEffect(() => {
+    const applyFallback = () => {
+      setIdentity({
+        loading: false,
+        userName: 'Unbekannt',
+        deviceId: `port-${window.location.port || 'n/a'}`,
+        vpnIp: '-',
+        role: '-',
+        source: 'fallback',
+      });
+    };
+
+    const loadIdentity = async () => {
+      try {
+        const response = await fetch('/api/whoami', { credentials: 'include' });
+        if (!response.ok) {
+          applyFallback();
+          return;
+        }
+
+        const data = await response.json();
+        setIdentity({
+          loading: false,
+          userName: data.user?.name || 'Unbekannt',
+          deviceId: data.deviceId || 'unbekannt',
+          vpnIp: data.vpnIp || '-',
+          role: data.user?.role || '-',
+          source: 'api',
+        });
+      } catch {
+        applyFallback();
+      }
+    };
+
+    loadIdentity();
   }, []);
 
   const openApp = (id) => setScreen(id);
@@ -104,6 +149,7 @@ export default function App() {
         contrast={contrast}
         onContrast={() => setContrast(v => !v)}
         onRead={readAloud}
+        identity={identity}
       />
       <div className="content" data-screen-label={SCREEN_LABELS[screen] || screen}>
         {currentScreen}
