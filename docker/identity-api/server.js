@@ -1,62 +1,77 @@
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
+const { Pool } = require('pg');
 
 const app = express();
-const DB_FILE = path.join(__dirname, 'users.db.json');
-
-function loadUsersDb() {
-  const raw = fs.readFileSync(DB_FILE, 'utf8');
-  const parsed = JSON.parse(raw);
-  return Array.isArray(parsed.users) ? parsed.users : [];
-}
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 function getForwardedIp(headerValue) {
   if (!headerValue) return null;
-  const first = headerValue.split(',')[0].trim();
-  return first || null;
+  return headerValue.split(',')[0].trim() || null;
 }
 
-function findUser(users, sourceIp, sourcePort) {
-  const byIp = sourceIp ? users.find((u) => u.vpnIp === sourceIp) : null;
-  const byPort = sourcePort ? users.find((u) => String(u.localDevPort) === String(sourcePort)) : null;
+async function findUser(sourceIp, sourcePort) {
+  const { rows } = await pool.query(
+    `SELECT user_id, username, display_name, role, device_id, vpn_ip::text AS vpn_ip
+     FROM users
+     WHERE vpn_ip = $1::inet OR local_dev_port = $2
+     LIMIT 2`,
+    [sourceIp || null, sourcePort ? Number(sourcePort) : null]
+  );
 
-  if (byIp && byPort && byIp.userId !== byPort.userId) {
+  if (rows.length === 0) return { user: null, reason: 'not-found' };
+  if (rows.length === 2 && rows[0].user_id !== rows[1].user_id)
     return { user: null, reason: 'ip-port-mismatch' };
-  }
 
-  return { user: byIp || byPort || null, reason: null };
+  return { user: rows[0], reason: null };
 }
 
-app.get('/health', (_req, res) => {
-  const users = loadUsersDb();
-  res.json({ ok: true, users: users.length });
+app.get('/health', async (_req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT COUNT(*) AS count FROM users');
+    res.json({ ok: true, users: Number(rows[0].count) });
+  } catch (err) {
+    res.status(503).json({ ok: false, error: err.message });
+  }
 });
 
-app.get('/api/whoami', (req, res) => {
-  const users = loadUsersDb();
+// Called by nginx auth_request on every request.
+// Returns 200 + identity headers on success, 403 on unknown/mismatched device.
+// No body — nginx only reads the status code and response headers.
+app.get('/internal/auth', async (req, res) => {
   const sourceIp = getForwardedIp(req.get('X-Forwarded-For'));
   const sourcePort = req.get('X-Source-Port');
-  const { user, reason } = findUser(users, sourceIp, sourcePort);
+  const { user, reason } = await findUser(sourceIp, sourcePort);
 
   if (!user) {
-    return res.status(403).json({
-      error: 'Unknown or missing device identity',
-      reason: reason || 'not-found',
-    });
+    return res.status(403).end();
+  }
+
+  res.set('X-User-Id',   user.user_id);
+  res.set('X-User-Name', user.display_name);
+  res.set('X-User-Role', user.role);
+  res.set('X-Device-Id', user.device_id);
+  res.set('X-Vpn-Ip',    user.vpn_ip);
+  return res.status(200).end();
+});
+
+// Called by the SPA after nginx has validated identity and injected headers.
+// Reads injected headers — no second IP lookup needed.
+app.get('/api/identity', (req, res) => {
+  const userId   = req.get('X-User-Id');
+  const userName = req.get('X-User-Name');
+  const role     = req.get('X-User-Role');
+  const deviceId = req.get('X-Device-Id');
+  const vpnIp    = req.get('X-Vpn-Ip');
+
+  if (!userId) {
+    return res.status(403).json({ error: 'Missing identity headers — request did not pass auth_request?' });
   }
 
   return res.json({
     authenticated: true,
-    deviceId: user.deviceId,
-    deviceLabel: user.deviceId,
-    vpnIp: user.vpnIp,
-    user: {
-      id: user.userId,
-      username: user.username,
-      name: user.displayName,
-      role: user.role,
-    },
+    deviceId,
+    vpnIp,
+    user: { id: userId, name: userName, role },
   });
 });
 

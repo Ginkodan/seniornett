@@ -1,5 +1,10 @@
 node_modules
-dist
 .DS_Store
 *.log
+dist
 .vite
+.next
+out
+.vercel
+.env.local
+.env*.local
