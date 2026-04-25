@@ -11,7 +11,7 @@ export function NewsScreen() {
   return (
     <div className="app">
       <div className="app-header">
-        <h1 className="app-title">Nachrichten</h1>
+        <h1 className="app-title">Zeitung</h1>
         <div className="spacer" />
         <button className="btn" onClick={refreshNews} disabled={!isOnline && !news?.updatedAt}>
           Neu laden

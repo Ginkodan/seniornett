@@ -1,0 +1,187 @@
+"use client";
+
+import React from "react";
+
+function formatDate(value) {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleString("de-CH", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function SourceBadge({ source }) {
+  return (
+    <span className={`video-source-badge video-source-badge--${source}`}>
+      {source === "ted" ? "TED" : "SRF"}
+    </span>
+  );
+}
+
+export function VideoScreen({ loadVideoAction }) {
+  const [data, setData] = React.useState({ sections: [], error: "" });
+  const [loading, setLoading] = React.useState(true);
+  const [player, setPlayer] = React.useState({
+    open: false,
+    title: "",
+    url: "",
+    fallbackUrl: "",
+    mode: "iframe",
+  });
+  const videoRef = React.useRef(null);
+
+  const loadData = React.useCallback(() => {
+    setLoading(true);
+    return loadVideoAction()
+      .then((result) => setData(result))
+      .catch(() =>
+        setData({
+          sections: [],
+          error: "Inhalte konnten nicht geladen werden.",
+        })
+      )
+      .finally(() => setLoading(false));
+  }, [loadVideoAction]);
+
+  React.useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  React.useEffect(() => {
+    if (!player.open) return;
+    function onKeyDown(event) {
+      if (event.key === "Escape") {
+        setPlayer({ open: false, title: "", url: "", fallbackUrl: "", mode: "iframe" });
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [player.open]);
+
+  function openPlayer(episode) {
+    setPlayer({
+      open: true,
+      title: episode.title,
+      url: episode.streamUrl || episode.playUrl,
+      fallbackUrl: episode.playUrl,
+      mode: episode.streamUrl ? "video" : "iframe",
+    });
+  }
+
+  function closePlayer() {
+    setPlayer({ open: false, title: "", url: "", fallbackUrl: "", mode: "iframe" });
+  }
+
+  const hasSections =
+    !loading && !data.error && data.sections && data.sections.some((s) => s.episodes.length > 0);
+
+  return (
+    <div className="app">
+      <div className="app-header">
+        <h1 className="app-title">Fernsehen &amp; Vorträge</h1>
+        <div className="spacer" />
+        <button className="btn" onClick={loadData} disabled={loading}>
+          {loading ? "Lädt ..." : "Neu laden"}
+        </button>
+      </div>
+
+      <div className="app-body">
+        <div className="video-shell">
+          {data.error && <div className="video-warning">{data.error}</div>}
+
+          {loading && (
+            <p className="video-loading">Sendungen werden geladen …</p>
+          )}
+
+          {data.sections && data.sections.map((section) =>
+            section.episodes.length === 0 ? null : (
+              <section key={section.showId} className="video-section">
+                <div className="video-section-header">
+                  <h2 className="video-section-title">{section.title}</h2>
+                  <SourceBadge source={section.source} />
+                </div>
+                <div className="video-episode-list">
+                  {section.episodes.map((episode) => (
+                    <button
+                      key={episode.id}
+                      className="video-episode-card"
+                      onClick={() => openPlayer(episode)}
+                    >
+                      <div className="video-episode-image-wrap">
+                        {episode.imageUrl ? (
+                          <img
+                            src={episode.imageUrl}
+                            alt={episode.title}
+                            className="video-episode-image"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="video-episode-image-fallback">
+                            {episode.source === "ted" ? "TED" : "SRF"}
+                          </div>
+                        )}
+                      </div>
+                      <div className="video-episode-body">
+                        <div className="video-episode-title">{episode.title}</div>
+                        <div className="video-episode-meta">
+                          {episode.source === "ted"
+                            ? episode.duration || formatDate(episode.publishedAt)
+                            : formatDate(episode.publishedAt)}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )
+          )}
+
+          {!loading && !data.error && !hasSections && (
+            <div className="video-warning">
+              Zurzeit konnten keine Sendungen geladen werden. Bitte später nochmals versuchen.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {player.open && (
+        <div className="video-player-overlay" role="dialog" aria-modal="true" aria-label={player.title}>
+          <div className="video-player-panel">
+            <div className="video-player-head">
+              <h3>{player.title}</h3>
+              <button className="btn" onClick={closePlayer}>
+                Schliessen
+              </button>
+            </div>
+            <div className="video-player-frame-wrap">
+              {player.mode === "video" ? (
+                <video
+                  key={player.url}
+                  ref={videoRef}
+                  className="video-player-frame"
+                  src={player.url}
+                  controls
+                  autoPlay
+                  playsInline
+                />
+              ) : (
+                <iframe
+                  title={player.title}
+                  src={player.url}
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                  className="video-player-frame"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

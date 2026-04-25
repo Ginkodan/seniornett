@@ -2,14 +2,15 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { MessagesSquare, Newspaper, BookOpen, CloudSun } from 'lucide-react';
+import { MessagesSquare, Newspaper, BookOpen, CloudSun, Tv } from 'lucide-react';
 import { useAppState } from './app-provider.jsx';
 
 export const APPS = [
-  { id: 'news', href: '/news', icon: <Newspaper size={36} strokeWidth={2.25} />, label: 'Nachrichten' },
-  { id: 'lotti-live', href: '/lotti-live', icon: <MessagesSquare size={36} strokeWidth={2.25} />, label: 'Lotti live' },
+  { id: 'news', href: '/news', icon: <Newspaper size={36} strokeWidth={2.25} />, label: 'Zeitung' },
+  { id: 'lotti-live', href: '/lotti-live', icon: <MessagesSquare size={36} strokeWidth={2.25} />, label: 'Frag Lotti' },
   { id: 'lexikon', href: '/lexikon', icon: <BookOpen size={36} strokeWidth={2.25} />, label: 'Lexikon' },
   { id: 'wetter', href: '/wetter', icon: <CloudSun size={36} strokeWidth={2.25} />, label: 'Wetter' },
+  { id: 'video', href: '/video', icon: <Tv size={36} strokeWidth={2.25} />, label: 'Fernsehen' },
 ];
 
 export function HomeScreen() {
