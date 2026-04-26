@@ -10,7 +10,6 @@ For every change consider the `design-guide.md` before implementing a todo.
 - [ ] Musik Player
 - [ ] Spiele (unter anderem Brainfitness)
 - [ ] Kontakte & Chat-/Mailartiges kommunizieren
-- [ ] Notfall Kontakt
 - [ ] Caregiveer Chat (evtl. Spitex integration oder ähnlich)
 - [ ] Fotos und Dokumente
 - [ ] Video Calls mit Kontakten

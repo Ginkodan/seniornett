@@ -71,7 +71,7 @@ export function LottiLiveScreen({ askLottiAction }) {
             <div className="lotti-messages" ref={listRef}>
               {!messages.length && !pending && (
                 <div className="lotti-empty-state">
-                  Ihre Unterhaltung erscheint hier.
+                  Deine Unterhaltung erscheint hier.
                 </div>
               )}
 
