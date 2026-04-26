@@ -350,6 +350,7 @@
       "unassigned": "Noch nicht zugeordnet"
     },
     "detail": {
+      "info": "Hinweise zum Foto oder Papier",
       "from": "Bekommen von",
       "received": "Angekommen am",
       "where": "Zu finden in",
@@ -358,6 +359,15 @@
       "noteEmpty": "Hier hat Nina noch keine Notiz hinterlegt.",
       "empty": "Wähle links ein Foto oder Papier aus.",
       "previewFallback": "Vorschau wird angezeigt, sobald das Papier geladen ist."
+    },
+    "reader": {
+      "previous": "Zurück",
+      "next": "Weiter",
+      "pageIndicator": "Seite {page} von {count}",
+      "empty": "Dieses Papier kann gerade nicht angezeigt werden.",
+      "unsupported": "Dieses Papier kann SeniorNett noch nicht anzeigen.",
+      "pdfError": "Dieses Papier kann gerade nicht angezeigt werden.",
+      "textError": "Dieses Papier kann gerade nicht gelesen werden."
     },
     "upload": {
       "eyebrow": "Für die Betreuung",

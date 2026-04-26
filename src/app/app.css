@@ -687,6 +687,8 @@ body {
   border: var(--border-thin);
   border-radius: calc(var(--radius) - 0.2rem);
   background: var(--paper-2);
+  display: block;
+  object-fit: cover;
 }
 
 .media-card-document-compact-icon {
@@ -735,10 +737,38 @@ body {
 }
 
 .media-document-sheet-body {
-  display: grid;
-  grid-template-columns: auto 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
-  align-items: start;
+  min-height: 18rem;
+}
+
+.media-document-paper {
+  min-height: 18rem;
+  padding: 1.25rem 1.1rem;
+  border: var(--border-thin);
+  border-radius: calc(var(--radius) - 0.1rem);
+  background: linear-gradient(180deg, #fffdf7 0%, #faf7f0 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow: auto;
+}
+
+.media-document-paper-title {
+  font-size: var(--fs-md);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.media-document-paper-text {
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  flex: 1;
 }
 
 .media-document-file-icon {
@@ -983,8 +1013,42 @@ body {
   padding: 0.75rem;
 }
 
-.media-viewer-preview img,
-.media-viewer-preview object {
+.media-pdf-sheet {
+  width: 100%;
+  min-height: 42rem;
+  padding: 0.75rem;
+  background: linear-gradient(180deg, #fffdf7 0%, #faf7f0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.media-pdf-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border: var(--border-thin);
+  border-radius: calc(var(--radius) - 0.15rem);
+  background: white;
+}
+
+.media-pdf-fallback {
+  min-height: 38rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-thin);
+  border-radius: calc(var(--radius) - 0.15rem);
+  background: white;
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.media-viewer-preview > img,
+.media-viewer-preview > object {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -993,6 +1057,190 @@ body {
 
 .media-viewer-preview .media-document-sheet {
   min-height: 100%;
+}
+
+.media-viewer-preview .media-pdf-sheet {
+  min-height: 100%;
+}
+
+.media-focus-panel {
+  width: min(1500px, 96vw);
+  height: min(940px, calc(100vh - 2.5rem));
+  max-height: calc(100vh - 2.5rem);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.media-focus-panel .app-modal-head {
+  flex: 0 0 auto;
+  margin-bottom: 0.85rem;
+}
+
+.media-focus-panel .app-modal-head .app-title {
+  font-size: var(--fs-xl);
+  line-height: 1.05;
+}
+
+.media-focus-layout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(17rem, 24rem);
+  gap: 1rem;
+}
+
+.media-focus-reader-region {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+}
+
+.focus-image-reader,
+.focus-pdf-scroll-reader {
+  width: 100%;
+  min-height: 0;
+  flex: 1;
+}
+
+.focus-image-reader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-thin);
+  border-radius: var(--radius-lg);
+  background: #fffdf5;
+  overflow: hidden;
+}
+
+.focus-image-reader-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.focus-pdf-scroll-reader {
+  height: 100%;
+  overflow: auto;
+  border: var(--border-thin);
+  border-radius: var(--radius-lg);
+  background: #fffdf5;
+  padding: clamp(0.85rem, 2vw, 1.25rem);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.focus-pdf-page {
+  width: calc(100% * var(--type-scale));
+  max-width: none;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.focus-pdf-page-label {
+  align-self: flex-start;
+  font-size: var(--fs-xs);
+  color: var(--ink-4);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.focus-pdf-page-image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  background: #ffffff;
+  border: var(--border-thin);
+  border-radius: calc(var(--radius) - 0.1rem);
+}
+
+.focus-reader-page-loading,
+.focus-reader-loading,
+.focus-reader-fallback {
+  width: 100%;
+  min-height: 20rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+  text-align: center;
+  padding: 2rem;
+}
+
+.focus-reader-page-loading::after {
+  content: "";
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0.22rem solid var(--paper-3);
+  border-top-color: var(--ink);
+  border-radius: 999px;
+  animation: spin 0.8s linear infinite;
+}
+
+.focus-text-document-reader {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  border: var(--border-thin);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, #fffefa 0%, #fbf7ef 100%);
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  color: var(--ink);
+  white-space: pre-wrap;
+  line-height: 1.7;
+  font-size: var(--fs-base);
+}
+
+.focus-text-document-reader h3 {
+  margin: 0 0 1.25rem;
+  font-size: var(--fs-lg);
+  line-height: 1.15;
+}
+
+.reader-metadata-aside {
+  min-width: 0;
+  overflow: auto;
+  border-left: var(--border-thin);
+  padding-left: 1rem;
+  color: var(--ink-2);
+}
+
+.reader-metadata-note,
+.reader-metadata-list > div {
+  border-top: var(--border-thin);
+  padding: 0.8rem 0;
+}
+
+.reader-metadata-note h3,
+.reader-metadata-list dt {
+  margin: 0 0 0.35rem;
+  color: var(--ink-4);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.reader-metadata-note p,
+.reader-metadata-list dd {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.reader-metadata-list {
+  margin: 0;
 }
 
 .media-upload-owner {
@@ -3858,6 +4106,30 @@ textarea.field { height: auto; padding: 1rem 1.25rem; resize: vertical; line-hei
   .notfall-profile-list {
     grid-template-columns: 1fr;
   }
+
+  .media-focus-panel {
+    width: min(100%, calc(100vw - 1rem));
+    height: min(96vh, 980px);
+    max-height: 96vh;
+    padding: 1rem;
+  }
+
+  .media-focus-layout {
+    grid-template-columns: 1fr;
+    overflow: auto;
+  }
+
+  .media-focus-reader-region {
+    min-height: 62vh;
+  }
+
+  .reader-metadata-aside {
+    border-left: 0;
+    border-top: var(--border-thin);
+    padding-left: 0;
+    padding-top: 0.5rem;
+    overflow: visible;
+  }
 }
 
 @media (max-width: 760px) {
@@ -3891,6 +4163,10 @@ textarea.field { height: auto; padding: 1rem 1.25rem; resize: vertical; line-hei
   }
 
   .media-searchbox {
+    width: 100%;
+  }
+
+  .focus-pdf-page {
     width: 100%;
   }
 }

@@ -2,7 +2,14 @@
 
 import { headers } from "next/headers";
 
-import { buildMediaBootstrap, searchMediaItems, uploadMediaItem } from "@/lib/media";
+import {
+  buildMediaBootstrap,
+  getMediaImageDataUrl,
+  getMediaPdfPageDataUrl,
+  getMediaReaderDescriptor,
+  searchMediaItems,
+  uploadMediaItem,
+} from "@/lib/media";
 import { requireIdentityHeaders } from "@/lib/request-auth";
 
 export async function getMediaBootstrap(ownerUserId?: string | null) {
@@ -21,4 +28,22 @@ export async function searchMediaItemsAction(ownerUserId: string | null | undefi
   const requestHeaders = await headers();
   const identity = requireIdentityHeaders(requestHeaders);
   return searchMediaItems(identity, ownerUserId, query);
+}
+
+export async function getMediaReaderDescriptorAction(mediaItemId: string) {
+  const requestHeaders = await headers();
+  const identity = requireIdentityHeaders(requestHeaders);
+  return getMediaReaderDescriptor(identity, mediaItemId);
+}
+
+export async function getMediaImageDataUrlAction(mediaItemId: string) {
+  const requestHeaders = await headers();
+  const identity = requireIdentityHeaders(requestHeaders);
+  return getMediaImageDataUrl(identity, mediaItemId);
+}
+
+export async function getMediaPdfPageDataUrlAction(mediaItemId: string, pageNumber: number) {
+  const requestHeaders = await headers();
+  const identity = requireIdentityHeaders(requestHeaders);
+  return getMediaPdfPageDataUrl(identity, mediaItemId, pageNumber);
 }

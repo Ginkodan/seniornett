@@ -7,6 +7,10 @@ import { getPool } from "@/lib/db";
 import { inferJson } from "@/lib/inference";
 import { putObject, getObject } from "@/lib/object-storage";
 import type { RequestIdentity } from "@/lib/request-auth";
+import { createCanvas } from "@napi-rs/canvas";
+import { XMLParser } from "fast-xml-parser";
+import JSZip from "jszip";
+import * as mammoth from "mammoth";
 
 type CurrentUserRow = {
   user_id: string;
@@ -94,6 +98,7 @@ export type MediaItem = {
   checksum: string;
   labels: string[];
   collections: string[];
+  previewText: string | null;
   previewDataUrl: string | null;
 };
 
@@ -176,7 +181,7 @@ function humanizeName(value: string) {
 function detectKind(fileName: string, mimeType: string) {
   if (mimeType.startsWith("image/")) return "photo";
   if (mimeType === "application/pdf" || /\.(pdf)$/i.test(fileName)) return "document";
-  if (/\.(doc|docx)$/i.test(fileName)) return "document";
+  if (/\.(doc|docx|odt)$/i.test(fileName)) return "document";
   if (mimeType.startsWith("audio/")) return "audio";
   if (mimeType.startsWith("video/")) return "video";
   return "unknown";
@@ -187,18 +192,142 @@ function detectMimeType(fileName: string, fallback = "application/octet-stream")
   if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
   if (lower.endsWith(".png")) return "image/png";
   if (lower.endsWith(".gif")) return "image/gif";
+  if (lower.endsWith(".webp")) return "image/webp";
   if (lower.endsWith(".pdf")) return "application/pdf";
   if (lower.endsWith(".docx")) return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
   if (lower.endsWith(".doc")) return "application/msword";
+  if (lower.endsWith(".odt")) return "application/vnd.oasis.opendocument.text";
   return fallback;
 }
 
-function isInlinePreview(mimeType: string) {
-  return mimeType.startsWith("image/") || mimeType === "application/pdf";
+function isImageMime(mimeType: string) {
+  return mimeType.startsWith("image/");
 }
 
 function toDataUrl(mimeType: string, bytes: Buffer) {
   return `data:${mimeType};base64,${bytes.toString("base64")}`;
+}
+
+let pdfjsModulePromise: Promise<typeof import("pdfjs-dist/legacy/build/pdf.mjs")> | null = null;
+
+async function getPdfjsLib() {
+  pdfjsModulePromise ??= import("pdfjs-dist/legacy/build/pdf.mjs");
+  return pdfjsModulePromise;
+}
+
+async function extractDocxText(bytes: Buffer) {
+  try {
+    const result = await mammoth.extractRawText({ buffer: bytes });
+    return (result.value || "").trim();
+  } catch {
+    return "";
+  }
+}
+
+function collectXmlText(value: unknown, pieces: string[]) {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (trimmed) pieces.push(trimmed);
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    for (const child of value) collectXmlText(child, pieces);
+    return;
+  }
+
+  if (value && typeof value === "object") {
+    for (const [key, child] of Object.entries(value)) {
+      if (key.startsWith("@_")) continue;
+      collectXmlText(child, pieces);
+    }
+  }
+}
+
+async function extractOdtText(bytes: Buffer) {
+  try {
+    const zip = await JSZip.loadAsync(bytes);
+    const content = await zip.file("content.xml")?.async("string");
+    if (!content) return "";
+
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      preserveOrder: true,
+      trimValues: true,
+    });
+    const parsed = parser.parse(content);
+    const pieces: string[] = [];
+    collectXmlText(parsed, pieces);
+    return pieces.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+  } catch {
+    return "";
+  }
+}
+
+function splitTextIntoReaderPages(text: string) {
+  const cleaned = text
+    .replace(/\r/g, "")
+    .split(/\n{2,}/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (!cleaned.length) return [];
+
+  const pages: string[] = [];
+  let current = "";
+  const targetLength = 1150;
+
+  for (const paragraph of cleaned) {
+    if (!current) {
+      current = paragraph;
+      continue;
+    }
+
+    if ((current + "\n\n" + paragraph).length > targetLength) {
+      pages.push(current);
+      current = paragraph;
+    } else {
+      current += "\n\n" + paragraph;
+    }
+  }
+
+  if (current) pages.push(current);
+  return pages;
+}
+
+async function getPdfDocument(bytes: Buffer) {
+  const pdfjsLib = await getPdfjsLib();
+  const loadingTask = pdfjsLib.getDocument({
+    data: new Uint8Array(bytes),
+  });
+  return loadingTask.promise;
+}
+
+async function getPdfPageCount(bytes: Buffer) {
+  const pdf = await getPdfDocument(bytes);
+  return pdf.numPages;
+}
+
+async function renderPdfPageToJpeg(bytes: Buffer, pageNumber: number) {
+  try {
+    const pdf = await getPdfDocument(bytes);
+    const page = await pdf.getPage(pageNumber);
+    const viewport = page.getViewport({ scale: 1 });
+    const scale = Math.min(2.6, 1800 / viewport.width);
+    const renderedViewport = page.getViewport({ scale });
+
+    const canvas = createCanvas(Math.ceil(renderedViewport.width), Math.ceil(renderedViewport.height));
+    const context = canvas.getContext("2d") as unknown as CanvasRenderingContext2D;
+    await page.render({
+      canvas: canvas as unknown as HTMLCanvasElement,
+      canvasContext: context,
+      viewport: renderedViewport,
+    }).promise;
+
+    return (canvas as unknown as { toBuffer: (mimeType?: string, quality?: number) => Buffer }).toBuffer("image/jpeg", 0.9);
+  } catch {
+    return null;
+  }
 }
 
 function normalizeLabels(raw: string | undefined) {
@@ -435,6 +564,33 @@ async function getSourcePersonName(sourcePersonId: string | null): Promise<strin
   return rows[0]?.display_name || null;
 }
 
+function mapMediaRow(row: MediaItemRow, sourcePersonName: string | null, previewDataUrl: string | null = null): MediaItem {
+  return {
+    id: row.id,
+    ownerUserId: row.owner_user_id,
+    kind: row.kind,
+    title: row.title,
+    seniorLabel: row.senior_label,
+    plainDescription: row.plain_description,
+    plainSummary: row.plain_summary,
+    sourceKind: row.source_kind,
+    sourcePersonId: row.source_person_id,
+    sourcePersonName,
+    receivedAt: row.received_at,
+    sensitivity: row.sensitivity,
+    lifecycleState: row.lifecycle_state,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    mimeType: row.mime_type,
+    byteSize: Number(row.byte_size || 0),
+    checksum: row.checksum,
+    labels: row.labels || [],
+    collections: row.collections || [],
+    previewText: null,
+    previewDataUrl,
+  };
+}
+
 async function getMediaItems(ownerUserId: string): Promise<MediaItem[]> {
   const { rows } = await getPool().query<MediaItemRow>(
     `SELECT mi.id,
@@ -476,33 +632,11 @@ async function getMediaItems(ownerUserId: string): Promise<MediaItem[]> {
   const items: MediaItem[] = [];
 
   for (const row of rows) {
-    const bytes = await getObject(row.blob_bucket, row.blob_key);
-    const previewDataUrl = isInlinePreview(row.mime_type) ? toDataUrl(row.mime_type, bytes) : null;
     const sourcePersonName = await getSourcePersonName(row.source_person_id);
-
-    items.push({
-      id: row.id,
-      ownerUserId: row.owner_user_id,
-      kind: row.kind,
-      title: row.title,
-      seniorLabel: row.senior_label,
-      plainDescription: row.plain_description,
-      plainSummary: row.plain_summary,
-      sourceKind: row.source_kind,
-      sourcePersonId: row.source_person_id,
-      sourcePersonName,
-      receivedAt: row.received_at,
-      sensitivity: row.sensitivity,
-      lifecycleState: row.lifecycle_state,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      mimeType: row.mime_type,
-      byteSize: Number(row.byte_size || 0),
-      checksum: row.checksum,
-      labels: row.labels || [],
-      collections: row.collections || [],
-      previewDataUrl,
-    });
+    const previewDataUrl = isImageMime(row.mime_type)
+      ? toDataUrl(row.mime_type, await getObject(row.blob_bucket, row.blob_key))
+      : null;
+    items.push(mapMediaRow(row, sourcePersonName, previewDataUrl));
   }
 
   return items;
@@ -792,6 +926,172 @@ export async function uploadMediaItem(identity: RequestIdentity, formData: FormD
 
   return {
     itemId,
+  };
+}
+
+async function getAuthorizedMediaRow(identity: RequestIdentity, mediaItemId: string) {
+  const currentUser = await getCurrentUser(identity);
+  const { owners } = await getAccessibleOwnerIds(currentUser, null);
+  const ownerIds = owners.map((owner) => owner.user_id);
+
+  if (!ownerIds.length) {
+    throw new Error("Keine freigegebenen Menschen gefunden.");
+  }
+
+  const { rows } = await getPool().query<MediaItemRow>(
+    `SELECT mi.id,
+            mi.owner_user_id,
+            mi.kind,
+            mi.title,
+            mi.senior_label,
+            mi.plain_description,
+            mi.plain_summary,
+            mi.source_kind,
+            mi.source_person_id,
+            mi.received_at::text,
+            mi.sensitivity,
+            mi.lifecycle_state,
+            mi.created_at::text,
+            mi.updated_at::text,
+            mb.bucket AS blob_bucket,
+            mb.object_key AS blob_key,
+            mb.mime_type,
+            mb.byte_size::text,
+            mb.checksum,
+            COALESCE(array_agg(DISTINCT ml.label) FILTER (WHERE ml.label IS NOT NULL), ARRAY[]::text[]) AS labels,
+            COALESCE(array_agg(DISTINCT mc.name) FILTER (WHERE mc.name IS NOT NULL), ARRAY[]::text[]) AS collections
+     FROM media_items mi
+     JOIN media_blobs mb
+       ON mb.media_item_id = mi.id AND mb.variant = 'original'
+     LEFT JOIN media_labels ml
+       ON ml.media_item_id = mi.id
+     LEFT JOIN media_item_collections mic
+       ON mic.media_item_id = mi.id
+     LEFT JOIN media_collections mc
+       ON mc.id = mic.collection_id
+     WHERE mi.id = $1
+       AND mi.owner_user_id = ANY($2::text[])
+     GROUP BY mi.id, mb.bucket, mb.object_key, mb.mime_type, mb.byte_size, mb.checksum
+     LIMIT 1`,
+    [mediaItemId, ownerIds]
+  );
+
+  const row = rows[0];
+  if (!row) {
+    throw new Error("Dieses Foto oder Papier wurde nicht gefunden.");
+  }
+
+  return row;
+}
+
+async function getAuthorizedMediaBytes(identity: RequestIdentity, mediaItemId: string) {
+  const row = await getAuthorizedMediaRow(identity, mediaItemId);
+  const bytes = await getObject(row.blob_bucket, row.blob_key);
+  return { row, bytes };
+}
+
+export async function getMediaSource(identity: RequestIdentity, mediaItemId: string) {
+  const { row, bytes } = await getAuthorizedMediaBytes(identity, mediaItemId);
+
+  if (!isImageMime(row.mime_type)) {
+    throw new Error("Dieses Element ist kein Bild.");
+  }
+
+  return {
+    bytes,
+    mimeType: row.mime_type,
+    title: row.title,
+  };
+}
+
+export async function getMediaImageDataUrl(identity: RequestIdentity, mediaItemId: string) {
+  const source = await getMediaSource(identity, mediaItemId);
+  return {
+    dataUrl: toDataUrl(source.mimeType, source.bytes),
+    title: source.title,
+    mimeType: source.mimeType,
+  };
+}
+
+export async function getMediaReaderDescriptor(identity: RequestIdentity, mediaItemId: string) {
+  const { row, bytes } = await getAuthorizedMediaBytes(identity, mediaItemId);
+
+  if (isImageMime(row.mime_type)) {
+    return {
+      readerKind: "image" as const,
+      pageCount: 1,
+    };
+  }
+
+  if (row.mime_type === "application/pdf") {
+    try {
+      return {
+        readerKind: "pdf" as const,
+        pageCount: await getPdfPageCount(bytes),
+      };
+    } catch {
+      return {
+        readerKind: "unsupported" as const,
+        pageCount: 0,
+      };
+    }
+  }
+
+  if (row.mime_type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+    const textPages = splitTextIntoReaderPages(await extractDocxText(bytes));
+    return {
+      readerKind: "text" as const,
+      pageCount: textPages.length,
+      textPages,
+    };
+  }
+
+  if (row.mime_type === "application/vnd.oasis.opendocument.text") {
+    const textPages = splitTextIntoReaderPages(await extractOdtText(bytes));
+    return {
+      readerKind: "text" as const,
+      pageCount: textPages.length,
+      textPages,
+    };
+  }
+
+  return {
+    readerKind: "unsupported" as const,
+    pageCount: 0,
+  };
+}
+
+export async function getMediaPdfPage(identity: RequestIdentity, mediaItemId: string, pageNumber: number) {
+  const { row, bytes } = await getAuthorizedMediaBytes(identity, mediaItemId);
+
+  if (row.mime_type !== "application/pdf") {
+    throw new Error("Dieses Element ist kein Papier mit Seiten.");
+  }
+
+  const pageCount = await getPdfPageCount(bytes);
+  if (!Number.isFinite(pageNumber) || pageNumber < 1 || pageNumber > pageCount) {
+    throw new Error("Diese Seite wurde nicht gefunden.");
+  }
+
+  const page = await renderPdfPageToJpeg(bytes, pageNumber);
+  if (!page) {
+    throw new Error("Diese Seite kann gerade nicht angezeigt werden.");
+  }
+
+  return {
+    bytes: page,
+    mimeType: "image/jpeg",
+    pageCount,
+    title: row.title,
+  };
+}
+
+export async function getMediaPdfPageDataUrl(identity: RequestIdentity, mediaItemId: string, pageNumber: number) {
+  const page = await getMediaPdfPage(identity, mediaItemId, pageNumber);
+  return {
+    dataUrl: toDataUrl(page.mimeType, page.bytes),
+    pageCount: page.pageCount,
+    title: page.title,
   };
 }
 

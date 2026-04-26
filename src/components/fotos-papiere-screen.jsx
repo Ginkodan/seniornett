@@ -5,6 +5,7 @@ import { Eye, FileImage, FileText, LoaderCircle, Users } from "lucide-react";
 
 import { getMediaBootstrap, searchMediaItemsAction, uploadMediaItemAction } from "@/app/actions/media";
 import { ModalOverlay } from "./modal-overlay.jsx";
+import { MediaFocusViewer } from "./media-readers/media-focus-viewer.jsx";
 import { useAppState } from "./app-provider.jsx";
 
 const EMPTY_ARRAY = [];
@@ -44,7 +45,8 @@ function getCardSenderLabel(item, localeTag, t) {
 
 function getCardPurposeLabel(item, t) {
   if (item.kind === "photo") {
-    const label = item.labels.slice(0, 2).join(" · ") || item.collections.find((name) => name !== "Eingangskorb" && name !== "Fotoalbum");
+    const warmLabels = item.labels.filter((label) => !/^(pdf|docx?|odt|png|jpe?g|gif|webp)$/i.test(label));
+    const label = warmLabels.slice(0, 2).join(" · ") || item.collections.find((name) => name !== "Eingangskorb" && name !== "Fotoalbum");
     return label ? translateCollectionName(label, t) : t("media.collections.photoAlbum");
   }
 
@@ -63,21 +65,34 @@ function DocumentVisual({ item, variant }) {
   const isPdf = item.mimeType === "application/pdf";
   const badge = "Papier";
   const summary = item.plainSummary || item.plainDescription || "Papier";
+  const previewText = item.previewText || item.plainDescription || summary;
 
   if (variant === "compact") {
     return (
       <div className="media-card-document-compact">
-        {isPdf && item.previewDataUrl ? (
-          <object data={item.previewDataUrl} type={item.mimeType} aria-label={item.title} className="media-card-document-compact-preview">
-            <div className="media-card-document-fallback">
-              <FileText size={24} strokeWidth={1.8} />
-            </div>
-          </object>
+        {item.previewDataUrl ? (
+          <img src={item.previewDataUrl} alt={item.title} className="media-card-document-compact-preview" />
         ) : (
           <div className="media-card-document-compact-preview media-card-document-compact-icon">
             <FileText size={30} strokeWidth={1.8} />
           </div>
         )}
+      </div>
+    );
+  }
+
+  if (isPdf) {
+    return item.previewDataUrl ? (
+      <div className="media-pdf-sheet">
+        <img src={item.previewDataUrl} alt={item.title} className="media-pdf-image" />
+      </div>
+    ) : (
+      <div className="media-pdf-sheet">
+        <div className="media-pdf-fallback">
+          <FileText size={40} strokeWidth={1.8} />
+          <div>{item.title}</div>
+          <div>{summary}</div>
+        </div>
       </div>
     );
   }
@@ -91,26 +106,13 @@ function DocumentVisual({ item, variant }) {
           <div className="media-document-summary">{summary}</div>
         </div>
       </div>
-
-      {isPdf ? (
-        <object data={item.previewDataUrl || undefined} type={item.mimeType} aria-label={item.title}>
-          <div className="media-document-fallback">
-            <FileText size={40} strokeWidth={1.8} />
-            <div>{item.title}</div>
-            <div>{summary}</div>
-          </div>
-        </object>
-      ) : (
-        <div className="media-document-sheet-body">
-          <div className="media-document-file-icon">
-            <FileText size={44} strokeWidth={1.8} />
-          </div>
-          <div className="media-document-sheet-copy">
-            <p>{item.plainDescription || summary || "Dieses Papier kannst du dir ansehen und bei Bedarf erklären lassen."}</p>
-            {item.labels.length ? <div className="media-document-tags">{item.labels.join(" · ")}</div> : null}
-          </div>
+      <div className="media-document-sheet-body">
+        <div className="media-document-paper">
+          <div className="media-document-paper-title">{item.title}</div>
+          <div className="media-document-paper-text">{previewText}</div>
+          {item.labels.length ? <div className="media-document-tags">{item.labels.join(" · ")}</div> : null}
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -289,10 +291,6 @@ export function FotosPapiereScreen() {
 
   function closeViewer() {
     setViewerItemId("");
-  }
-
-  function askNinaAboutItem() {
-    setStatus("Nina wurde gefragt.");
   }
 
   async function handleSearchSubmit(event) {
@@ -508,7 +506,7 @@ export function FotosPapiereScreen() {
 
               <label className="media-field media-field-file">
                 <span>{t("media.upload.file")}</span>
-                <input className="field media-file-input" name="file" type="file" accept="image/*,application/pdf,.doc,.docx,.gif" />
+                <input className="field media-file-input" name="file" type="file" accept="image/*,application/pdf,.doc,.docx,.odt,.gif,.webp" />
               </label>
 
               <label className="media-field media-field-file">
@@ -536,51 +534,16 @@ export function FotosPapiereScreen() {
             </form>
           </ModalOverlay>
 
-          <ModalOverlay
+          <MediaFocusViewer
             open={Boolean(viewerItem)}
-            eyebrow={null}
-            title={viewerItem?.title || t("media.detail.empty")}
+            item={viewerItem}
             closeLabel={t("common.close")}
             onClose={closeViewer}
-            className="media-viewer-panel"
-          >
-            {viewerItem ? (
-              <div className="media-viewer-body">
-                <div className={`media-viewer-preview ${viewerItem.kind === "document" ? "media-viewer-preview-document" : ""}`}>
-                  <MediaPreview item={viewerItem} />
-                </div>
-
-                <div className="media-viewer-meta">
-                  <div className="media-detail-note">
-                    <div className="media-detail-note-label">{t("media.detail.noteFromNina")}</div>
-                    <div className="media-detail-note-text">{viewerItem.plainDescription || t("media.detail.noteEmpty")}</div>
-                  </div>
-                  <dl className="media-detail-list">
-                    <div>
-                      <dt>{t("media.detail.from")}</dt>
-                      <dd>{viewerItem.sourcePersonName || t("media.card.unassigned")}</dd>
-                    </div>
-                    <div>
-                      <dt>{t("media.detail.received")}</dt>
-                      <dd>{formatDate(viewerItem.receivedAt, localeTag)}</dd>
-                    </div>
-                    <div>
-                      <dt>{t("media.detail.where")}</dt>
-                      <dd>{viewerItem.collections.join(" · ") || "-"}</dd>
-                    </div>
-                    <div>
-                      <dt>{t("media.detail.labels")}</dt>
-                      <dd>{viewerItem.labels.join(" · ") || "-"}</dd>
-                    </div>
-                  </dl>
-
-                  <div className="media-detail-actions">
-                    {canChooseOwners ? <button type="button" className="btn media-card-action" onClick={askNinaAboutItem}>{t("media.actions.askNina")}</button> : null}
-                  </div>
-                </div>
-              </div>
-            ) : null}
-          </ModalOverlay>
+            t={t}
+            localeTag={localeTag}
+            formatDate={formatDate}
+            translateCollectionName={translateCollectionName}
+          />
         </div>
       </div>
     </div>

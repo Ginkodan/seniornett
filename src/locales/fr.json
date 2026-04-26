@@ -350,6 +350,7 @@
       "unassigned": "Pas encore attribué"
     },
     "detail": {
+      "info": "Indications sur la photo ou le papier",
       "from": "Reçu de",
       "received": "Arrivé le",
       "where": "À trouver dans",
@@ -358,6 +359,15 @@
       "noteEmpty": "Nina n'a pas encore laissé de note ici.",
       "empty": "Choisissez d'abord une photo ou un papier à gauche.",
       "previewFallback": "L'aperçu s'affiche dès que le papier est chargé."
+    },
+    "reader": {
+      "previous": "Retour",
+      "next": "Suivant",
+      "pageIndicator": "Page {page} sur {count}",
+      "empty": "Ce papier ne peut pas être affiché pour le moment.",
+      "unsupported": "SeniorNett ne peut pas encore afficher ce papier.",
+      "pdfError": "Ce papier ne peut pas être affiché pour le moment.",
+      "textError": "Ce papier ne peut pas être lu pour le moment."
     },
     "upload": {
       "eyebrow": "Pour l'assistance",
