@@ -69,9 +69,21 @@
   "emergency": {
     "title": "Urgence",
     "quick": {
-      "police": { "label": "Police", "description": "Sécurité", "call": "Appeler {label} – {number}" },
-      "fire": { "label": "Pompiers", "description": "Incendie & secours", "call": "Appeler {label} – {number}" },
-      "ambulance": { "label": "Ambulance / secours", "description": "Médical", "call": "Appeler {label} – {number}" }
+      "police": {
+        "label": "Police",
+        "description": "Sécurité",
+        "call": "Appeler {label} – {number}"
+      },
+      "fire": {
+        "label": "Pompiers",
+        "description": "Incendie & secours",
+        "call": "Appeler {label} – {number}"
+      },
+      "ambulance": {
+        "label": "Ambulance / secours",
+        "description": "Médical",
+        "call": "Appeler {label} – {number}"
+      }
     },
     "profile": {
       "eyebrow": "Informations médicales",
@@ -297,9 +309,10 @@
     "title": "Photos et papiers",
     "subtitle": "Regarder des images et retrouver des papiers importants",
     "filters": {
-      "collections": "Rangement",
+      "collections": "Que voulez-vous voir ?",
       "all": "Tout",
-      "allSummary": "éléments"
+      "allSummary": "éléments",
+      "showing": "Voici ce qu'il y a"
     },
     "collections": {
       "inbox": "Boîte d'arrivée",
@@ -323,44 +336,44 @@
       "empty": "Aucune chose n'a encore été enregistrée ici."
     },
     "search": {
-      "placeholder": "Montre-moi des photos de Nina",
+      "placeholder": "Demande à Lotti : où est ma lettre d'assurance maladie ?",
       "submit": "Demander à Lotti",
       "error": "Lotti n'a rien trouvé pour le moment."
     },
     "actions": {
       "view": "Voir",
-      "lotti": "Demander à Lotti"
+      "lotti": "Demander à Lotti",
+      "askNina": "Demander à Nina"
     },
     "card": {
       "from": "De",
-      "unknownSender": "Inconnu"
+      "unassigned": "Pas encore attribué"
     },
     "detail": {
-      "eyebrow": "Carte Lotti",
-      "from": "De",
+      "from": "Reçu de",
       "received": "Arrivé le",
-      "where": "Déposé dans",
-      "labels": "Mots-clés",
+      "where": "À trouver dans",
+      "labels": "De quoi s'agit-il ?",
+      "noteFromNina": "Note de Nina",
+      "noteEmpty": "Nina n'a pas encore laissé de note ici.",
       "empty": "Choisissez d'abord une photo ou un papier à gauche.",
-      "previewFallback": "L'aperçu s'affiche dès que le papier est chargé.",
-      "photoNote": "Ceci est une photo. Vous pouvez la regarder ou demander à Lotti à son sujet.",
-      "documentNote": "Ceci est un papier. Vous pouvez le faire lire ou demander à Nina."
+      "previewFallback": "L'aperçu s'affiche dès que le papier est chargé."
     },
     "upload": {
       "eyebrow": "Pour l'assistance",
-      "title": "Téléverser un fichier",
+      "title": "Ajouter une photo ou un papier",
       "owner": "Pour qui ?",
+      "help": "Ces informations aident Lotti à retrouver la photo ou le papier plus tard.",
       "titleField": "Titre",
       "titlePlaceholder": "p. ex. Assurance maladie 2026",
-      "labels": "Mots-clés",
+      "labels": "Mots-clés pour Lotti",
       "labelsPlaceholder": "p. ex. Nina, enfants, jardin",
-      "summary": "Résumé",
+      "summary": "Courte explication pour Heidi",
       "summaryPlaceholder": "Expliquer brièvement en mots simples",
-      "description": "Note supplémentaire",
+      "description": "Note pour l'assistance",
       "descriptionPlaceholder": "Pourquoi est-ce important ?",
-      "category": "Classeur papier",
-      "categoryEmpty": "Choisir une catégorie",
-      "file": "Téléverser un fichier",
+      "file": "Choisir une photo ou un papier",
+      "emergency": "Marquer comme urgence",
       "submit": "Téléverser",
       "saving": "Téléversement ...",
       "error": "La photo ou le papier n'a pas pu être téléversé."

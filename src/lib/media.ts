@@ -675,7 +675,7 @@ export async function uploadMediaItem(identity: RequestIdentity, formData: FormD
   const description = String(formData.get("description") || "").trim();
   const labelList = normalizeLabels(String(formData.get("labels") || ""));
   const file = formData.get("file");
-  const collectionId = String(formData.get("collectionId") || "").trim();
+  const emergencyFlag = String(formData.get("isEmergency") || "").trim() === "1";
 
   if (!(file instanceof File)) {
     throw new Error("Bitte eine Datei auswählen.");
@@ -744,18 +744,8 @@ export async function uploadMediaItem(identity: RequestIdentity, formData: FormD
       collectionNames.add("Papiermappe");
     }
 
-    if (collectionId) {
-      const { rows } = await client.query<{ name: string }>(
-        `SELECT name
-         FROM media_collections
-         WHERE id = $1 AND owner_user_id = $2
-         LIMIT 1`,
-        [collectionId, selectedOwnerId]
-      );
-
-      if (rows[0]?.name) {
-        collectionNames.add(rows[0].name);
-      }
+    if (emergencyFlag) {
+      collectionNames.add("Notfall");
     }
 
     for (const name of collectionNames) {

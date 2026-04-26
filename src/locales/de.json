@@ -69,9 +69,21 @@
   "emergency": {
     "title": "Notfall",
     "quick": {
-      "police": { "label": "Polizei", "description": "Sicherheit", "call": "{label} anrufen – {number}" },
-      "fire": { "label": "Feuerwehr", "description": "Brand & Rettung", "call": "{label} anrufen – {number}" },
-      "ambulance": { "label": "Ambulanz / Sanität", "description": "Medizin", "call": "{label} anrufen – {number}" }
+      "police": {
+        "label": "Polizei",
+        "description": "Sicherheit",
+        "call": "{label} anrufen – {number}"
+      },
+      "fire": {
+        "label": "Feuerwehr",
+        "description": "Brand & Rettung",
+        "call": "{label} anrufen – {number}"
+      },
+      "ambulance": {
+        "label": "Ambulanz / Sanität",
+        "description": "Medizin",
+        "call": "{label} anrufen – {number}"
+      }
     },
     "profile": {
       "eyebrow": "Medizinische Angaben",
@@ -297,9 +309,10 @@
     "title": "Fotos & Papiere",
     "subtitle": "Bilder anschauen und wichtige Papiere finden",
     "filters": {
-      "collections": "Ablage",
-      "all": "Alle Sachen",
-      "allSummary": "Sachen"
+      "collections": "Was möchtest du sehen?",
+      "all": "Alles",
+      "allSummary": "Sachen",
+      "showing": "Das ist da"
     },
     "collections": {
       "inbox": "Eingangskorb",
@@ -323,44 +336,44 @@
       "empty": "Hier sind im Moment noch keine Sachen eingetragen."
     },
     "search": {
-      "placeholder": "Zeig mir Fotos von Nina",
+      "placeholder": "Frag Lotti: Wo ist mein Krankenkassenbrief?",
       "submit": "Lotti fragen",
       "error": "Lotti konnte gerade nichts finden."
     },
     "actions": {
       "view": "Anschauen",
-      "lotti": "Lotti fragen"
+      "lotti": "Lotti fragen",
+      "askNina": "Nina fragen"
     },
     "card": {
       "from": "Von",
-      "unknownSender": "Unbekannt"
+      "unassigned": "Noch nicht zugeordnet"
     },
     "detail": {
-      "eyebrow": "Lotti-Karte",
-      "from": "Von",
-      "received": "Angekommen",
-      "where": "Liegt in",
-      "labels": "Stichworte",
+      "from": "Bekommen von",
+      "received": "Angekommen am",
+      "where": "Zu finden in",
+      "labels": "Worum geht es?",
+      "noteFromNina": "Notiz von Nina",
+      "noteEmpty": "Hier hat Nina noch keine Notiz hinterlegt.",
       "empty": "Wähle links ein Foto oder Papier aus.",
-      "previewFallback": "Vorschau wird angezeigt, sobald das Papier geladen ist.",
-      "photoNote": "Das ist ein Foto. Du kannst es anschauen oder Lotti danach fragen.",
-      "documentNote": "Das ist ein Papier. Du kannst es vorlesen lassen oder Nina fragen."
+      "previewFallback": "Vorschau wird angezeigt, sobald das Papier geladen ist."
     },
     "upload": {
       "eyebrow": "Für die Betreuung",
-      "title": "Datei hochladen",
+      "title": "Foto oder Papier hinzufügen",
       "owner": "Für wen ist es?",
+      "help": "Diese Angaben helfen Lotti, das Foto oder Papier später wiederzufinden.",
       "titleField": "Titel",
       "titlePlaceholder": "z. B. Krankenkasse 2026",
-      "labels": "Stichworte",
+      "labels": "Suchwörter für Lotti",
       "labelsPlaceholder": "z. B. Nina, Kinder, Garten",
-      "summary": "Zusammenfassung",
+      "summary": "Kurze Erklärung für Heidi",
       "summaryPlaceholder": "Kurz in einfachen Worten erklären",
-      "description": "Zusätzliche Notiz",
+      "description": "Notiz für Betreuung",
       "descriptionPlaceholder": "Warum ist das wichtig?",
-      "category": "Papiermappe",
-      "categoryEmpty": "Kategorie wählen",
-      "file": "Datei hochladen",
+      "file": "Foto oder Papier auswählen",
+      "emergency": "Als Notfall markieren",
       "submit": "Hochladen",
       "saving": "Wird hochgeladen ...",
       "error": "Das Foto oder Papier konnte nicht hochgeladen werden."
