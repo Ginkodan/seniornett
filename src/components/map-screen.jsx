@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Bike, Minus, Mountain, Plus } from 'lucide-react';
+import { Bike, Minus, Mountain, Plus, Search, X } from 'lucide-react';
 
 const SWITZERLAND_CENTER = [46.8182, 8.2275];
 const SWITZERLAND_ZOOM = 8;
@@ -35,6 +35,11 @@ export function MapScreen() {
   const baseLayerRef = React.useRef(null);
   const overlayLayersRef = React.useRef({});
   const [activeOverlay, setActiveOverlay] = React.useState('hiking');
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [searchResults, setSearchResults] = React.useState([]);
+  const [searchOpen, setSearchOpen] = React.useState(false);
+  const searchMarkerRef = React.useRef(null);
+  const searchTimeoutRef = React.useRef(null);
 
   React.useEffect(() => {
     let disposed = false;
@@ -134,6 +139,74 @@ export function MapScreen() {
     mapInstanceRef.current?.zoomOut();
   }
 
+  function stripHtml(html) {
+    return html.replace(/<[^>]*>/g, '');
+  }
+
+  function handleSearchChange(e) {
+    const query = e.target.value;
+    setSearchQuery(query);
+    setSearchOpen(true);
+
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+
+    if (query.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const url = new URL('https://api3.geo.admin.ch/rest/services/api/SearchServer');
+        url.searchParams.set('searchText', query.trim());
+        url.searchParams.set('type', 'locations');
+        url.searchParams.set('lang', 'de');
+        url.searchParams.set('limit', '8');
+        const res = await fetch(url.toString());
+        if (!res.ok) return;
+        const data = await res.json();
+        setSearchResults(data.results || []);
+      } catch {
+        // network error – silently ignore
+      }
+    }, 350);
+  }
+
+  function handleSelectResult(result) {
+    const { lat, lon } = result.attrs;
+    const map = mapInstanceRef.current;
+    const L = leafletRef.current;
+    if (!map || !L) return;
+
+    if (searchMarkerRef.current) {
+      map.removeLayer(searchMarkerRef.current);
+    }
+    searchMarkerRef.current = L.circleMarker([lat, lon], {
+      radius: 10,
+      fillColor: '#e63946',
+      color: '#fff',
+      weight: 2.5,
+      opacity: 1,
+      fillOpacity: 1,
+    }).addTo(map);
+
+    map.setView([lat, lon], 14);
+    setSearchQuery(stripHtml(result.attrs.label));
+    setSearchResults([]);
+    setSearchOpen(false);
+  }
+
+  function handleClearSearch() {
+    setSearchQuery('');
+    setSearchResults([]);
+    setSearchOpen(false);
+    const map = mapInstanceRef.current;
+    if (map && searchMarkerRef.current) {
+      map.removeLayer(searchMarkerRef.current);
+      searchMarkerRef.current = null;
+    }
+  }
+
   return (
     <div className="app map-app">
       <div className="app-header">
@@ -186,6 +259,49 @@ export function MapScreen() {
                 >
                   <Minus size={28} strokeWidth={2.75} />
                 </button>
+              </div>
+
+              <div className="map-search">
+                <div className="map-search-bar">
+                  <Search size={22} strokeWidth={2.2} className="map-search-icon" aria-hidden="true" />
+                  <input
+                    className="map-search-input"
+                    type="text"
+                    placeholder="Ort oder Adresse suchen…"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    onFocus={() => searchResults.length > 0 && setSearchOpen(true)}
+                    onBlur={() => { setTimeout(() => setSearchOpen(false), 160); }}
+                    aria-label="Ortssuche"
+                    aria-autocomplete="list"
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                  {searchQuery && (
+                    <button
+                      className="map-search-clear"
+                      type="button"
+                      onClick={handleClearSearch}
+                      aria-label="Suche löschen"
+                    >
+                      <X size={20} strokeWidth={2.2} />
+                    </button>
+                  )}
+                </div>
+                {searchOpen && searchResults.length > 0 && (
+                  <ul className="map-search-results" role="listbox" aria-label="Suchergebnisse">
+                    {searchResults.map((result) => (
+                      <li
+                        key={result.id ?? result.attrs.geomStabId}
+                        className="map-search-result-item"
+                        role="option"
+                        onMouseDown={() => handleSelectResult(result)}
+                      >
+                        {stripHtml(result.attrs.label)}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               <div
