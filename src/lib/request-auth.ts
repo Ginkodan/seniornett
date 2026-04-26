@@ -1,5 +1,6 @@
 export type RequestIdentity = {
   userId: string;
+  language: string;
 };
 
 function readHeaderValue(requestHeaders: Headers, name: string): string {
@@ -15,6 +16,7 @@ export function readIdentityHeaders(requestHeaders: Headers): RequestIdentity | 
 
   return {
     userId,
+    language: readHeaderValue(requestHeaders, "x-user-language") || "de",
   };
 }
 
@@ -27,4 +29,3 @@ export function requireIdentityHeaders(requestHeaders: Headers): RequestIdentity
 
   return identity;
 }
-

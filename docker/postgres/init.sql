@@ -6,6 +6,7 @@ CREATE TABLE users (
   user_id            TEXT        PRIMARY KEY,
   username           TEXT        UNIQUE NOT NULL,
   display_name       TEXT        NOT NULL,
+  language           TEXT        NOT NULL DEFAULT 'de' CHECK (language IN ('de', 'fr')),
   role               TEXT        NOT NULL CHECK (role IN ('user', 'caregiver', 'admin')),
   device_id          TEXT        UNIQUE NOT NULL,
   wireguard_pub_key  TEXT        UNIQUE NOT NULL,
@@ -42,6 +43,7 @@ INSERT INTO users (
   user_id,
   username,
   display_name,
+  language,
   role,
   device_id,
   wireguard_pub_key,
@@ -54,6 +56,7 @@ VALUES
     'user-parent-001',
     'heidi',
     'Heidi',
+    'de',
     'user',
     'parent-tablet',
     'wg-pub-parent-demo',
@@ -76,6 +79,7 @@ VALUES
     'user-grandpa-001',
     'walter',
     'Walter',
+    'fr',
     'user',
     'grandpa-tablet',
     'wg-pub-grandpa-demo',
@@ -94,7 +98,7 @@ VALUES
       "notfallkontakt": "Nina Meier, Tochter, 079 555 12 34"
     }'::jsonb
   ),
-  ('user-caregiver-001','nina',   'Nina',   'caregiver', 'caregiver-tablet', 'wg-pub-caregiver-demo', '10.44.0.27', 5175, '{}'::jsonb);
+  ('user-caregiver-001','nina',   'Nina',   'de', 'caregiver', 'caregiver-tablet', 'wg-pub-caregiver-demo', '10.44.0.27', 5175, '{}'::jsonb);
 
 INSERT INTO chat_relationships (user_id, contact_user_id, label)
 VALUES

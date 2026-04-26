@@ -2,39 +2,42 @@
 
 import React from "react";
 import { BookOpen, Headphones, Pause, Play, Radio, Square } from "lucide-react";
-import { AUDIOBOOK_GENRES, AUDIOBOOK_GENRE_DESCRIPTIONS, BOOK_FILTER_ALL } from "../lib/audio/genres";
+import { AUDIOBOOK_GENRES, BOOK_FILTER_ALL } from "../lib/audio/genres";
+import { useAppState } from "./app-provider.jsx";
 
 const TABS = [
-  { id: "radio", label: "Radio", icon: Radio },
-  { id: "programs", label: "Sendungen", icon: Headphones },
-  { id: "books", label: "Hörbücher", icon: BookOpen },
+  { id: "radio", key: "radio", icon: Radio },
+  { id: "programs", key: "programs", icon: Headphones },
+  { id: "books", key: "books", icon: BookOpen },
 ];
 
-const FALLBACK_DATA = {
-  radioStations: [
-    {
-      id: "radio-swiss-pop",
-      title: "Radio Swiss Pop",
-      description: "Ruhige Popmusik ohne Unterbruch.",
-      section: "radio",
-      url: "https://stream.srg-ssr.ch/srgssr/rsp/mp3/128",
-      meta: "Live-Radio",
-    },
-  ],
-  audioPrograms: [],
-  audiobookSources: [],
-  error: "",
-};
-
-function formatDate(value) {
+function formatDate(value, localeTag) {
   if (!value) return "";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString("de-CH", {
+  return date.toLocaleDateString(localeTag, {
     weekday: "short",
     day: "2-digit",
     month: "2-digit",
   });
+}
+
+function buildFallbackData(t) {
+  return {
+    radioStations: [
+      {
+        id: "radio-swiss-pop",
+        title: t("audio.fallback.radioTitle"),
+        description: t("audio.fallback.radioDescription"),
+        section: "radio",
+        url: "https://stream.srg-ssr.ch/srgssr/rsp/mp3/128",
+        meta: t("audio.fallback.radioMeta"),
+      },
+    ],
+    audioPrograms: [],
+    audiobookSources: [],
+    error: "",
+  };
 }
 
 function formatTime(seconds) {
@@ -64,13 +67,13 @@ function RadioCard({ station, active, onSelect }) {
   );
 }
 
-function MediaCard({ item, active, onSelect }) {
+function MediaCard({ item, active, onSelect, localeTag }) {
   return (
     <button className={`audio-media-card ${active ? "active" : ""}`} onClick={() => onSelect(item)}>
       <div className="audio-media-card-title">{item.title}</div>
       <div className="audio-media-card-description">{item.description}</div>
       <div className="audio-media-card-meta">
-        {[item.author, item.subtitle, item.duration, formatDate(item.publishedAt)].filter(Boolean).join(" · ")}
+        {[item.author, item.subtitle, item.duration, formatDate(item.publishedAt, localeTag)].filter(Boolean).join(" · ")}
       </div>
     </button>
   );
@@ -116,12 +119,14 @@ function mergeBookLibrary(audiobookSources) {
 }
 
 export function AudioScreen({ loadAudioAction }) {
-  const [data, setData] = React.useState(FALLBACK_DATA);
+  const { t, localeTag } = useAppState();
+  const fallbackData = React.useMemo(() => buildFallbackData(t), [t]);
+  const [data, setData] = React.useState(fallbackData);
   const [loading, setLoading] = React.useState(true);
   const [activeTab, setActiveTab] = React.useState("radio");
   const [selectedProgramId, setSelectedProgramId] = React.useState("");
   const [selectedBookFilterId, setSelectedBookFilterId] = React.useState(BOOK_FILTER_ALL);
-  const [selectedId, setSelectedId] = React.useState(FALLBACK_DATA.radioStations[0].id);
+  const [selectedId, setSelectedId] = React.useState(fallbackData.radioStations[0].id);
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [currentTime, setCurrentTime] = React.useState(0);
   const [duration, setDuration] = React.useState(0);
@@ -142,8 +147,8 @@ export function AudioScreen({ loadAudioAction }) {
       .catch(() => {
         if (!cancelled) {
           setData({
-            ...FALLBACK_DATA,
-            error: "Audio-Inhalte konnten nicht geladen werden.",
+            ...fallbackData,
+            error: t("audio.playback.loadError"),
           });
         }
       })
@@ -156,7 +161,7 @@ export function AudioScreen({ loadAudioAction }) {
     return () => {
       cancelled = true;
     };
-  }, [loadAudioAction]);
+  }, [loadAudioAction, fallbackData, t]);
 
   React.useEffect(() => {
     const audio = audioRef.current;
@@ -198,7 +203,7 @@ export function AudioScreen({ loadAudioAction }) {
     function handleError() {
       setIsPlaying(false);
       setIsBuffering(false);
-      setPlaybackError("Die Wiedergabe konnte nicht gestartet werden.");
+      setPlaybackError(t("audio.playback.retry"));
     }
 
     audio.addEventListener("timeupdate", syncTime);
@@ -222,7 +227,7 @@ export function AudioScreen({ loadAudioAction }) {
       audio.removeEventListener("ended", handleEnded);
       audio.removeEventListener("error", handleError);
     };
-  }, []);
+  }, [t]);
 
   const selectedProgram =
     data.audioPrograms.find((program) => program.id === selectedProgramId) || data.audioPrograms[0] || null;
@@ -256,12 +261,12 @@ export function AudioScreen({ loadAudioAction }) {
       source.items.map((item) => ({
         ...item,
         section: "book",
-        contextTitle: "Hörbuch",
+        contextTitle: t("audio.tabs.books"),
       }))
     );
 
     return [...data.radioStations, ...programItems, ...bookItems];
-  }, [data]);
+  }, [data, t]);
 
   const player = playableItems.find((item) => item.id === selectedId) || data.radioStations[0] || null;
   const isOnDemand = player?.section === "audio" || player?.section === "book";
@@ -269,7 +274,7 @@ export function AudioScreen({ loadAudioAction }) {
   function startPlayback(item) {
     const audio = audioRef.current;
     if (!item?.url || !audio) {
-      setPlaybackError("Diese Auswahl ist gerade nicht verfuegbar.");
+      setPlaybackError(t("audio.playback.missing"));
       return;
     }
 
@@ -285,7 +290,7 @@ export function AudioScreen({ loadAudioAction }) {
     const playPromise = audio.play();
     if (playPromise && typeof playPromise.catch === "function") {
       playPromise.catch(() => {
-        setPlaybackError("Bitte tippen Sie nochmals auf Abspielen.");
+        setPlaybackError(t("audio.playback.retry"));
         setIsPlaying(false);
       });
     }
@@ -294,7 +299,7 @@ export function AudioScreen({ loadAudioAction }) {
   function togglePlayback() {
     const audio = audioRef.current;
     if (!audio || !player?.url) {
-      setPlaybackError("Diese Auswahl ist gerade nicht verfuegbar.");
+      setPlaybackError(t("audio.playback.missing"));
       return;
     }
 
@@ -308,7 +313,7 @@ export function AudioScreen({ loadAudioAction }) {
     if (audio.paused) {
       const playPromise = audio.play();
       if (playPromise && typeof playPromise.catch === "function") {
-        playPromise.catch(() => setPlaybackError("Bitte tippen Sie nochmals auf Abspielen."));
+        playPromise.catch(() => setPlaybackError(t("audio.playback.retry")));
       }
       return;
     }
@@ -346,17 +351,17 @@ export function AudioScreen({ loadAudioAction }) {
       ? player.title
       : player?.section === "book"
         ? player.title
-        : player?.title || "Nichts ausgewählt";
+        : player?.title || t("common.noSelection");
 
   const nowMeta =
     player?.section === "radio"
-      ? "Live-Radio"
+      ? t("common.liveRadio")
       : [
           player?.author,
           player?.section === "audio" ? player?.contextTitle : null,
           player?.subtitle,
           player?.duration,
-          formatDate(player?.publishedAt),
+          formatDate(player?.publishedAt, localeTag),
         ]
           .filter(Boolean)
           .join(" · ");
@@ -367,13 +372,13 @@ export function AudioScreen({ loadAudioAction }) {
         <div className="audio-shell">
           <div className="audio-sticky-stack">
             <div className="audio-page-header">
-              <h1 className="app-title">Audio &amp; Musik</h1>
+              <h1 className="app-title">{t("audio.title")}</h1>
 
-              <div className="audio-tabs" role="tablist" aria-label="Audio-Bereiche">
+              <div className="audio-tabs" role="tablist" aria-label={t("audio.title")}>
                 {TABS.map((tab) => (
                   <TabButton
                     key={tab.id}
-                    label={tab.label}
+                    label={t(`audio.tabs.${tab.key}`)}
                     icon={tab.icon}
                     active={activeTab === tab.id}
                     onClick={() => setActiveTab(tab.id)}
@@ -385,7 +390,7 @@ export function AudioScreen({ loadAudioAction }) {
             <section className="audio-now-bar" aria-labelledby="audio-now-playing">
               <div className="audio-now-main">
                 <div className="audio-now-label" id="audio-now-playing">
-                  Jetzt läuft
+                  {t("audio.nowPlaying")}
                 </div>
                 <div className="audio-now-title">{nowTitle}</div>
                 <div className="audio-now-meta">{nowMeta}</div>
@@ -394,11 +399,11 @@ export function AudioScreen({ loadAudioAction }) {
               <div className="audio-now-controls">
                 <button className="audio-control audio-control--primary" onClick={togglePlayback} disabled={!player?.url}>
                   {isPlaying ? <Pause size={22} strokeWidth={2.5} /> : <Play size={22} strokeWidth={2.5} />}
-                  <span>{isPlaying ? "Pause" : "Abspielen"}</span>
+                  <span>{isPlaying ? t("common.pause") : t("common.play")}</span>
                 </button>
                 <button className="audio-control" onClick={stopPlayback} disabled={!player?.url}>
                   <Square size={18} strokeWidth={2.5} />
-                  <span>Stoppen</span>
+                  <span>{t("common.stop")}</span>
                 </button>
               </div>
 
@@ -413,7 +418,7 @@ export function AudioScreen({ loadAudioAction }) {
                     value={Math.min(currentTime, duration || 0)}
                     onChange={seekTo}
                     disabled={!duration}
-                    aria-label="Position in der Aufnahme"
+                    aria-label={t("audio.nowPlaying")}
                   />
                   <span>{formatTime(duration)}</span>
                 </div>
@@ -424,9 +429,9 @@ export function AudioScreen({ loadAudioAction }) {
               {(loading || isBuffering || playbackError) ? (
                 <div className="audio-player-status">
                   {loading
-                    ? "Audio wird geladen ..."
+                    ? t("audio.playback.loading")
                     : isBuffering
-                      ? "Verbindung wird aufgebaut ..."
+                      ? t("audio.playback.buffering")
                       : playbackError}
                 </div>
               ) : null}
@@ -439,7 +444,7 @@ export function AudioScreen({ loadAudioAction }) {
             {activeTab === "radio" ? (
               <section className="audio-panel">
                 <div className="audio-panel-head">
-                  <h2>Radio</h2>
+                  <h2>{t("audio.tabs.radio")}</h2>
                 </div>
 
                 <div className="audio-choice-grid">
@@ -458,10 +463,10 @@ export function AudioScreen({ loadAudioAction }) {
             {activeTab === "programs" ? (
               <section className="audio-panel">
                 <div className="audio-panel-head">
-                  <h2>Sendungen</h2>
+                  <h2>{t("audio.tabs.programs")}</h2>
                 </div>
 
-                <div className="audio-filter-row" role="tablist" aria-label="Sendungen">
+                <div className="audio-filter-row" role="tablist" aria-label={t("audio.tabs.programs")}>
                   {data.audioPrograms.map((program) => (
                     <button
                       key={program.id}
@@ -487,6 +492,7 @@ export function AudioScreen({ loadAudioAction }) {
                           key={episode.id}
                           item={episode}
                           active={selectedId === episode.id}
+                          localeTag={localeTag}
                           onSelect={(item) =>
                             startPlayback({
                               ...item,
@@ -499,7 +505,7 @@ export function AudioScreen({ loadAudioAction }) {
                     </div>
                   </>
                 ) : (
-                  <div className="audio-empty">Zurzeit sind keine Sendungen verfuegbar.</div>
+                  <div className="audio-empty">{t("audio.playback.noPrograms")}</div>
                 )}
               </section>
             ) : null}
@@ -507,10 +513,10 @@ export function AudioScreen({ loadAudioAction }) {
             {activeTab === "books" ? (
               <section className="audio-panel">
                 <div className="audio-panel-head">
-                  <h2>Hörbücher</h2>
+                  <h2>{t("audio.tabs.books")}</h2>
                 </div>
 
-                <div className="audio-filter-row" role="tablist" aria-label="Hörbuch-Genres">
+                <div className="audio-filter-row" role="tablist" aria-label={t("audio.tabs.books")}>
                   {visibleBookFilters.map((filter) => (
                     <button
                       key={filter.id}
@@ -518,7 +524,7 @@ export function AudioScreen({ loadAudioAction }) {
                       onClick={() => setSelectedBookFilterId(filter.id)}
                       aria-pressed={activeBookFilterId === filter.id}
                     >
-                      {filter.label}
+                      {t(`audio.genres.${filter.id}`)}
                     </button>
                   ))}
                 </div>
@@ -526,8 +532,8 @@ export function AudioScreen({ loadAudioAction }) {
                 {allBooks.length > 0 ? (
                   <>
                     <div className="audio-selection-header">
-                      <h3>Hörbücher</h3>
-                      <p>{AUDIOBOOK_GENRE_DESCRIPTIONS[activeBookFilterId] || AUDIOBOOK_GENRE_DESCRIPTIONS.all}</p>
+                      <h3>{t("audio.tabs.books")}</h3>
+                      <p>{t(`audio.genreDescriptions.${activeBookFilterId}`) || t("audio.genreDescriptions.all")}</p>
                     </div>
 
                     {visibleBooks.length > 0 ? (
@@ -537,22 +543,23 @@ export function AudioScreen({ loadAudioAction }) {
                             key={item.id}
                             item={item}
                             active={selectedId === item.id}
+                            localeTag={localeTag}
                             onSelect={(book) =>
                               startPlayback({
                                 ...book,
                                 section: "book",
-                                contextTitle: "Hörbuch",
+                                contextTitle: t("audio.tabs.books"),
                               })
                             }
                           />
                         ))}
                       </div>
                     ) : (
-                      <div className="audio-empty">Für diesen Filter sind gerade keine Hörbücher sichtbar.</div>
+                      <div className="audio-empty">{t("audio.playback.noBooksForFilter")}</div>
                     )}
                   </>
                 ) : (
-                  <div className="audio-empty">Zurzeit sind keine Hörbücher verfuegbar.</div>
+                  <div className="audio-empty">{t("audio.playback.noBooks")}</div>
                 )}
               </section>
             ) : null}

@@ -82,12 +82,13 @@ export async function searchWikipediaAction(query: string): Promise<WikiResult[]
           const res = await fetch(extractUrl, { cache: "no-store" });
           if (!res.ok) return null;
           const data = await res.json();
-          const pages = Object.values(data?.query?.pages ?? {}) as any[];
+          const pages = Object.values(data?.query?.pages ?? {}) as Array<Record<string, unknown>>;
           const page = pages[0];
           // Skip disambiguation pages
-          if (page?.pageprops?.disambiguation !== undefined) return null;
-          const rawExtract: string = page?.extract?.trim() ?? "";
-          const pageTitle: string = page?.title ?? title;
+          const pageProps = page?.pageprops as Record<string, unknown> | undefined;
+          if (pageProps?.disambiguation !== undefined) return null;
+          const rawExtract = typeof page?.extract === "string" ? page.extract.trim() : "";
+          const pageTitle = typeof page?.title === "string" ? page.title : title;
           if (!rawExtract) return null;
           const extract = sanitizeWikiHtml(rawExtract);
           return extract ? { title: pageTitle, extract } : null;

@@ -3,13 +3,14 @@ import React from "react";
 
 import { getMessagingBootstrap, sendMessageAction } from "@/app/actions/messaging";
 import { LoaderCircle, MessageCircleMore } from "lucide-react";
+import { useAppState } from "./app-provider.jsx";
 
-function formatTime(value) {
+function formatTime(value, localeTag) {
   if (!value) {
     return "";
   }
 
-  return new Intl.DateTimeFormat("de-CH", {
+  return new Intl.DateTimeFormat(localeTag, {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
@@ -36,6 +37,7 @@ function getLastIncomingTimestamp(contact, currentUserId) {
 }
 
 export function MessagingScreen() {
+  const { t, localeTag } = useAppState();
   const refreshTimerRef = React.useRef(null);
   const [lastReadByContact, setLastReadByContact] = React.useState({});
   const [bootstrap, setBootstrap] = React.useState(null);
@@ -60,22 +62,20 @@ export function MessagingScreen() {
       const nextConversations = buildConversations(payload.contacts || []);
       setConversations(nextConversations);
       setSelectedContactId((current) => current || nextConversations[0]?.id || "");
-    } catch (loadError) {
-      setError(
-        loadError instanceof Error
-          ? loadError.message
-          : "Nachrichten konnten nicht geladen werden."
-      );
+    } catch {
+      setError(t("messaging.conversation.loadError"));
     } finally {
       if (showLoader) {
         setLoading(false);
       }
     }
-  }, []);
+  }, [t]);
 
   React.useEffect(() => {
     let cancelled = false;
 
+    // Initial load is intentionally kicked off from an effect.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadBootstrap(true).then(() => {
       if (!cancelled) {
         refreshTimerRef.current = window.setInterval(() => {
@@ -107,6 +107,8 @@ export function MessagingScreen() {
       return;
     }
 
+    // Mark the latest incoming message as read for the active contact.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLastReadByContact((current) => {
       if (current[selectedContactId] === latestIncomingTimestamp) {
         return current;
@@ -156,36 +158,32 @@ export function MessagingScreen() {
       await sendMessageAction(selectedConversation.id, text);
       setDraft("");
       await loadBootstrap(false);
-    } catch (sendError) {
-      setError(
-        sendError instanceof Error
-          ? sendError.message
-          : "Die Nachricht konnte nicht gesendet werden."
-      );
+    } catch {
+      setError(t("messaging.conversation.sendError"));
     } finally {
       setSending(false);
     }
-  }, [draft, selectedConversation, sending, loadBootstrap]);
+  }, [draft, selectedConversation, sending, loadBootstrap, t]);
 
   return (
     <div className="app">
       <div className="app-header">
-        <h1 className="app-title">Nachrichten</h1>
+        <h1 className="app-title">{t("messaging.title")}</h1>
       </div>
 
       <div className="app-body">
         <div className="messaging-shell">
-          <aside className="messaging-sidebar" aria-label="Freigegebene Kontakte">
+          <aside className="messaging-sidebar" aria-label={t("messaging.contacts.aria")}>
             {loading ? (
               <div className="messaging-placeholder">
                 <LoaderCircle className="spin" size={24} strokeWidth={2.25} />
-                Kontakte werden geladen
+                {t("messaging.contacts.loading")}
               </div>
             ) : null}
 
             {!loading && !bootstrap?.contacts?.length ? (
               <div className="messaging-placeholder">
-                Noch keine Kontakte freigegeben.
+                {t("messaging.contacts.empty")}
               </div>
             ) : null}
 
@@ -201,9 +199,9 @@ export function MessagingScreen() {
                     );
 
                     return hasUnread ? (
-                      <div className="messaging-contact-notice" aria-label={`Neue Nachricht von ${contact.name}`}>
+                      <div className="messaging-contact-notice" aria-label={`${t("messaging.contacts.new")} ${contact.name}`}>
                         <span className="messaging-contact-dot" aria-hidden="true" />
-                        <span>Neu</span>
+                        <span>{t("messaging.contacts.new")}</span>
                       </div>
                     ) : (
                       <div className="messaging-contact-notice messaging-contact-notice-empty" aria-hidden="true" />
@@ -223,26 +221,26 @@ export function MessagingScreen() {
             </div>
           </aside>
 
-          <section className="messaging-panel" aria-label="Unterhaltung">
-            {selectedConversation ? (
-              <>
-                <div className="messaging-conversation-head">
-                  <div>
-                    <h2>{selectedConversation.name}</h2>
-                    <p>
-                      {selectedConversation.label ||
-                        (selectedConversation.role === "caregiver" ? "Betreuung" : "Kontakt")}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="messaging-timeline">
-                  {!selectedConversation.messages.length ? (
-                    <div className="messaging-empty-state">
-                      <MessageCircleMore size={32} strokeWidth={2.25} />
-                      <div>Die Unterhaltung beginnt hier.</div>
+            <section className="messaging-panel" aria-label={t("messaging.conversation.aria")}>
+              {selectedConversation ? (
+                <>
+                  <div className="messaging-conversation-head">
+                    <div>
+                      <h2>{selectedConversation.name}</h2>
+                      <p>
+                        {selectedConversation.label ||
+                        (selectedConversation.role === "caregiver" ? t("messaging.conversation.caregiver") : t("messaging.conversation.contact"))}
+                      </p>
                     </div>
-                  ) : null}
+                  </div>
+
+                  <div className="messaging-timeline">
+                    {!selectedConversation.messages.length ? (
+                      <div className="messaging-empty-state">
+                        <MessageCircleMore size={32} strokeWidth={2.25} />
+                        <div>{t("messaging.conversation.empty")}</div>
+                      </div>
+                    ) : null}
 
                   {selectedConversation.messages.map((message) => (
                     <div
@@ -250,19 +248,19 @@ export function MessagingScreen() {
                       className={`messaging-bubble ${message.role === "own" ? "own" : "other"}`}
                     >
                       <div className="messaging-bubble-text">{message.text}</div>
-                      <div className="messaging-bubble-time">{formatTime(message.timestamp)}</div>
+                      <div className="messaging-bubble-time">{formatTime(message.timestamp, localeTag)}</div>
                     </div>
                   ))}
                 </div>
 
                 <div className="messaging-compose">
                   <label className="sr-only" htmlFor="message-draft">
-                    Nachricht schreiben
+                    {t("messaging.conversation.label")}
                   </label>
                   <textarea
                     id="message-draft"
                     className="field messaging-input"
-                    placeholder="Nachricht eingeben"
+                    placeholder={t("messaging.conversation.placeholder")}
                     value={draft}
                     onChange={(event) => setDraft(event.target.value)}
                     onKeyDown={(event) => {
@@ -278,13 +276,13 @@ export function MessagingScreen() {
                     onClick={sendMessage}
                     disabled={sending || !draft.trim()}
                   >
-                    {sending ? "Wird gesendet ..." : "Senden"}
+                    {sending ? t("messaging.conversation.sending") : t("messaging.conversation.send")}
                   </button>
                 </div>
               </>
             ) : (
               <div className="messaging-panel-empty">
-                Waehle links eine Person aus.
+                {t("messaging.conversation.selectContact")}
               </div>
             )}
 

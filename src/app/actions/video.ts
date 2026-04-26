@@ -1,5 +1,7 @@
 "use server";
 
+import { createTranslator, normalizeLanguage } from "@/lib/i18n";
+
 const REQUEST_TIMEOUT_MS = 12000;
 
 const SRF_SHOWS = [
@@ -160,7 +162,7 @@ async function resolvePodcastFeedUrl(showId: string): Promise<string | null> {
   }
 }
 
-function parseEpisodesFromFeed(xmlText: string, limit = 8): VideoEpisode[] {
+function parseEpisodesFromFeed(xmlText: string, limit = 8, fallbackTitle = "Sendung"): VideoEpisode[] {
   const itemBlocks = xmlText.match(/<item\b[\s\S]*?<\/item>/gi) || [];
 
   return itemBlocks
@@ -182,7 +184,7 @@ function parseEpisodesFromFeed(xmlText: string, limit = 8): VideoEpisode[] {
 
       return {
         id,
-        title: title || "Sendung",
+        title: title || fallbackTitle,
         publishedAt,
         streamUrl: "",
         playUrl,
@@ -253,7 +255,7 @@ async function loadSrfShowEpisodes(showId: string): Promise<VideoEpisode[]> {
   return enriched.slice(0, 8);
 }
 
-async function loadTedEpisodes(): Promise<VideoEpisode[]> {
+async function loadTedEpisodes(fallbackTitle = "TED Talk"): Promise<VideoEpisode[]> {
   const xmlText = await fetchRemoteText(TED_FEED_URL);
   if (!xmlText) return [];
 
@@ -285,7 +287,7 @@ async function loadTedEpisodes(): Promise<VideoEpisode[]> {
 
       return {
         id,
-        title: title || "TED Talk",
+        title: title || fallbackTitle,
         publishedAt,
         streamUrl,
         playUrl,
@@ -297,7 +299,9 @@ async function loadTedEpisodes(): Promise<VideoEpisode[]> {
     .filter((ep) => ep.streamUrl || ep.playUrl);
 }
 
-export async function loadVideoAction(): Promise<VideoResult> {
+export async function loadVideoAction(language?: string): Promise<VideoResult> {
+  const locale = normalizeLanguage(language);
+  const t = createTranslator(locale);
   try {
     const [srfResults, tedEpisodes] = await Promise.all([
       Promise.all(
@@ -308,14 +312,14 @@ export async function loadVideoAction(): Promise<VideoResult> {
           source: "srf" as const,
         }))
       ),
-      loadTedEpisodes(),
+      loadTedEpisodes(t("video.fallbackShow")),
     ]);
 
     const sections: VideoSection[] = [
       ...srfResults,
       {
         showId: "ted-talks",
-        title: "TED Talks",
+        title: t("video.source.ted"),
         episodes: tedEpisodes,
         source: "ted" as const,
       },
@@ -325,7 +329,7 @@ export async function loadVideoAction(): Promise<VideoResult> {
   } catch {
     return {
       sections: [],
-      error: "Inhalte konnten nicht geladen werden.",
+      error: t("video.error"),
     };
   }
 }

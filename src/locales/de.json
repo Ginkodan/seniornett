@@ -1,0 +1,243 @@
+{
+  "meta": {
+    "title": "SeniorNett",
+    "description": "SeniorNett ist ein ruhiger, gut lesbarer Treffpunkt fuer Seniorinnen und Senioren."
+  },
+  "common": {
+    "loading": "Wird geladen ...",
+    "home": "Zur Startseite",
+    "textSize": "Textgröße",
+    "readAloud": "Vorlesen",
+    "readAloudCue": "Vorlesen ...",
+    "refresh": "Neu laden",
+    "search": "Suchen",
+    "close": "Schliessen",
+    "send": "Senden",
+    "sendLoading": "Wird gesendet ...",
+    "stop": "Stoppen",
+    "play": "Abspielen",
+    "pause": "Pause",
+    "noSelection": "Nichts ausgewählt",
+    "liveRadio": "Live-Radio",
+    "loadingDots": "Lädt ...",
+    "loadingEllipsis": "Wird geladen ...",
+    "unavailable": "Nicht verfuegbar"
+  },
+  "home": {
+    "greeting": "Grüezi, {name}.",
+    "apps": {
+      "nachrichten": "Nachrichten",
+      "audio": "Audio & Musik",
+      "news": "Zeitung",
+      "lotti-live": "Frag Lotti",
+      "lexikon": "Lexikon",
+      "wetter": "Wetter",
+      "karte": "Karte",
+      "video": "Fernsehen",
+      "notfall": "Notfall"
+    }
+  },
+  "topbar": {
+    "userLoading": "Wird geladen ...",
+    "userUnknown": "Unbekannt",
+    "dateTimeSeparator": " · "
+  },
+  "offline": {
+    "eyebrow": "Verbindung unterbrochen",
+    "title": "SeniorNett ist im Moment offline.",
+    "body": "Keine Sorge. Die Seite verbindet sich automatisch wieder. Bereits geladene Inhalte bleiben sichtbar.",
+    "call": "{name} anrufen: {phone}"
+  },
+  "news": {
+    "title": "Zeitung",
+    "reload": "Neu laden",
+    "fallback": {
+      "one": {
+        "title": "SeniorNett zeigt Nachrichten ruhig und ohne Werbung.",
+        "summary": "Sobald eine Verbindung besteht, laden wir aktuelle Meldungen von ausgewählten Schweizer Quellen. Ohne Internet bleibt die letzte Ausgabe lesbar."
+      },
+      "two": {
+        "title": "Wichtige Meldungen werden in grosser Schrift gesammelt.",
+        "summary": "Die Nachrichtenansicht bleibt bewusst einfach: klare Überschriften, kurze Zusammenfassungen und kein hektischer Strom von Meldungen."
+      }
+    },
+    "errors": {
+      "unavailable": "Die Live-Quellen waren gerade nicht erreichbar. Wir zeigen die zuletzt gespeicherte Ausgabe."
+    }
+  },
+  "emergency": {
+    "title": "Notfall",
+    "quick": {
+      "police": { "label": "Polizei", "description": "Sicherheit", "call": "{label} anrufen – {number}" },
+      "fire": { "label": "Feuerwehr", "description": "Brand & Rettung", "call": "{label} anrufen – {number}" },
+      "ambulance": { "label": "Ambulanz / Sanität", "description": "Medizin", "call": "{label} anrufen – {number}" }
+    },
+    "profile": {
+      "eyebrow": "Medizinische Angaben",
+      "fallbackTitle": "Notfallkarte",
+      "summaryLabel": "Wichtige Eckdaten",
+      "contactLabel": "Notfallkontakt",
+      "empty": "Für diese Person sind im Moment keine medizinischen Angaben hinterlegt.",
+      "loadingError": "Profil konnte nicht geladen werden."
+    },
+    "fields": {
+      "geburtsdatum": "Geboren",
+      "blutgruppe": "Blutgruppe",
+      "notfallkontakt": "Kontakt"
+    }
+  },
+  "weather": {
+    "title": "Wetter",
+    "subtitle": "Wetterprognose für 5 Tage",
+    "source": "Quelle: MeteoSchweiz",
+    "searchLabel": "Ort suchen",
+    "searchPlaceholder": "z. B. Bern, Basel oder Luzern",
+    "loadingButton": "Lädt ...",
+    "searchButton": "Suchen",
+    "loading": "Wetterdaten werden geladen ...",
+    "error": "Wetterdaten konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
+    "conditions": {
+      "sunny": "Sonnig",
+      "partlyCloudy": "Heiter",
+      "mixed": "Wechselhaft",
+      "cloudy": "Bewölkt",
+      "overcast": "Bedeckt",
+      "highFog": "Hochnebel",
+      "fog": "Nebel",
+      "lightShowers": "Leichte Schauer",
+      "showers": "Schauer",
+      "rainShowers": "Regenschauer",
+      "rain": "Regen",
+      "heavyRain": "Starker Regen",
+      "strongRain": "Kräftiger Regen",
+      "downpour": "Starkregen",
+      "thunderstorm": "Gewitter",
+      "severeThunderstorm": "Schweres Gewitter",
+      "hailThunderstorm": "Gewitter mit Hagel",
+      "snowShowers": "Schneeschauer",
+      "snow": "Schneefall",
+      "snowfall": "Schnee",
+      "sleet": "Schneeregen",
+      "heavySnow": "Starker Schneefall",
+      "winterThunderstorm": "Wintergewitter",
+      "genericCloudy": "Bewölkt",
+      "genericFog": "Nebelig",
+      "genericPrecipitation": "Niederschlag",
+      "genericSnow": "Schnee",
+      "unknown": "–",
+      "lightPrecipitation": "Wenig Niederschlag",
+      "precipitation": "{amount} mm Niederschlag"
+    }
+  },
+  "audio": {
+    "title": "Audio & Musik",
+    "tabs": {
+      "radio": "Radio",
+      "programs": "Sendungen",
+      "books": "Hörbücher"
+    },
+    "nowPlaying": "Jetzt läuft",
+    "playback": {
+      "play": "Abspielen",
+      "pause": "Pause",
+      "stop": "Stoppen",
+      "loading": "Audio wird geladen ...",
+      "buffering": "Verbindung wird aufgebaut ...",
+      "missing": "Diese Auswahl ist gerade nicht verfuegbar.",
+      "retry": "Bitte tippen Sie nochmals auf Abspielen.",
+      "loadError": "Audio-Inhalte konnten nicht geladen werden.",
+      "noPrograms": "Zurzeit sind keine Sendungen verfuegbar.",
+      "noBooks": "Zurzeit sind keine Hörbücher verfuegbar.",
+      "noBooksForFilter": "Für diesen Filter sind gerade keine Hörbücher sichtbar.",
+      "noneSelected": "Nichts ausgewählt"
+    },
+    "genres": {
+      "all": "Alle",
+      "romane": "Romane",
+      "hoerspiele": "Hörspiele",
+      "kurztexte": "Kurztexte",
+      "spannung": "Spannung",
+      "kinder": "Kinder"
+    },
+    "genreDescriptions": {
+      "all": "Gemischte Auswahl zum direkten Abspielen.",
+      "romane": "Längere Erzählungen und klassische Stoffe aus verschiedenen Katalogen.",
+      "hoerspiele": "Inszenierte Geschichten mit Rollen, Stimmen und Atmosphäre.",
+      "kurztexte": "Kürzere Texte, Gedichte und kompakte Lesungen.",
+      "spannung": "Krimis, dramatische Geschichten und dichte Handlung.",
+      "kinder": "Ruhige und zugängliche Titel für Familien und jüngere Zuhörende."
+    },
+    "fallback": {
+      "radioTitle": "Radio Swiss Pop",
+      "radioDescription": "Ruhige Popmusik ohne Unterbruch.",
+      "radioMeta": "Live-Radio"
+    }
+  },
+  "messaging": {
+    "title": "Nachrichten",
+    "contacts": {
+      "aria": "Freigegebene Kontakte",
+      "loading": "Kontakte werden geladen",
+      "empty": "Noch keine Kontakte freigegeben.",
+      "new": "Neu"
+    },
+    "conversation": {
+      "aria": "Unterhaltung",
+      "caregiver": "Betreuung",
+      "contact": "Kontakt",
+      "empty": "Die Unterhaltung beginnt hier.",
+      "label": "Nachricht schreiben",
+      "placeholder": "Nachricht eingeben",
+      "send": "Senden",
+      "sending": "Wird gesendet ...",
+      "selectContact": "Waehle links eine Person aus.",
+      "loadError": "Nachrichten konnten nicht geladen werden.",
+      "sendError": "Die Nachricht konnte nicht gesendet werden."
+    }
+  },
+  "lotti": {
+    "title": "Frag Lotti",
+    "empty": "Deine Unterhaltung erscheint hier.",
+    "pending": "Einen Moment bitte ...",
+    "label": "Ihre Frage an Lotti",
+    "placeholder": "Frage hier eingeben",
+    "send": "Senden",
+    "validation": "Schreib bitte zuerst eine Frage an Lotti.",
+    "fallback": {
+      "general": "Gerne. Ich bin da und helfe Schritt für Schritt. Stell mir einfach deine Frage, und ich antworte ruhig und verständlich.",
+      "call": "Gerne. Auf der Startseite kann ich dir als Nächstes auch eine einfache Kontaktliste zeigen. Für jetzt: Wenn du mir sagst, wen du anrufen möchtest, formuliere ich es Schritt für Schritt.",
+      "news": "Ich helfe gern. Öffne Nachrichten, dann siehst du die Meldungen ruhig und gut lesbar. Wenn du möchtest, erkläre ich dir auch eine einzelne Überschrift in einfachen Worten.",
+      "person": "Ich bin eine KI und habe keinen echten Wohnort. Der warme Schweizer Hof-Ton ist mein Stil, damit sich das Gespräch freundlich und vertraut anfühlt. Ich helfe dir aber sehr gern konkret weiter.",
+      "breakfast": "Das klingt fein. Ich habe zwar keinen echten Hof oder eine echte Küche, aber ich helfe dir sehr gern mit einfachen Frühstücksideen. Möchtest du etwas Herzhaftes oder eher etwas Leichtes?"
+    }
+  },
+  "video": {
+    "title": "Fernsehen & Vorträge",
+    "reload": "Neu laden",
+    "loading": "Lädt ...",
+    "loadingEpisodes": "Sendungen werden geladen …",
+    "error": "Inhalte konnten nicht geladen werden.",
+    "empty": "Zurzeit konnten keine Sendungen geladen werden. Bitte später nochmals versuchen.",
+    "close": "Schliessen",
+    "source": {
+      "srf": "SRF",
+      "ted": "TED"
+    },
+    "fallbackShow": "Sendung"
+  },
+  "map": {
+    "title": "Karte",
+    "layers": "Kartenebenen",
+    "controls": "Kartensteuerung",
+    "hiking": "Wanderwege",
+    "cycling": "Veloland",
+    "zoomIn": "Vergrössern",
+    "zoomOut": "Verkleinern",
+    "searchPlaceholder": "Ort oder Adresse suchen…",
+    "searchLabel": "Ortssuche",
+    "clearSearch": "Suche löschen",
+    "results": "Suchergebnisse",
+    "aria": "Schweizer Karte mit Wanderwegen",
+    "instructions": "Die Karte kann mit dem Finger oder mit der Maus verschoben werden."
+  }
+}

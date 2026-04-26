@@ -1,8 +1,10 @@
 "use client";
 
 import React from "react";
+import { useAppState } from "./app-provider.jsx";
 
 export function WeatherScreen({ fetchWeatherAction, searchLocationsAction }) {
+  const { t, locale } = useAppState();
   const [result, setResult] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState("Zürich");
@@ -15,21 +17,23 @@ export function WeatherScreen({ fetchWeatherAction, searchLocationsAction }) {
 
   const loadWeather = React.useCallback((place) => {
     setLoading(true);
-    return fetchWeatherAction(place)
+    return fetchWeatherAction(place, locale)
       .then((data) => setResult(data))
       .catch(() =>
         setResult({
           city: place || "Zürich",
           days: [],
-          error: "Die Wetterdaten konnten nicht geladen werden.",
+          error: t("weather.error"),
         })
       )
       .finally(() => setLoading(false));
-  }, [fetchWeatherAction]);
+  }, [fetchWeatherAction, locale, t]);
 
   React.useEffect(() => {
+    // Kick off the initial weather fetch once the screen mounts.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadWeather("Zürich");
-  }, []);
+  }, [loadWeather]);
 
   // Close dropdown when clicking outside
   React.useEffect(() => {
@@ -54,10 +58,10 @@ export function WeatherScreen({ fetchWeatherAction, searchLocationsAction }) {
       return;
     }
     debounceRef.current = setTimeout(() => {
-      searchLocationsAction(value.trim()).then((list) => {
-        setSuggestions(list);
-        setShowSuggestions(list.length > 0);
-      });
+        searchLocationsAction(value.trim(), locale).then((list) => {
+          setSuggestions(list);
+          setShowSuggestions(list.length > 0);
+        });
     }, 280);
   }
 
@@ -97,14 +101,14 @@ export function WeatherScreen({ fetchWeatherAction, searchLocationsAction }) {
   return (
     <div className="weather-screen">
       <div className="weather-header">
-        <h1 className="weather-city">{result?.city || "Wetter"}</h1>
-        <p className="weather-subtitle">Wetterprognose für 5 Tage</p>
-        <p className="weather-source">Quelle: MeteoSchweiz</p>
+        <h1 className="weather-city">{result?.city || t("weather.title")}</h1>
+        <p className="weather-subtitle">{t("weather.subtitle")}</p>
+        <p className="weather-source">{t("weather.source")}</p>
       </div>
 
       <form className="weather-search" onSubmit={handleSearchSubmit}>
         <label className="weather-search-label" htmlFor="weather-place-input">
-          Ort suchen
+          {t("weather.searchLabel")}
         </label>
         <div className="weather-search-row">
           <div className="weather-search-wrap" ref={wrapRef}>
@@ -116,10 +120,9 @@ export function WeatherScreen({ fetchWeatherAction, searchLocationsAction }) {
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-              placeholder="z. B. Bern, Basel oder Luzern"
+              placeholder={t("weather.searchPlaceholder")}
               autoComplete="off"
               aria-autocomplete="list"
-              aria-expanded={showSuggestions}
               aria-controls="weather-suggestions"
               aria-activedescendant={
                 activeIndex >= 0 ? `weather-suggestion-${activeIndex}` : undefined
@@ -153,14 +156,14 @@ export function WeatherScreen({ fetchWeatherAction, searchLocationsAction }) {
             )}
           </div>
           <button type="submit" className="weather-search-btn" disabled={loading}>
-            {loading ? "Lädt ..." : "Suchen"}
+            {loading ? t("weather.loadingButton") : t("weather.searchButton")}
           </button>
         </div>
       </form>
 
       {loading && (
         <div className="weather-loading">
-          <p>Wetterdaten werden geladen ...</p>
+          <p>{t("weather.loading")}</p>
         </div>
       )}
 
@@ -168,7 +171,7 @@ export function WeatherScreen({ fetchWeatherAction, searchLocationsAction }) {
         <div className="weather-error">
           <p>
             {result?.error ||
-              "Wetterdaten konnten nicht geladen werden. Bitte versuchen Sie es später erneut."}
+              t("weather.error")}
           </p>
         </div>
       )}
@@ -194,8 +197,8 @@ export function WeatherScreen({ fetchWeatherAction, searchLocationsAction }) {
                   {day.precipMm > 0 && (
                     <span className="weather-precip">
                       {day.precipMm < 1
-                        ? "Wenig Niederschlag"
-                        : `${day.precipMm} mm Niederschlag`}
+                        ? t("weather.conditions.lightPrecipitation")
+                        : t("weather.conditions.precipitation", { amount: day.precipMm })}
                     </span>
                   )}
                 </div>

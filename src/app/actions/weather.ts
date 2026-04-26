@@ -1,5 +1,7 @@
 "use server";
 
+import { createTranslator, getLocaleTag, normalizeLanguage } from "@/lib/i18n";
+
 // MeteoSwiss OGD Local Forecast data
 // See: https://opendatadocs.meteoswiss.ch/e4-local-forecast-model-data/e4-local-forecast-model-data
 
@@ -21,46 +23,46 @@ interface MetaPoint {
   lon: number;
 }
 
-const ICON_MAP: Record<number, { emoji: string; label: string }> = {
-  1: { emoji: "☀️", label: "Sonnig" },
-  2: { emoji: "🌤️", label: "Heiter" },
-  3: { emoji: "⛅", label: "Wechselhaft" },
-  4: { emoji: "🌥️", label: "Bewölkt" },
-  5: { emoji: "☁️", label: "Bedeckt" },
-  8: { emoji: "🌫️", label: "Hochnebel" },
-  9: { emoji: "🌫️", label: "Nebel" },
-  10: { emoji: "🌫️", label: "Nebel" },
-  11: { emoji: "🌦️", label: "Leichte Schauer" },
-  12: { emoji: "🌦️", label: "Schauer" },
-  13: { emoji: "🌧️", label: "Schauer" },
-  14: { emoji: "🌧️", label: "Regenschauer" },
-  17: { emoji: "🌧️", label: "Regen" },
-  18: { emoji: "🌧️", label: "Starker Regen" },
-  19: { emoji: "🌧️", label: "Kräftiger Regen" },
-  20: { emoji: "🌧️", label: "Starkregen" },
-  21: { emoji: "⛈️", label: "Gewitter" },
-  23: { emoji: "⛈️", label: "Gewitter" },
-  24: { emoji: "⛈️", label: "Schweres Gewitter" },
-  25: { emoji: "⛈️", label: "Gewitter mit Hagel" },
-  27: { emoji: "🌨️", label: "Schneeschauer" },
-  28: { emoji: "❄️", label: "Schneefall" },
-  29: { emoji: "❄️", label: "Schnee" },
-  30: { emoji: "🌨️", label: "Schneeregen" },
-  31: { emoji: "🌨️", label: "Schneeregen" },
-  32: { emoji: "❄️", label: "Schnee" },
-  33: { emoji: "❄️", label: "Starker Schneefall" },
-  34: { emoji: "🌩️", label: "Wintergewitter" },
-};
+function iconForCode(code: number, t: ReturnType<typeof createTranslator>): { emoji: string; label: string } {
+  const iconMap: Record<number, { emoji: string; label: string }> = {
+    1: { emoji: "☀️", label: t("weather.conditions.sunny") },
+    2: { emoji: "🌤️", label: t("weather.conditions.partlyCloudy") },
+    3: { emoji: "⛅", label: t("weather.conditions.mixed") },
+    4: { emoji: "🌥️", label: t("weather.conditions.cloudy") },
+    5: { emoji: "☁️", label: t("weather.conditions.overcast") },
+    8: { emoji: "🌫️", label: t("weather.conditions.highFog") },
+    9: { emoji: "🌫️", label: t("weather.conditions.fog") },
+    10: { emoji: "🌫️", label: t("weather.conditions.fog") },
+    11: { emoji: "🌦️", label: t("weather.conditions.lightShowers") },
+    12: { emoji: "🌦️", label: t("weather.conditions.showers") },
+    13: { emoji: "🌧️", label: t("weather.conditions.showers") },
+    14: { emoji: "🌧️", label: t("weather.conditions.rainShowers") },
+    17: { emoji: "🌧️", label: t("weather.conditions.rain") },
+    18: { emoji: "🌧️", label: t("weather.conditions.heavyRain") },
+    19: { emoji: "🌧️", label: t("weather.conditions.strongRain") },
+    20: { emoji: "🌧️", label: t("weather.conditions.downpour") },
+    21: { emoji: "⛈️", label: t("weather.conditions.thunderstorm") },
+    23: { emoji: "⛈️", label: t("weather.conditions.thunderstorm") },
+    24: { emoji: "⛈️", label: t("weather.conditions.severeThunderstorm") },
+    25: { emoji: "⛈️", label: t("weather.conditions.hailThunderstorm") },
+    27: { emoji: "🌨️", label: t("weather.conditions.snowShowers") },
+    28: { emoji: "❄️", label: t("weather.conditions.snow") },
+    29: { emoji: "❄️", label: t("weather.conditions.snowfall") },
+    30: { emoji: "🌨️", label: t("weather.conditions.sleet") },
+    31: { emoji: "🌨️", label: t("weather.conditions.sleet") },
+    32: { emoji: "❄️", label: t("weather.conditions.snowfall") },
+    33: { emoji: "❄️", label: t("weather.conditions.heavySnow") },
+    34: { emoji: "🌩️", label: t("weather.conditions.winterThunderstorm") },
+  };
 
-function iconForCode(code: number): { emoji: string; label: string } {
-  if (ICON_MAP[code]) return ICON_MAP[code];
+  if (iconMap[code]) return iconMap[code];
   // Fallback by range
-  if (code >= 1 && code <= 5) return { emoji: "☁️", label: "Bewölkt" };
-  if (code >= 6 && code <= 10) return { emoji: "🌫️", label: "Nebelig" };
-  if (code >= 11 && code <= 20) return { emoji: "🌧️", label: "Niederschlag" };
-  if (code >= 21 && code <= 26) return { emoji: "⛈️", label: "Gewitter" };
-  if (code >= 27 && code <= 40) return { emoji: "❄️", label: "Schnee" };
-  return { emoji: "🌡️", label: "–" };
+  if (code >= 1 && code <= 5) return { emoji: "☁️", label: t("weather.conditions.genericCloudy") };
+  if (code >= 6 && code <= 10) return { emoji: "🌫️", label: t("weather.conditions.genericFog") };
+  if (code >= 11 && code <= 20) return { emoji: "🌧️", label: t("weather.conditions.genericPrecipitation") };
+  if (code >= 21 && code <= 26) return { emoji: "⛈️", label: t("weather.conditions.thunderstorm") };
+  if (code >= 27 && code <= 40) return { emoji: "❄️", label: t("weather.conditions.genericSnow") };
+  return { emoji: "🌡️", label: t("weather.conditions.unknown") };
 }
 
 function parseCsvMap(text: string, pointId: string): Map<string, number> {
@@ -80,13 +82,13 @@ function parseCsvMap(text: string, pointId: string): Map<string, number> {
   return map;
 }
 
-function formatDayLabel(dateKey: string): string {
+function formatDayLabel(dateKey: string, localeTag: string): string {
   // dateKey is YYYYMMDDHHMM
   const year = parseInt(dateKey.slice(0, 4));
   const month = parseInt(dateKey.slice(4, 6)) - 1;
   const day = parseInt(dateKey.slice(6, 8));
   const d = new Date(Date.UTC(year, month, day));
-  return d.toLocaleDateString("de-CH", {
+  return d.toLocaleDateString(localeTag, {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -373,7 +375,10 @@ async function resolvePointForQuery(query?: string): Promise<ResolvedPoint> {
   return resolved;
 }
 
-export async function fetchWeatherAction(query?: string): Promise<WeatherResult> {
+export async function fetchWeatherAction(query?: string, language?: string): Promise<WeatherResult> {
+  const locale = normalizeLanguage(language);
+  const t = createTranslator(locale);
+  const localeTag = getLocaleTag(locale);
   let cityName = ZURICH_NAME;
   try {
     const resolvedPoint = await resolvePointForQuery(query);
@@ -429,10 +434,10 @@ export async function fetchWeatherAction(query?: string): Promise<WeatherResult>
 
     const days: DayForecast[] = dates.map((dateKey) => {
       const iconCode = Math.round(iconMap.get(dateKey) ?? 0);
-      const iconInfo = iconForCode(iconCode);
+      const iconInfo = iconForCode(iconCode, t);
       return {
         date: `${dateKey.slice(0, 4)}-${dateKey.slice(4, 6)}-${dateKey.slice(6, 8)}`,
-        dayLabel: formatDayLabel(dateKey),
+        dayLabel: formatDayLabel(dateKey, localeTag),
         tempMin: Math.round(minMap.get(dateKey) ?? 0),
         tempMax: Math.round(maxMap.get(dateKey) ?? 0),
         precipMm:
@@ -443,14 +448,14 @@ export async function fetchWeatherAction(query?: string): Promise<WeatherResult>
     });
 
     return { city: cityName, days };
-  } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Unbekannter Fehler";
+  } catch {
+    const message = t("weather.error");
     return { city: cityName, days: [], error: message };
   }
 }
 
-export async function searchLocationsAction(query: string): Promise<string[]> {
+export async function searchLocationsAction(query: string, language?: string): Promise<string[]> {
+  const locale = normalizeLanguage(language);
   const q = query.trim();
   if (q.length < 2) return [];
 
@@ -497,7 +502,7 @@ export async function searchLocationsAction(query: string): Promise<string[]> {
   }
 
   return results
-    .sort((a, b) => b.score - a.score || a.label.localeCompare(b.label, "de-CH"))
+    .sort((a, b) => b.score - a.score || a.label.localeCompare(b.label, getLocaleTag(locale)))
     .slice(0, 8)
     .map((r) => r.label);
 }

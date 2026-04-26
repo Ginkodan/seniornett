@@ -1,12 +1,13 @@
 "use client";
 
 import React from "react";
+import { useAppState } from "./app-provider.jsx";
 
-function formatDate(value) {
+function formatDate(value, localeTag) {
   if (!value) return "";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleString("de-CH", {
+  return d.toLocaleString(localeTag, {
     weekday: "short",
     day: "2-digit",
     month: "2-digit",
@@ -15,15 +16,16 @@ function formatDate(value) {
   });
 }
 
-function SourceBadge({ source }) {
+function SourceBadge({ source, t }) {
   return (
     <span className={`video-source-badge video-source-badge--${source}`}>
-      {source === "ted" ? "TED" : "SRF"}
+      {source === "ted" ? t("video.source.ted") : t("video.source.srf")}
     </span>
   );
 }
 
 export function VideoScreen({ loadVideoAction }) {
+  const { t, localeTag } = useAppState();
   const [data, setData] = React.useState({ sections: [], error: "" });
   const [loading, setLoading] = React.useState(true);
   const [player, setPlayer] = React.useState({
@@ -37,18 +39,20 @@ export function VideoScreen({ loadVideoAction }) {
 
   const loadData = React.useCallback(() => {
     setLoading(true);
-    return loadVideoAction()
+    return loadVideoAction(locale)
       .then((result) => setData(result))
       .catch(() =>
         setData({
           sections: [],
-          error: "Inhalte konnten nicht geladen werden.",
+          error: t("video.error"),
         })
       )
       .finally(() => setLoading(false));
-  }, [loadVideoAction]);
+  }, [loadVideoAction, t]);
 
   React.useEffect(() => {
+    // Kick off the initial content load once the screen mounts.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
   }, [loadData]);
 
@@ -83,10 +87,10 @@ export function VideoScreen({ loadVideoAction }) {
   return (
     <div className="app">
       <div className="app-header">
-        <h1 className="app-title">Fernsehen &amp; Vorträge</h1>
+        <h1 className="app-title">{t("video.title")}</h1>
         <div className="spacer" />
         <button className="btn" onClick={loadData} disabled={loading}>
-          {loading ? "Lädt ..." : "Neu laden"}
+          {loading ? t("video.loading") : t("video.reload")}
         </button>
       </div>
 
@@ -95,7 +99,7 @@ export function VideoScreen({ loadVideoAction }) {
           {data.error && <div className="video-warning">{data.error}</div>}
 
           {loading && (
-            <p className="video-loading">Sendungen werden geladen …</p>
+            <p className="video-loading">{t("video.loadingEpisodes")}</p>
           )}
 
           {data.sections && data.sections.map((section) =>
@@ -103,7 +107,7 @@ export function VideoScreen({ loadVideoAction }) {
               <section key={section.showId} className="video-section">
                 <div className="video-section-header">
                   <h2 className="video-section-title">{section.title}</h2>
-                  <SourceBadge source={section.source} />
+                  <SourceBadge source={section.source} t={t} />
                 </div>
                 <div className="video-episode-list">
                   {section.episodes.map((episode) => (
@@ -122,7 +126,7 @@ export function VideoScreen({ loadVideoAction }) {
                           />
                         ) : (
                           <div className="video-episode-image-fallback">
-                            {episode.source === "ted" ? "TED" : "SRF"}
+                            {episode.source === "ted" ? t("video.source.ted") : t("video.source.srf")}
                           </div>
                         )}
                       </div>
@@ -130,8 +134,8 @@ export function VideoScreen({ loadVideoAction }) {
                         <div className="video-episode-title">{episode.title}</div>
                         <div className="video-episode-meta">
                           {episode.source === "ted"
-                            ? episode.duration || formatDate(episode.publishedAt)
-                            : formatDate(episode.publishedAt)}
+                            ? episode.duration || formatDate(episode.publishedAt, localeTag)
+                            : formatDate(episode.publishedAt, localeTag)}
                         </div>
                       </div>
                     </button>
@@ -143,7 +147,7 @@ export function VideoScreen({ loadVideoAction }) {
 
           {!loading && !data.error && !hasSections && (
             <div className="video-warning">
-              Zurzeit konnten keine Sendungen geladen werden. Bitte später nochmals versuchen.
+              {t("video.empty")}
             </div>
           )}
         </div>
@@ -155,7 +159,7 @@ export function VideoScreen({ loadVideoAction }) {
             <div className="video-player-head">
               <h3>{player.title}</h3>
               <button className="btn" onClick={closePlayer}>
-                Schliessen
+                {t("video.close")}
               </button>
             </div>
             <div className="video-player-frame-wrap">

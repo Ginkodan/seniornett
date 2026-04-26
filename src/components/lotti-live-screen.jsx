@@ -1,8 +1,10 @@
 "use client";
 
 import React from 'react';
+import { useAppState } from './app-provider.jsx';
 
 export function LottiLiveScreen({ askLottiAction }) {
+  const { t, locale } = useAppState();
   const [messages, setMessages] = React.useState([]);
   const [draft, setDraft] = React.useState('');
   const [pending, setPending] = React.useState(false);
@@ -34,13 +36,13 @@ export function LottiLiveScreen({ askLottiAction }) {
 
     try {
       const history = messages.map(({ role, text }) => ({ role, text }));
-      const result = await askLottiAction(text, history);
+      const result = await askLottiAction(text, history, locale);
       setMessages((current) => [
         ...current,
         {
           id: `assistant-${Date.now()}`,
           role: 'assistant',
-          text: result?.text || 'Im Moment konnte ich keine Antwort formulieren.',
+          text: result?.text || t('lotti.fallback.general'),
           source: result?.source || 'fallback',
         },
       ]);
@@ -50,7 +52,7 @@ export function LottiLiveScreen({ askLottiAction }) {
         {
           id: `assistant-${Date.now()}`,
           role: 'assistant',
-          text: 'Im Moment klappt die Verbindung nicht ganz. Versuch es bitte noch einmal.',
+          text: t('lotti.fallback.general'),
           source: 'fallback',
         },
       ]);
@@ -62,7 +64,7 @@ export function LottiLiveScreen({ askLottiAction }) {
   return (
     <div className="app">
       <div className="app-header">
-        <h1 className="app-title">Frag Lotti</h1>
+        <h1 className="app-title">{t('lotti.title')}</h1>
       </div>
 
       <div className="app-body">
@@ -71,7 +73,7 @@ export function LottiLiveScreen({ askLottiAction }) {
             <div className="lotti-messages" ref={listRef}>
               {!messages.length && !pending && (
                 <div className="lotti-empty-state">
-                  Deine Unterhaltung erscheint hier.
+                  {t('lotti.empty')}
                 </div>
               )}
 
@@ -83,7 +85,7 @@ export function LottiLiveScreen({ askLottiAction }) {
 
               {pending && (
                 <div className="lotti-message assistant pending">
-                  <div className="lotti-message-text">Einen Moment bitte …</div>
+                  <div className="lotti-message-text">{t('lotti.pending')}</div>
                 </div>
               )}
             </div>
@@ -91,12 +93,12 @@ export function LottiLiveScreen({ askLottiAction }) {
             <div className="lotti-compose">
               <div className="lotti-compose-row">
                 <label className="lotti-label sr-only" htmlFor="lotti-question">
-                  Ihre Frage an Lotti
+                  {t('lotti.label')}
                 </label>
                 <textarea
                   id="lotti-question"
                   className="field lotti-input"
-                  placeholder="Frage hier eingeben"
+                  placeholder={t('lotti.placeholder')}
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
                   onKeyDown={(event) => {
@@ -108,7 +110,7 @@ export function LottiLiveScreen({ askLottiAction }) {
                   disabled={pending}
                 />
                 <button className="btn btn-primary lotti-send" onClick={submitQuestion} disabled={pending || !draft.trim()}>
-                  Senden
+                  {t('lotti.send')}
                 </button>
               </div>
             </div>

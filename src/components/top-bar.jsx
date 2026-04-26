@@ -5,27 +5,27 @@ import Link from 'next/link';
 import { Volume2 } from 'lucide-react';
 import { useAppState } from './app-provider.jsx';
 
-function formatDateTime(value) {
+function formatDateTime(value, localeTag, separator) {
   if (!value) {
     return '';
   }
 
   const time = new Date(value);
-  const dateStr = time.toLocaleDateString('de-CH', {
+  const dateStr = time.toLocaleDateString(localeTag, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
   });
-  const timeStr = time.toLocaleTimeString('de-CH', {
+  const timeStr = time.toLocaleTimeString(localeTag, {
     hour: '2-digit',
     minute: '2-digit',
   });
 
-  return `${dateStr} · ${timeStr}`;
+  return `${dateStr}${separator}${timeStr}`;
 }
 
 export function TopBar() {
-  const { textSize, setTextSize, readAloud, identity } = useAppState();
+  const { textSize, setTextSize, readAloud, identity, t, localeTag } = useAppState();
   const [now, setNow] = React.useState(null);
 
   React.useEffect(() => {
@@ -39,12 +39,12 @@ export function TopBar() {
 
   return (
     <div className="topbar">
-      <Link className="logo logo-btn" href="/" aria-label="Zur Startseite">
-        Zur Startseite
+      <Link className="logo logo-btn" href="/" aria-label={t('common.home')}>
+        {t('common.home')}
       </Link>
 
       <div className="a11y">
-        <div className="a11y-group" role="group" aria-label="Textgröße">
+        <div className="a11y-group" role="group" aria-label={t('common.textSize')}>
           {['A', 'A+', 'A++'].map((label, i) => (
             <button
               key={label}
@@ -56,9 +56,9 @@ export function TopBar() {
             </button>
           ))}
         </div>
-        <button className="a11y-btn" onClick={readAloud} title="Seite vorlesen">
+        <button className="a11y-btn" onClick={readAloud} title={t('common.readAloud')}>
           <Volume2 size={18} strokeWidth={2.25} />
-          Vorlesen
+          {t('common.readAloud')}
         </button>
       </div>
 
@@ -66,11 +66,11 @@ export function TopBar() {
 
       <div className="whoami-chip" aria-live="polite">
         <div className="whoami-main">
-          {identity?.loading ? 'Wird geladen ...' : `${identity?.userName || 'Unbekannt'}`}
+          {identity?.loading ? t('topbar.userLoading') : `${identity?.userName || t('topbar.userUnknown')}`}
         </div>
       </div>
 
-      <div className="time" aria-live="polite">{formatDateTime(now)}</div>
+      <div className="time" aria-live="polite">{formatDateTime(now, localeTag, t('topbar.dateTimeSeparator'))}</div>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Bike, Minus, Mountain, Plus, Search, X } from 'lucide-react';
+import { useAppState } from './app-provider.jsx';
 
 const SWITZERLAND_CENTER = [46.8182, 8.2275];
 const SWITZERLAND_ZOOM = 8;
@@ -29,6 +30,7 @@ function createOverlayLayer(L, layerId) {
 }
 
 export function MapScreen() {
+  const { t, locale } = useAppState();
   const mapElementRef = React.useRef(null);
   const mapInstanceRef = React.useRef(null);
   const leafletRef = React.useRef(null);
@@ -160,7 +162,7 @@ export function MapScreen() {
         const url = new URL('https://api3.geo.admin.ch/rest/services/api/SearchServer');
         url.searchParams.set('searchText', query.trim());
         url.searchParams.set('type', 'locations');
-        url.searchParams.set('lang', 'de');
+        url.searchParams.set('lang', locale);
         url.searchParams.set('limit', '8');
         const res = await fetch(url.toString());
         if (!res.ok) return;
@@ -210,15 +212,15 @@ export function MapScreen() {
   return (
     <div className="app map-app">
       <div className="app-header">
-        <h1 className="app-title">Karte</h1>
+        <h1 className="app-title">{t('map.title')}</h1>
         <div className="spacer" />
-        <div className="map-title-actions" aria-label="Kartenebenen">
+        <div className="map-title-actions" aria-label={t('map.layers')}>
           <button
             className={`map-toggle-btn ${activeOverlay === 'hiking' ? 'active' : ''}`}
             type="button"
-            aria-label="Wanderwege"
+            aria-label={t('map.hiking')}
             aria-pressed={activeOverlay === 'hiking'}
-            title="Wanderwege"
+            title={t('map.hiking')}
             onClick={() => setActiveOverlay('hiking')}
           >
             <Mountain size={24} strokeWidth={2.4} />
@@ -226,9 +228,9 @@ export function MapScreen() {
           <button
             className={`map-toggle-btn ${activeOverlay === 'cycling' ? 'active' : ''}`}
             type="button"
-            aria-label="Veloland"
+            aria-label={t('map.cycling')}
             aria-pressed={activeOverlay === 'cycling'}
-            title="Veloland"
+            title={t('map.cycling')}
             onClick={() => setActiveOverlay('cycling')}
           >
             <Bike size={24} strokeWidth={2.4} />
@@ -240,13 +242,13 @@ export function MapScreen() {
         <div className="map-screen">
           <div className="map-panel">
             <div className="map-frame">
-              <div className="map-controls" aria-label="Kartensteuerung">
+              <div className="map-controls" aria-label={t('map.controls')}>
                 <button
                   className="map-control-btn"
                   type="button"
                   onClick={handleZoomIn}
-                  aria-label="Vergrössern"
-                  title="Vergrössern"
+                  aria-label={t('map.zoomIn')}
+                  title={t('map.zoomIn')}
                 >
                   <Plus size={28} strokeWidth={2.75} />
                 </button>
@@ -254,8 +256,8 @@ export function MapScreen() {
                   className="map-control-btn"
                   type="button"
                   onClick={handleZoomOut}
-                  aria-label="Verkleinern"
-                  title="Verkleinern"
+                  aria-label={t('map.zoomOut')}
+                  title={t('map.zoomOut')}
                 >
                   <Minus size={28} strokeWidth={2.75} />
                 </button>
@@ -267,12 +269,12 @@ export function MapScreen() {
                   <input
                     className="map-search-input"
                     type="text"
-                    placeholder="Ort oder Adresse suchen…"
+                    placeholder={t('map.searchPlaceholder')}
                     value={searchQuery}
                     onChange={handleSearchChange}
                     onFocus={() => searchResults.length > 0 && setSearchOpen(true)}
                     onBlur={() => { setTimeout(() => setSearchOpen(false), 160); }}
-                    aria-label="Ortssuche"
+                    aria-label={t('map.searchLabel')}
                     aria-autocomplete="list"
                     autoComplete="off"
                     spellCheck={false}
@@ -282,21 +284,22 @@ export function MapScreen() {
                       className="map-search-clear"
                       type="button"
                       onClick={handleClearSearch}
-                      aria-label="Suche löschen"
+                      aria-label={t('map.clearSearch')}
                     >
                       <X size={20} strokeWidth={2.2} />
                     </button>
                   )}
                 </div>
                 {searchOpen && searchResults.length > 0 && (
-                  <ul className="map-search-results" role="listbox" aria-label="Suchergebnisse">
+                  <ul className="map-search-results" role="listbox" aria-label={t('map.results')}>
                     {searchResults.map((result) => (
                       <li
                         key={result.id ?? result.attrs.geomStabId}
                         className="map-search-result-item"
-                        role="option"
-                        onMouseDown={() => handleSelectResult(result)}
-                      >
+                    role="option"
+                    aria-selected={false}
+                    onMouseDown={() => handleSelectResult(result)}
+                  >
                         {stripHtml(result.attrs.label)}
                       </li>
                     ))}
@@ -308,10 +311,10 @@ export function MapScreen() {
                 ref={mapElementRef}
                 className="swiss-map-canvas"
                 role="application"
-                aria-label="Schweizer Karte mit Wanderwegen"
+                aria-label={t('map.aria')}
               />
               <span className="sr-only">
-                Die Karte kann mit dem Finger oder mit der Maus verschoben werden.
+                {t('map.instructions')}
               </span>
             </div>
           </div>

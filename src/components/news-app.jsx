@@ -5,16 +5,16 @@ import { useAppState } from './app-provider.jsx';
 import { NewsArticleCard } from './news-article-card.jsx';
 
 export function NewsScreen() {
-  const { news, isOnline, refreshNews } = useAppState();
+  const { news, isOnline, refreshNews, t } = useAppState();
   const articles = news?.items || [];
 
   return (
     <div className="app">
       <div className="app-header">
-        <h1 className="app-title">Zeitung</h1>
+        <h1 className="app-title">{t('news.title')}</h1>
         <div className="spacer" />
         <button className="btn" onClick={refreshNews} disabled={!isOnline && !news?.updatedAt}>
-          Neu laden
+          {t('news.reload')}
         </button>
       </div>
 
@@ -22,7 +22,7 @@ export function NewsScreen() {
         <div className="news-app-shell">
           {news?.error && (
             <div className="news-app-warning">
-              Die Live-Quellen waren gerade nicht erreichbar. Wir zeigen die zuletzt gespeicherte Ausgabe.
+              {t('news.errors.unavailable')}
             </div>
           )}
 
