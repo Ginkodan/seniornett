@@ -7,6 +7,7 @@ export const seniorFacingRoutes: SeniorRoute[] = [
   { path: "/", name: "Startseite" },
   { path: "/social-hub", name: "Treffpunkt" },
   { path: "/fotos-papiere", name: "Fotos und Papiere" },
+  { path: "/marktplatz", name: "Marktplatz" },
   { path: "/lotti-live", name: "Lotti fragen" },
   { path: "/lexikon", name: "Lexikon" },
   { path: "/audio", name: "Audio und Musik" },
@@ -21,4 +22,3 @@ export const auditViewports = [
   { name: "desktop", width: 1440, height: 1000 },
   { name: "tablet", width: 1024, height: 768 },
 ] as const;
-

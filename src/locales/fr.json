@@ -30,6 +30,7 @@
     "apps": {
       "social-hub": "Parler avec quelqu’un",
       "media": "Photos et papiers",
+      "marketplace": "Marché",
       "audio": "Audio et musique",
       "news": "Journal",
       "lotti-live": "Demander à Lotti",
@@ -42,6 +43,7 @@
     "appDescriptions": {
       "social-hub": "Joindre la famille, les amis et l’accompagnement.",
       "media": "Voir des photos et retrouver des papiers importants.",
+      "marketplace": "Trouver ou donner des objets gratuitement.",
       "audio": "Écouter la radio, des émissions et des livres audio.",
       "news": "Lire les nouvelles calmement, sans publicité.",
       "lotti-live": "Poser une question simple.",
@@ -472,5 +474,74 @@
     "results": "Résultats de recherche",
     "aria": "Carte suisse avec sentiers de randonnée",
     "instructions": "La carte peut être déplacée avec le doigt ou la souris."
+  },
+  "marketplace": {
+    "title": "Marché",
+    "subtitle": "Trouver des objets gratuits ou en donner simplement.",
+    "intro": "Ici, vous pouvez trouver un objet gratuit ou donner quelque chose tranquillement. Tout reste simple et rassurant.",
+    "actions": {
+      "create": "Créer une annonce gratuite",
+      "publish": "Publier l'annonce",
+      "publishing": "Enregistrement en cours ...",
+      "cancel": "Annuler",
+      "contact": "Écrire un message",
+      "connecting": "Ouverture du contact ...",
+      "ownListing": "Mon annonce",
+      "delete": "Supprimer l'annonce",
+      "deleteNow": "Supprimer maintenant",
+      "deleting": "Suppression ..."
+    },
+    "labels": {
+      "own": "Mon annonce",
+      "from": "De",
+      "place": "Retrait",
+      "published": "Publié"
+    },
+    "filters": {
+      "aria": "Filtrer les catégories",
+      "all": "Tous"
+    },
+    "loading": {
+      "title": "Le marché se prépare.",
+      "body": "Les annonces et vos photos sont en chargement."
+    },
+    "empty": {
+      "title": "Aucune annonce dans cette sélection",
+      "body": "Choisissez une autre catégorie ou créez une nouvelle annonce gratuite."
+    },
+    "fields": {
+      "title": "Que souhaitez-vous donner ?",
+      "pickupArea": "Où peut-on le retirer ?",
+      "description": "Brève description",
+      "category": "Catégorie",
+      "condition": "État"
+    },
+    "create": {
+      "title": "Nouvelle annonce gratuite",
+      "eyebrow": "Donner quelque chose simplement",
+      "helpTitle": "Comment faire",
+      "helpBody": "Choisissez si possible une photo dans vos fichiers. Ensuite, écrivez brièvement de quoi il s'agit et où l'objet peut être retiré.",
+      "photosTitle": "Images depuis mes fichiers",
+      "photosHint": "Vous pouvez choisir jusqu'à trois images.",
+      "noPhotosTitle": "Pas encore de photo adaptée",
+      "noPhotosBody": "Dans Photos et papiers, vous pouvez d'abord regarder ou préparer des images.",
+      "goToFiles": "Vers Photos et papiers"
+    },
+    "delete": {
+      "title": "Supprimer l'annonce",
+      "eyebrow": "Retirer sa propre annonce",
+      "helpTitle": "Voulez-vous vraiment supprimer cette annonce ?",
+      "helpBody": "L'annonce disparaîtra du marché. Plus tard, vous pourrez créer une nouvelle annonce si vous le souhaitez."
+    },
+    "messages": {
+      "created": "Votre annonce gratuite est maintenant visible.",
+      "deleted": "Votre annonce a été supprimée.",
+      "createError": "L'annonce n'a pas pu être enregistrée pour le moment.",
+      "deleteError": "L'annonce n'a pas pu être supprimée pour le moment.",
+      "contactError": "Le chat n'a pas pu être ouvert pour le moment.",
+      "loadError": "Le marché n'a pas pu être chargé pour le moment.",
+      "attention": "À vérifier",
+      "good": "C'est bon"
+    }
   }
 }

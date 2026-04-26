@@ -1,0 +1,206 @@
+.scope {
+  display: block;
+}
+
+.introCard {
+  margin-bottom: 1.5rem;
+}
+
+.introText {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.65;
+  color: var(--ink-strong, #1f2937);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0 0 1.5rem;
+}
+
+.list {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.listingCard {
+  overflow: hidden;
+}
+
+.listingMedia {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #eef2f7;
+  border-bottom: 2px solid #d6deea;
+}
+
+.listingImage {
+  object-fit: cover;
+}
+
+.listingPlaceholder {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+}
+
+.listingBody {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.1rem 1.1rem 1.2rem;
+}
+
+.listingMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.listingBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  border-radius: 999px;
+  border: 2px solid #cdd7e4;
+  padding: 0.2rem 0.8rem;
+  font-weight: 700;
+  color: #23364d;
+  background: #f8fbff;
+}
+
+.listingOwnBadge {
+  border-color: #1b5e20;
+  background: #edf8ef;
+  color: #184b1b;
+}
+
+.listingTitle {
+  margin: 0;
+  font-size: 1.45rem;
+  line-height: 1.35;
+  color: #101828;
+}
+
+.listingDescription {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.65;
+  color: #334155;
+}
+
+.listingDetails {
+  display: grid;
+  gap: 0.5rem;
+  color: #1f2937;
+}
+
+.detailRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: baseline;
+}
+
+.detailLabel {
+  font-weight: 800;
+}
+
+.listingActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.formBody {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.fieldGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.photoChooserHeader {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.chooserTitle {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1.4;
+  color: #0f172a;
+}
+
+.chooserHint {
+  margin: 0;
+  line-height: 1.6;
+  color: #334155;
+}
+
+.photoGrid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}
+
+.photoButton {
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.photoCard {
+  overflow: hidden;
+}
+
+.photoPreview {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: #eef2f7;
+}
+
+.photoPreviewImage {
+  object-fit: cover;
+}
+
+.photoCaption {
+  padding: 0.85rem 0.95rem 1rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: #102033;
+}
+
+.modalActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.emptyLink {
+  display: inline-flex;
+  margin-top: 0.75rem;
+  font-weight: 700;
+  color: #0f4c81;
+  text-decoration: underline;
+}
+
+@media (min-width: 980px) {
+  .list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fieldGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -1,6 +1,6 @@
 # SeniorNett
 
-Calm, high-contrast Next.js app for senior users: home, messages, social hub, media, weather, map, audio, video, lexicon, and emergency info.
+Calm, high-contrast Next.js app for senior users: home, messages, social hub, marketplace, media, weather, map, audio, video, lexicon, and emergency info.
 
 ## Quick Start
 

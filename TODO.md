@@ -4,8 +4,8 @@ For every change consider the `design-guide.md` before implementing a todo.
 
 ## Apps & Features
 
-- [ ] Marktplatz / Gratisinserate
 - [ ] Share files/images
+- [ ] Improve Gratisinserate/Marktplatz app
 - [ ] Facebook-artige App zum teilen von Eindrücken
 - [ ] Reisebüro für Kreuzfahrt, Busreise, Seminare etc...
 - [ ] Spiele (unter anderem Brainfitness)

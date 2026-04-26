@@ -30,6 +30,7 @@
     "apps": {
       "social-hub": "Mit Menschen sprechen",
       "media": "Fotos & Papiere",
+      "marketplace": "Marktplatz",
       "audio": "Audio & Musik",
       "news": "Zeitung",
       "lotti-live": "Lotti fragen",
@@ -42,6 +43,7 @@
     "appDescriptions": {
       "social-hub": "Familie, Freunde und Betreuung erreichen.",
       "media": "Fotos ansehen und wichtige Papiere finden.",
+      "marketplace": "Gratis Dinge finden oder weitergeben.",
       "audio": "Radio, Sendungen und Hörbücher hören.",
       "news": "Nachrichten ruhig und ohne Werbung lesen.",
       "lotti-live": "Eine einfache Frage stellen.",
@@ -472,5 +474,74 @@
     "results": "Suchergebnisse",
     "aria": "Schweizer Karte mit Wanderwegen",
     "instructions": "Die Karte kann mit dem Finger oder mit der Maus verschoben werden."
+  },
+  "marketplace": {
+    "title": "Marktplatz",
+    "subtitle": "Gratis Dinge finden oder freundlich weitergeben.",
+    "intro": "Hier können Sie gratis etwas finden oder selbst einen Gegenstand weitergeben. Alles bleibt ruhig und einfach.",
+    "actions": {
+      "create": "Gratisinserat erstellen",
+      "publish": "Inserat veröffentlichen",
+      "publishing": "Inserat wird gespeichert ...",
+      "cancel": "Abbrechen",
+      "contact": "Nachricht schreiben",
+      "connecting": "Verbindung wird geöffnet ...",
+      "ownListing": "Mein Inserat",
+      "delete": "Inserat löschen",
+      "deleteNow": "Jetzt löschen",
+      "deleting": "Wird entfernt ..."
+    },
+    "labels": {
+      "own": "Mein Inserat",
+      "from": "Von",
+      "place": "Abholung",
+      "published": "Eingestellt"
+    },
+    "filters": {
+      "aria": "Kategorien filtern",
+      "all": "Alle"
+    },
+    "loading": {
+      "title": "Der Marktplatz wird vorbereitet.",
+      "body": "Inserate und eigene Fotos werden geladen."
+    },
+    "empty": {
+      "title": "Noch keine Inserate in dieser Auswahl",
+      "body": "Wählen Sie eine andere Kategorie oder erstellen Sie ein neues Gratisinserat."
+    },
+    "fields": {
+      "title": "Was möchten Sie verschenken?",
+      "pickupArea": "Wo kann man es abholen?",
+      "description": "Kurze Beschreibung",
+      "category": "Kategorie",
+      "condition": "Zustand"
+    },
+    "create": {
+      "title": "Neues Gratisinserat",
+      "eyebrow": "Etwas freundlich weitergeben",
+      "helpTitle": "So geht es",
+      "helpBody": "Wählen Sie wenn möglich ein Bild aus Ihren Fotos. Danach schreiben Sie kurz, worum es geht und wo man es abholen kann.",
+      "photosTitle": "Bilder aus meinen Dateien",
+      "photosHint": "Sie können bis zu drei Bilder auswählen.",
+      "noPhotosTitle": "Noch keine passenden Fotos vorhanden",
+      "noPhotosBody": "In Fotos & Papiere können Sie zuerst Bilder anschauen oder neue Bilder bereitstellen.",
+      "goToFiles": "Zu Fotos & Papiere"
+    },
+    "delete": {
+      "title": "Inserat löschen",
+      "eyebrow": "Eigenes Inserat entfernen",
+      "helpTitle": "Möchten Sie dieses Inserat wirklich entfernen?",
+      "helpBody": "Das Inserat verschwindet aus dem Marktplatz. Später können Sie bei Bedarf ein neues Inserat erstellen."
+    },
+    "messages": {
+      "created": "Ihr Gratisinserat ist jetzt sichtbar.",
+      "deleted": "Ihr Inserat wurde entfernt.",
+      "createError": "Das Inserat konnte gerade nicht gespeichert werden.",
+      "deleteError": "Das Inserat konnte gerade nicht entfernt werden.",
+      "contactError": "Der Chat konnte gerade nicht geöffnet werden.",
+      "loadError": "Der Marktplatz konnte gerade nicht geladen werden.",
+      "attention": "Bitte prüfen",
+      "good": "Alles bereit"
+    }
   }
 }
