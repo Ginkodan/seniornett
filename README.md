@@ -1,42 +1,64 @@
-# seniornett
+# SeniorNett
 
-Local WireGuard-style device identity setup with a custom chat UI.
+Calm, high-contrast Next.js app for senior users: home, messages, social hub, media, weather, map, audio, video, lexicon, and emergency info.
 
-Identity and chat data live in Postgres via `docker/postgres/init.sql`.
-
-## Run
+## Quick Start
 
 ```bash
 docker compose up
 ```
 
-Open one of these URLs:
+Open a seeded device view:
 
-- `http://localhost:5173` (parent-tablet -> 10.44.0.25)
-- `http://localhost:5174` (grandpa-tablet -> 10.44.0.26)
-- `http://localhost:5175` (caregiver-tablet -> 10.44.0.27)
+- `http://localhost:5173`
+- `http://localhost:5174`
+- `http://localhost:5175`
 
-The top bar shows "Wer bin ich?" based on the port (device in production).
+The nginx proxy maps local ports to seeded device identities from `docker/postgres/init.sql`. Ports `5173..5185` are reserved for local device views.
 
-## Messaging
+## Local App Only
 
-- Chat history is stored in Postgres through `chat_messages`.
-- Only contacts listed in `chat_relationships` are exposed in the UI.
-- Messages remain available even after browser cache is cleared.
+```bash
+npm install
+npm run dev
+```
 
-## Live development
+Default app port: `5176`.
 
-- Edit files in `src/` as usual.
-- Vite hot reload updates all three client pages immediately.
-- Keep three browser windows open (5173/5174/5175) to develop and compare client views in parallel.
+## Checks
 
-## Add a user (single place)
+```bash
+npm run lint
+npm run build
+```
 
-1. Edit the seeded user rows in `docker/postgres/init.sql`
-2. Add a user with fields like:
-   - `user_id`, `username`, `display_name`, `role`
-   - `wireguard_pub_key`, `vpn_ip`, `local_dev_port`, `device_id`
-3. Choose any free `localDevPort` in `5173..5185`
-4. Restart stack: `docker compose up --build`
+## Stack
 
-No app/proxy code change needed for new users in that range.
+- `src/app`: Next routes and server actions
+- `src/components`: TSX screens and shared UI primitives
+- `src/components/ui`: reusable design-system building blocks
+- `src/lib`: domain logic and shared helpers
+- `docker/postgres/init.sql`: users, relationships, chat/media seed data
+- `docker/nginx/nginx.conf`: local device identity routing
+
+## Services
+
+`docker compose up` starts:
+
+- Next app
+- Postgres
+- identity API
+- nginx device proxy
+- Garage S3-compatible media storage
+
+## Add a Local User
+
+1. Add the user/device rows in `docker/postgres/init.sql`.
+2. Pick a free `local_dev_port` in `5173..5185`.
+3. Restart with:
+
+```bash
+docker compose up --build
+```
+
+No app or proxy code change is needed for ports in that range.

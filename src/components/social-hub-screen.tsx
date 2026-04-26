@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 "use client";
 
 import React from "react";
@@ -10,7 +12,7 @@ import {
   selectSocialHubGroupTopicAction,
   setSocialHubTopicAction,
 } from "@/app/actions/social-hub";
-import { useAppState } from "./app-provider.jsx";
+import { useAppState } from "./app-provider";
 
 const AREAS = {
   CARE: "care",

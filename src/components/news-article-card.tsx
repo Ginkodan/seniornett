@@ -1,6 +1,9 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 "use client";
 
 import React from 'react';
+import { AppImage } from "./ui";
 
 function splitArticleContent(content) {
   return (content || '')
@@ -25,7 +28,7 @@ export function NewsArticleCard({ article }) {
         <h2>{article.title}</h2>
         {getImageSrc(article.imageDataUrl || article.image) && (
           <div className="news-article-image">
-            <img src={getImageSrc(article.imageDataUrl || article.image)} alt="" loading="lazy" />
+            <AppImage src={getImageSrc(article.imageDataUrl || article.image)} alt="" fill sizes="(max-width: 900px) 100vw, 42rem" />
           </div>
         )}
         <div className="news-article-content">

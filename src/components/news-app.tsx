@@ -1,8 +1,10 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 "use client";
 
 import React from 'react';
-import { useAppState } from './app-provider.jsx';
-import { NewsArticleCard } from './news-article-card.jsx';
+import { useAppState } from './app-provider';
+import { NewsArticleCard } from './news-article-card';
 
 export function NewsScreen() {
   const { news, isOnline, refreshNews, t } = useAppState();

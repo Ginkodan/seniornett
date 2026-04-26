@@ -1,4 +1,4 @@
-import { WikipediaScreen } from "../../components/wikipedia-screen.jsx";
+import { WikipediaScreen } from "../../components/wikipedia-screen";
 
 export default function WikipediaPage() {
   return <WikipediaScreen />;

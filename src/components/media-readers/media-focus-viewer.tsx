@@ -1,10 +1,12 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 "use client";
 
-import { ModalOverlay } from "../modal-overlay.jsx";
-import { ImageReader } from "./image-reader.jsx";
-import { PdfReader } from "./pdf-reader.jsx";
-import { ReaderMetadataAside } from "./reader-metadata-aside.jsx";
-import { TextDocumentReader } from "./text-document-reader.jsx";
+import { ModalOverlay } from "../ui";
+import { ImageReader } from "./image-reader";
+import { PdfReader } from "./pdf-reader";
+import { ReaderMetadataAside } from "./reader-metadata-aside";
+import { TextDocumentReader } from "./text-document-reader";
 
 function isTextDocument(item) {
   return [

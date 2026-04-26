@@ -1,5 +1,5 @@
 import { getProfileAction } from "../actions/profile";
-import { NotfallScreen } from "../../components/notfall-screen.jsx";
+import { NotfallScreen } from "../../components/notfall-screen";
 import { createEmptyProfile } from "@/lib/profile";
 import { headers } from "next/headers";
 import { createTranslator, normalizeLanguage } from "@/lib/i18n";

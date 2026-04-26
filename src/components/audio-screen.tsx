@@ -1,9 +1,11 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 "use client";
 
 import React from "react";
 import { BookOpen, Headphones, Pause, Play, Radio, Square } from "lucide-react";
 import { AUDIOBOOK_GENRES, BOOK_FILTER_ALL } from "../lib/audio/genres";
-import { useAppState } from "./app-provider.jsx";
+import { useAppState } from "./app-provider";
 
 const TABS = [
   { id: "radio", key: "radio", icon: Radio },

@@ -5,8 +5,8 @@ import "leaflet/dist/leaflet.css";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { loadNewsAction } from "./actions/news";
-import { AppProvider } from "../components/app-provider.jsx";
-import { TopBar } from "../components/top-bar.jsx";
+import { AppProvider } from "../components/app-provider";
+import { TopBar } from "../components/top-bar";
 import { createTranslator, getLocaleTag, normalizeLanguage } from "@/lib/i18n";
 
 export const metadata: Metadata = {

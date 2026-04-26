@@ -1,4 +1,4 @@
-import { SocialHubScreen } from "../../components/social-hub-screen.jsx";
+import { SocialHubScreen } from "../../components/social-hub-screen";
 
 export default async function SocialHubPage({
   searchParams,
