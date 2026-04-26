@@ -13,6 +13,7 @@ import {
   setSocialHubTopicAction,
 } from "@/app/actions/social-hub";
 import { useAppState } from "./app-provider";
+import styles from "./messaging-social.module.css";
 
 const AREAS = {
   CARE: "care",
@@ -737,7 +738,7 @@ export function SocialHubScreen({ initialContactId = "", initialArea = "" }) {
   }
 
   return (
-    <div className="app social-hub-app">
+    <div className={`${styles.scope} app social-hub-app`}>
       <div className="app-header social-hub-header">
         <div>
           <h1 className="app-title">{t("socialHub.title")}</h1>

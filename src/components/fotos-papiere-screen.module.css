@@ -1,0 +1,966 @@
+.scope { display: contents; }
+
+/* Media hub */
+.scope:global(.media-header), .scope :global(.media-header) {
+  align-items: flex-end;
+  gap: 1.5rem;
+}
+
+.scope:global(.media-header-copy), .scope :global(.media-header-copy) {
+  margin: 0.5rem 0 0;
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+  max-width: 42rem;
+}
+
+.scope:global(.media-shell), .scope :global(.media-shell) {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 2rem 3.5rem 3rem;
+  min-height: 100%;
+  overflow: auto;
+}
+
+.scope:global(.media-hero), .scope :global(.media-hero) {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.scope:global(.media-hero-actions), .scope :global(.media-hero-actions) {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 60rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.scope:global(.media-helper-input), .scope :global(.media-helper-input) {
+  width: 100%;
+}
+
+.scope:global(.media-helper-submit), .scope :global(.media-helper-submit) {
+  white-space: nowrap;
+}
+
+.scope:global(.media-filter-block), .scope :global(.media-filter-block) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.scope:global(.media-filter-row), .scope :global(.media-filter-row) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.scope:global(.media-filter-label), .scope :global(.media-filter-label) {
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-4);
+}
+
+.scope:global(.media-collections), .scope :global(.media-collections) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.scope:global(.media-collection-chip), .scope :global(.media-collection-chip) {
+  min-height: 3.5rem;
+  padding: 0.85rem 1rem;
+  border: var(--border-thin);
+  border-radius: 999px;
+  background: var(--paper-2);
+  color: var(--ink);
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.scope:global(.media-collection-chip.active), .scope :global(.media-collection-chip.active) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.scope:global(.media-collection-chip strong), .scope :global(.media-collection-chip strong) {
+  font-size: var(--fs-sm);
+}
+
+.scope:global(.media-warning), .scope :global(.media-warning) {
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius-lg);
+  border: var(--border-thin);
+  background: #fff4f2;
+  color: var(--ink);
+  font-size: var(--fs-sm);
+}
+
+.scope:global(.media-main), .scope :global(.media-main) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  min-height: 0;
+}
+
+.scope:global(.media-list),
+.scope :global(.media-list),
+.scope:global(.media-detail),
+.scope :global(.media-detail),
+.scope:global(.media-upload),
+.scope :global(.media-upload) {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.scope:global(.media-upload-head), .scope :global(.media-upload-head) {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.scope:global(.media-searchbox), .scope :global(.media-searchbox) {
+  width: 100%;
+  max-width: none;
+}
+
+.scope:global(.media-list-heading), .scope :global(.media-list-heading) {
+  margin-top: 0.15rem;
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.scope:global(.media-grid), .scope :global(.media-grid) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 0.9rem;
+}
+
+.scope:global(.media-card-item), .scope :global(.media-card-item) {
+  border: var(--border-thin);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  overflow: hidden;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  min-height: 15rem;
+}
+
+.scope:global(.media-card-photo), .scope :global(.media-card-photo) {
+  min-height: 19rem;
+}
+
+.scope:global(.media-card-document-card), .scope :global(.media-card-document-card) {
+  min-height: 11rem;
+  background: linear-gradient(180deg, #fbf7ef 0%, var(--card) 100%);
+}
+
+.scope:global(.media-card-item.active), .scope :global(.media-card-item.active) {
+  box-shadow: 0 0 0 3px var(--ink) inset;
+}
+
+.scope:global(.media-card-main), .scope :global(.media-card-main) {
+  text-align: left;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+}
+
+.scope:global(.media-card-preview), .scope :global(.media-card-preview) {
+  aspect-ratio: 16 / 10;
+  background: var(--paper-2);
+  border-bottom: var(--border-thin);
+  overflow: hidden;
+  display: flex;
+  position: relative;
+}
+
+.scope:global(.media-card-photo .media-card-preview), .scope :global(.media-card-photo .media-card-preview) {
+  aspect-ratio: 16 / 11;
+}
+
+.scope:global(.media-card-photo-preview), .scope :global(.media-card-photo-preview) {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--paper-2);
+}
+
+.scope:global(.media-card-photo-preview img), .scope :global(.media-card-photo-preview img) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.scope:global(.media-card-preview img),
+.scope :global(.media-card-preview img),
+.scope:global(.media-viewer-preview img),
+.scope :global(.media-viewer-preview img),
+.scope:global(.media-viewer-preview object),
+.scope :global(.media-viewer-preview object),
+.scope:global(.media-card-document-frame),
+.scope :global(.media-card-document-frame) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border: 0;
+}
+
+.scope:global(.media-card-placeholder), .scope :global(.media-card-placeholder) {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-4);
+}
+
+.scope:global(.media-card-body), .scope :global(.media-card-body) {
+  padding: 1rem 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.scope:global(.media-card-photo-body), .scope :global(.media-card-photo-body) {
+  padding-top: 0.95rem;
+}
+
+.scope:global(.media-card-document-main), .scope :global(.media-card-document-main) {
+  display: grid;
+  grid-template-columns: 6.2rem minmax(0, 1fr);
+  gap: 0.9rem;
+  padding: 0.95rem 0.95rem 0.9rem;
+  align-items: start;
+  min-height: 10.6rem;
+}
+
+.scope:global(.media-card-document-left), .scope :global(.media-card-document-left) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.scope:global(.media-card-document-right), .scope :global(.media-card-document-right) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 0.1rem;
+}
+
+.scope:global(.media-card-purpose), .scope :global(.media-card-purpose) {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  line-height: 1.35;
+}
+
+.scope:global(.media-card-title), .scope :global(.media-card-title) {
+  font-size: var(--fs-base);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.scope:global(.media-card-meta), .scope :global(.media-card-meta) {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  line-height: 1.35;
+}
+
+.scope:global(.media-document-sheet), .scope :global(.media-document-sheet) {
+  height: 100%;
+  border: var(--border-thin);
+  border-radius: calc(var(--radius) - 0.15rem);
+  background: linear-gradient(180deg, var(--paper) 0%, #faf8f4 100%);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.scope:global(.media-document-sheet-static), .scope :global(.media-document-sheet-static) {
+  min-height: 100%;
+}
+
+.scope:global(.media-card-document-compact), .scope :global(.media-card-document-compact) {
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+}
+
+.scope:global(.media-card-document-compact-preview), .scope :global(.media-card-document-compact-preview) {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  min-height: 7rem;
+  border: var(--border-thin);
+  border-radius: calc(var(--radius) - 0.2rem);
+  background: var(--paper-2);
+  display: block;
+  object-fit: cover;
+}
+
+.scope:global(.media-card-document-compact-icon), .scope :global(.media-card-document-compact-icon) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-2);
+  border: var(--border-thin);
+}
+
+.scope:global(.media-document-badge), .scope :global(.media-document-badge) {
+  min-width: 4.2rem;
+  min-height: 2.4rem;
+  padding: 0.25rem 0.75rem;
+  border: var(--border-thin);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  background: var(--paper);
+}
+
+.scope:global(.media-document-title), .scope :global(.media-document-title) {
+  font-size: var(--fs-md);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.scope:global(.media-document-summary), .scope :global(.media-document-summary) {
+  margin-top: 0.25rem;
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  line-height: 1.45;
+}
+
+.scope:global(.media-document-sheet object), .scope :global(.media-document-sheet object) {
+  width: 100%;
+  min-height: 18rem;
+  border: var(--border-thin);
+  border-radius: calc(var(--radius) - 0.2rem);
+  background: var(--paper-2);
+  flex: 1;
+}
+
+.scope:global(.media-document-sheet-body), .scope :global(.media-document-sheet-body) {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 18rem;
+}
+
+.scope:global(.media-document-paper), .scope :global(.media-document-paper) {
+  min-height: 18rem;
+  padding: 1.25rem 1.1rem;
+  border: var(--border-thin);
+  border-radius: calc(var(--radius) - 0.1rem);
+  background: linear-gradient(180deg, #fffdf7 0%, #faf7f0 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow: auto;
+}
+
+.scope:global(.media-document-paper-title), .scope :global(.media-document-paper-title) {
+  font-size: var(--fs-md);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.scope:global(.media-document-paper-text), .scope :global(.media-document-paper-text) {
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  flex: 1;
+}
+
+.scope:global(.media-document-file-icon), .scope :global(.media-document-file-icon) {
+  width: 4.5rem;
+  height: 4.5rem;
+  border: var(--border-thin);
+  border-radius: 1.15rem;
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-2);
+}
+
+.scope:global(.media-document-sheet-copy p), .scope :global(.media-document-sheet-copy p) {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.scope:global(.media-document-tags), .scope :global(.media-document-tags) {
+  margin-top: 0.75rem;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--ink-3);
+  letter-spacing: 0.01em;
+}
+
+.scope:global(.media-detail-preview object), .scope :global(.media-detail-preview object) {
+  background: var(--paper-2);
+}
+
+.scope:global(.media-document-fallback), .scope :global(.media-document-fallback) {
+  min-height: 18rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.scope:global(.media-detail-body), .scope :global(.media-detail-body) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.scope:global(.media-detail-note), .scope :global(.media-detail-note) {
+  padding: 0.75rem 0;
+  border-top: var(--border-thin);
+  border-bottom: var(--border-thin);
+}
+
+.scope:global(.media-detail-note-label), .scope :global(.media-detail-note-label) {
+  margin-bottom: 0.3rem;
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+.scope:global(.media-detail-note-text), .scope :global(.media-detail-note-text) {
+  font-size: var(--fs-base);
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.scope:global(.media-detail-list), .scope :global(.media-detail-list) {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.scope:global(.media-detail-list > div), .scope :global(.media-detail-list > div) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.2rem 0 0.65rem;
+  border-bottom: var(--border-thin);
+  background: transparent;
+}
+
+.scope:global(.media-detail-list dt), .scope :global(.media-detail-list dt) {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-4);
+}
+
+.scope:global(.media-detail-list dd), .scope :global(.media-detail-list dd) {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.scope:global(.media-detail-actions),
+.scope :global(.media-detail-actions),
+.scope:global(.media-upload-actions),
+.scope :global(.media-upload-actions) {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.scope:global(.media-card-actions), .scope :global(.media-card-actions) {
+  padding-top: 0.75rem;
+}
+
+.scope:global(.media-detail-actions), .scope :global(.media-detail-actions) {
+  margin-top: 0.35rem;
+  align-items: center;
+}
+
+.scope:global(.media-card-action), .scope :global(.media-card-action) {
+  min-height: 3.5rem;
+  padding: 0.95rem 1.4rem;
+  min-width: 12rem;
+}
+
+.scope:global(.media-card-action-card), .scope :global(.media-card-action-card) {
+  margin: 0 0.9rem 0.9rem;
+  justify-content: flex-start;
+}
+
+.scope:global(.media-empty), .scope :global(.media-empty) {
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  border: var(--border-thin);
+  background: var(--paper-2);
+  color: var(--ink-3);
+}
+
+.scope:global(.media-upload-grid), .scope :global(.media-upload-grid) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.scope:global(.media-field-check), .scope :global(.media-field-check) {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+  grid-column: 1 / -1;
+}
+
+.scope:global(.media-checkbox), .scope :global(.media-checkbox) {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0;
+  accent-color: var(--ink);
+}
+
+.scope:global(.media-upload-launch), .scope :global(.media-upload-launch) {
+  min-width: 12rem;
+  white-space: nowrap;
+}
+
+.scope:global(.app-modal-overlay),
+.scope :global(.app-modal-overlay),
+.scope:global(.media-upload-overlay),
+.scope :global(.media-upload-overlay) {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+.scope:global(.app-modal-backdrop),
+.scope :global(.app-modal-backdrop),
+.scope:global(.media-upload-overlay-backdrop),
+.scope :global(.media-upload-overlay-backdrop) {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.scope:global(.app-modal-panel),
+.scope :global(.app-modal-panel),
+.scope:global(.media-upload-panel),
+.scope :global(.media-upload-panel) {
+  position: relative;
+  z-index: 1;
+  width: min(1100px, 100%);
+  max-height: min(92vh, 920px);
+  overflow: auto;
+  background: var(--paper);
+  border: var(--border);
+  border-radius: 1.5rem;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.18);
+  padding: 1.5rem;
+}
+
+.scope:global(.media-upload-owner-wrap), .scope :global(.media-upload-owner-wrap) {
+  margin-bottom: 1rem;
+}
+
+.scope:global(.media-upload-help), .scope :global(.media-upload-help) {
+  margin: -0.35rem 0 1rem;
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+}
+
+.scope:global(.app-modal-head), .scope :global(.app-modal-head) {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.scope:global(.app-modal-head .app-title), .scope :global(.app-modal-head .app-title) {
+  margin-top: 0.15rem;
+}
+
+.scope:global(.media-viewer-panel), .scope :global(.media-viewer-panel) {
+  width: min(1220px, 100%);
+}
+
+.scope:global(.media-viewer-body), .scope :global(.media-viewer-body) {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.75fr);
+  gap: 1.15rem;
+}
+
+.scope:global(.media-viewer-preview), .scope :global(.media-viewer-preview) {
+  min-height: 42rem;
+  border-radius: var(--radius-lg);
+  border: var(--border-thin);
+  background: var(--paper-2);
+  overflow: hidden;
+}
+
+.scope:global(.media-viewer-preview-document), .scope :global(.media-viewer-preview-document) {
+  padding: 0.75rem;
+}
+
+.scope:global(.media-pdf-sheet), .scope :global(.media-pdf-sheet) {
+  width: 100%;
+  min-height: 42rem;
+  padding: 0.75rem;
+  background: linear-gradient(180deg, #fffdf7 0%, #faf7f0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scope:global(.media-pdf-image), .scope :global(.media-pdf-image) {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border: var(--border-thin);
+  border-radius: calc(var(--radius) - 0.15rem);
+  background: white;
+}
+
+.scope:global(.media-pdf-fallback), .scope :global(.media-pdf-fallback) {
+  min-height: 38rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-thin);
+  border-radius: calc(var(--radius) - 0.15rem);
+  background: white;
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.scope:global(.media-viewer-preview > img),
+.scope :global(.media-viewer-preview > img),
+.scope:global(.media-viewer-preview > object),
+.scope :global(.media-viewer-preview > object) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.scope:global(.media-viewer-preview .media-document-sheet), .scope :global(.media-viewer-preview .media-document-sheet) {
+  min-height: 100%;
+}
+
+.scope:global(.media-viewer-preview .media-pdf-sheet), .scope :global(.media-viewer-preview .media-pdf-sheet) {
+  min-height: 100%;
+}
+
+.scope:global(.media-focus-panel), .scope :global(.media-focus-panel) {
+  width: min(1500px, 96vw);
+  height: min(940px, calc(100vh - 2.5rem));
+  max-height: calc(100vh - 2.5rem);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.scope:global(.media-focus-panel .app-modal-head), .scope :global(.media-focus-panel .app-modal-head) {
+  flex: 0 0 auto;
+  margin-bottom: 0.85rem;
+}
+
+.scope:global(.media-focus-panel .app-modal-head .app-title), .scope :global(.media-focus-panel .app-modal-head .app-title) {
+  font-size: var(--fs-xl);
+  line-height: 1.05;
+}
+
+.scope:global(.media-focus-layout), .scope :global(.media-focus-layout) {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(17rem, 24rem);
+  gap: 1rem;
+}
+
+.scope:global(.media-focus-reader-region), .scope :global(.media-focus-reader-region) {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+}
+
+.scope:global(.focus-image-reader),
+.scope :global(.focus-image-reader),
+.scope:global(.focus-pdf-scroll-reader),
+.scope :global(.focus-pdf-scroll-reader) {
+  width: 100%;
+  min-height: 0;
+  flex: 1;
+}
+
+.scope:global(.focus-image-reader), .scope :global(.focus-image-reader) {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-thin);
+  border-radius: var(--radius-lg);
+  background: #fffdf5;
+  overflow: hidden;
+}
+
+.scope:global(.focus-image-reader-image), .scope :global(.focus-image-reader-image) {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.scope:global(.focus-pdf-scroll-reader), .scope :global(.focus-pdf-scroll-reader) {
+  height: 100%;
+  overflow: auto;
+  border: var(--border-thin);
+  border-radius: var(--radius-lg);
+  background: #fffdf5;
+  padding: clamp(0.85rem, 2vw, 1.25rem);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.scope:global(.focus-pdf-page), .scope :global(.focus-pdf-page) {
+  width: calc(100% * var(--type-scale));
+  max-width: none;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.scope:global(.focus-pdf-page-label), .scope :global(.focus-pdf-page-label) {
+  align-self: flex-start;
+  font-size: var(--fs-xs);
+  color: var(--ink-4);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.scope:global(.focus-pdf-page-image), .scope :global(.focus-pdf-page-image) {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  background: #ffffff;
+  border: var(--border-thin);
+  border-radius: calc(var(--radius) - 0.1rem);
+}
+
+.scope:global(.focus-reader-page-loading),
+.scope :global(.focus-reader-page-loading),
+.scope:global(.focus-reader-loading),
+.scope :global(.focus-reader-loading),
+.scope:global(.focus-reader-fallback),
+.scope :global(.focus-reader-fallback) {
+  width: 100%;
+  min-height: 20rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+  text-align: center;
+  padding: 2rem;
+}
+
+.scope:global(.focus-reader-page-loading::after), .scope :global(.focus-reader-page-loading::after) {
+  content: "";
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0.22rem solid var(--paper-3);
+  border-top-color: var(--ink);
+  border-radius: 999px;
+  animation: spin 0.8s linear infinite;
+}
+
+.scope:global(.focus-text-document-reader), .scope :global(.focus-text-document-reader) {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  border: var(--border-thin);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, #fffefa 0%, #fbf7ef 100%);
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  color: var(--ink);
+  white-space: pre-wrap;
+  line-height: 1.7;
+  font-size: var(--fs-base);
+}
+
+.scope:global(.focus-text-document-reader h3), .scope :global(.focus-text-document-reader h3) {
+  margin: 0 0 1.25rem;
+  font-size: var(--fs-lg);
+  line-height: 1.15;
+}
+
+.scope:global(.reader-metadata-aside), .scope :global(.reader-metadata-aside) {
+  min-width: 0;
+  overflow: auto;
+  border-left: var(--border-thin);
+  padding-left: 1rem;
+  color: var(--ink-2);
+}
+
+.scope:global(.reader-metadata-note),
+.scope :global(.reader-metadata-note),
+.scope:global(.reader-metadata-list > div),
+.scope :global(.reader-metadata-list > div) {
+  border-top: var(--border-thin);
+  padding: 0.8rem 0;
+}
+
+.scope:global(.reader-metadata-note h3),
+.scope :global(.reader-metadata-note h3),
+.scope:global(.reader-metadata-list dt),
+.scope :global(.reader-metadata-list dt) {
+  margin: 0 0 0.35rem;
+  color: var(--ink-4);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.scope:global(.reader-metadata-note p),
+.scope :global(.reader-metadata-note p),
+.scope:global(.reader-metadata-list dd),
+.scope :global(.reader-metadata-list dd) {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.scope:global(.reader-metadata-list), .scope :global(.reader-metadata-list) {
+  margin: 0;
+}
+
+.scope:global(.media-upload-owner), .scope :global(.media-upload-owner) {
+  margin-top: 0.4rem;
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.scope:global(.media-field), .scope :global(.media-field) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
+.scope:global(.media-field-file), .scope :global(.media-field-file) {
+  grid-column: 1 / -1;
+}
+
+.scope:global(.media-field span), .scope :global(.media-field span) {
+  color: var(--ink-2);
+}
+
+.scope:global(.media-file-input), .scope :global(.media-file-input) {
+  padding: 0.9rem 1.05rem;
+  cursor: pointer;
+}
+
+.scope:global(.media-file-input::file-selector-button), .scope :global(.media-file-input::file-selector-button) {
+  margin-right: 1rem;
+  min-height: 2.6rem;
+  padding: 0.6rem 1rem;
+  border: var(--border);
+  border-radius: calc(var(--radius) - 0.15rem);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.scope:global(.media-file-input:hover::file-selector-button), .scope :global(.media-file-input:hover::file-selector-button) {
+  background: var(--paper-2);
+}
+
+.scope:global(.media-file-input::file-selector-button:focus-visible), .scope :global(.media-file-input::file-selector-button:focus-visible) {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.scope:global(.media-upload-icon), .scope :global(.media-upload-icon) {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  border: var(--border-thin);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper-2);
+  flex-shrink: 0;
+}
+
+.scope:global(.media-upload-actions .btn), .scope :global(.media-upload-actions .btn) {
+  justify-content: center;
+}

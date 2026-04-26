@@ -6,6 +6,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Volume2 } from 'lucide-react';
 import { useAppState } from './app-provider';
+import styles from "./top-bar.module.css";
 
 function formatDateTime(value, localeTag, separator) {
   if (!value) {
@@ -40,7 +41,7 @@ export function TopBar() {
   }, []);
 
   return (
-    <div className="topbar">
+    <div className={`${styles.scope} topbar`}>
       <Link className="logo logo-btn" href="/" aria-label={t('common.home')}>
         {t('common.home')}
       </Link>

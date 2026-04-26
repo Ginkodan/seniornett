@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { useAppState } from './app-provider';
+import styles from "./lotti-live-screen.module.css";
 
 export function LottiLiveScreen({ askLottiAction }) {
   const { t, locale } = useAppState();
@@ -64,7 +65,7 @@ export function LottiLiveScreen({ askLottiAction }) {
   };
 
   return (
-    <div className="app">
+    <div className={`${styles.scope} app`}>
       <div className="app-header">
         <h1 className="app-title">{t('lotti.title')}</h1>
       </div>

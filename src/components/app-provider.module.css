@@ -1,0 +1,781 @@
+.scope { display: contents; }
+
+/* Generic app page */
+.scope:global(.app), .scope :global(.app) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100%;
+  min-height: 0;
+}
+.scope:global(.app-header), .scope :global(.app-header) {
+  padding: 1.75rem 3.5rem 1.25rem;
+  display: flex;
+  align-items: center;
+  min-height: 7rem;
+  gap: 1.25rem;
+  border-bottom: var(--border-thin);
+  background: var(--paper);
+}
+.scope:global(.app-title), .scope :global(.app-title) {
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0;
+  line-height: 1.1;
+}
+.scope:global(.app-body), .scope :global(.app-body) {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Buttons */
+.scope:global(.sn-button),
+.scope :global(.sn-button),
+.scope:global(.btn),
+.scope :global(.btn) {
+  min-height: 3.75rem;
+  min-width: 2.75rem;
+  height: auto;
+  padding: 0.75rem 1.5rem;
+  border: var(--border);
+  background: var(--paper);
+  font-family: inherit;
+  font-size: var(--fs-base);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius);
+  color: var(--ink);
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  line-height: 1.2;
+  white-space: normal;
+}
+.scope:global(.sn-button), .scope :global(.sn-button) {
+  position: relative;
+  min-width: 44px;
+}
+.scope:global(.sn-button-icon),
+.scope :global(.sn-button-icon),
+.scope:global(.sn-icon-button-icon),
+.scope :global(.sn-icon-button-icon),
+.scope:global(.sn-tab-icon),
+.scope :global(.sn-tab-icon) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.scope:global(.sn-button-primary), .scope :global(.sn-button-primary) {
+  background: var(--ink);
+  color: var(--paper);
+}
+.scope:global(.sn-button-primary:hover), .scope :global(.sn-button-primary:hover) {
+  background: #000;
+}
+.scope:global(.sn-button-secondary), .scope :global(.sn-button-secondary) {
+  background: var(--paper);
+  color: var(--ink);
+}
+.scope:global(.sn-button-selected), .scope :global(.sn-button-selected) {
+  background: var(--ink);
+  color: var(--paper);
+  border-width: 4px;
+  box-shadow: inset 0 0 0 3px var(--paper);
+}
+.scope:global(.sn-button-danger), .scope :global(.sn-button-danger) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.scope:global(.sn-button-danger:hover), .scope :global(.sn-button-danger:hover) {
+  background: var(--accent-ink);
+  border-color: var(--accent-ink);
+}
+.scope:global(.sn-button-quiet), .scope :global(.sn-button-quiet) {
+  border-color: var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-weight: 700;
+}
+.scope:global(.sn-button-lg), .scope :global(.sn-button-lg) {
+  min-height: 4.5rem;
+  font-size: var(--fs-md);
+  padding: 1rem 2rem;
+}
+.scope:global(.sn-selected-label), .scope :global(.sn-selected-label) {
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0.15rem 0.45rem;
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  line-height: 1.1;
+  text-transform: none;
+  white-space: nowrap;
+}
+.scope:global(.btn:hover), .scope :global(.btn:hover) { background: var(--paper-2); }
+.scope:global(.btn-primary), .scope :global(.btn-primary) { background: var(--ink); color: var(--paper); }
+.scope:global(.btn-primary:hover), .scope :global(.btn-primary:hover) { background: #000; }
+.scope:global(.btn-lg), .scope :global(.btn-lg) { min-height: 4.5rem; height: auto; font-size: var(--fs-md); padding: 1rem 2rem; }
+.scope:global(.btn-accent), .scope :global(.btn-accent) { background: var(--accent); border-color: var(--accent); color: #fff; }
+.scope:global(.btn-accent:hover), .scope :global(.btn-accent:hover) { background: var(--accent-ink); border-color: var(--accent-ink); }
+
+.scope:global(.sn-icon-button),
+.scope :global(.sn-icon-button),
+.scope:global(.ui-icon-button),
+.scope :global(.ui-icon-button) {
+  min-height: 3.75rem;
+  min-width: 44px;
+  padding: 0.75rem 1rem;
+  border: var(--border);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  gap: 0.625rem;
+  font: inherit;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.scope:global(.sn-icon-button-selected),
+.scope :global(.sn-icon-button-selected),
+.scope:global(.ui-icon-button.active),
+.scope :global(.ui-icon-button.active),
+.scope:global(.ui-icon-button-primary),
+.scope :global(.ui-icon-button-primary) {
+  background: var(--ink);
+  color: var(--paper);
+  border-width: 4px;
+  box-shadow: inset 0 0 0 3px var(--paper);
+}
+.scope:global(.sn-icon-button-primary), .scope :global(.sn-icon-button-primary) {
+  background: var(--ink);
+  color: var(--paper);
+}
+.scope:global(.sn-icon-button-danger), .scope :global(.sn-icon-button-danger) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.scope:global(.sn-icon-button-quiet), .scope :global(.sn-icon-button-quiet) {
+  background: transparent;
+}
+.scope:global(.sn-icon-button-text), .scope :global(.sn-icon-button-text) {
+  display: inline-block;
+}
+
+.scope:global(.sn-field-label),
+.scope :global(.sn-field-label),
+.scope:global(.ui-field-label),
+.scope :global(.ui-field-label) {
+  display: block;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.scope:global(.sn-field), .scope :global(.sn-field) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  width: 100%;
+}
+
+.scope:global(.sn-input),
+.scope :global(.sn-input),
+.scope:global(.sn-textarea),
+.scope :global(.sn-textarea),
+.scope:global(.field),
+.scope :global(.field) {
+  min-height: 44px;
+}
+
+.scope:global(.sn-input), .scope :global(.sn-input) {
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  border: var(--border);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: var(--fs-base);
+  line-height: 1.4;
+  background: var(--card);
+  color: var(--ink);
+}
+
+.scope:global(.sn-textarea), .scope :global(.sn-textarea) {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.scope:global(.sn-field-help),
+.scope :global(.sn-field-help),
+.scope:global(.sn-field-error),
+.scope :global(.sn-field-error) {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
+.scope:global(.sn-field-help), .scope :global(.sn-field-help) {
+  color: var(--ink-3);
+}
+
+.scope:global(.sn-field-error), .scope :global(.sn-field-error) {
+  color: var(--accent-ink);
+}
+
+.scope:global(.sn-status),
+.scope :global(.sn-status),
+.scope:global(.ui-status),
+.scope :global(.ui-status) {
+  padding: 1rem 1.25rem;
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--paper-2);
+  color: var(--ink);
+  font-size: var(--fs-base);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.scope:global(.sn-status), .scope :global(.sn-status) {
+  align-items: flex-start;
+  flex-direction: column;
+  min-height: 44px;
+}
+.scope:global(.sn-status-title), .scope :global(.sn-status-title) {
+  font-size: var(--fs-base);
+  font-weight: 800;
+  line-height: 1.2;
+}
+.scope:global(.sn-status-body), .scope :global(.sn-status-body) {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+.scope:global(.sn-status-success), .scope :global(.sn-status-success) {
+  background: color-mix(in srgb, var(--good) 12%, var(--card));
+}
+.scope:global(.sn-status-warning),
+.scope :global(.sn-status-warning),
+.scope:global(.ui-status-warning),
+.scope :global(.ui-status-warning),
+.scope:global(.ui-status-error),
+.scope :global(.ui-status-error) {
+  background: #fff4f2;
+}
+.scope:global(.sn-status-error), .scope :global(.sn-status-error) {
+  border-color: var(--accent);
+  background: #fff4f2;
+}
+.scope:global(.sn-loading-row), .scope :global(.sn-loading-row) {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.scope:global(.sn-chip),
+.scope :global(.sn-chip),
+.scope:global(.chip),
+.scope :global(.chip) {
+  min-height: 3.5rem;
+  min-width: 44px;
+  padding: 0.85rem 1rem;
+  border: var(--border-thin);
+  border-radius: 999px;
+  background: var(--paper-2);
+  color: var(--ink);
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+.scope:global(.sn-chip-selected),
+.scope :global(.sn-chip-selected),
+.scope:global(.chip.active),
+.scope :global(.chip.active) {
+  background: var(--ink);
+  color: var(--paper);
+  border: 4px solid var(--ink);
+  box-shadow: inset 0 0 0 3px var(--paper);
+}
+
+.scope:global(.sn-tabs),
+.scope :global(.sn-tabs),
+.scope:global(.ui-tabs),
+.scope :global(.ui-tabs) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.scope:global(.sn-tab),
+.scope :global(.sn-tab),
+.scope:global(.ui-tab),
+.scope :global(.ui-tab) {
+  min-height: 3.75rem;
+  min-width: 44px;
+  padding: 0.75rem 1.125rem;
+  border: var(--border-thin);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  cursor: pointer;
+}
+.scope:global(.sn-tab-selected),
+.scope :global(.sn-tab-selected),
+.scope:global(.ui-tab.active),
+.scope :global(.ui-tab.active) {
+  background: var(--ink);
+  color: var(--paper);
+  border: 4px solid var(--ink);
+  box-shadow: inset 0 0 0 3px var(--paper);
+}
+
+.scope:global(.sn-card), .scope :global(.sn-card) {
+  background: var(--card);
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+}
+
+.scope:global(.sn-card-selected), .scope :global(.sn-card-selected) {
+  border-width: 4px;
+  box-shadow: inset 0 0 0 3px var(--paper), 0 0 0 2px var(--ink);
+}
+
+.scope:global(.sn-card-selected-label), .scope :global(.sn-card-selected-label) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  border: var(--border-thin);
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+}
+
+.scope:global(.sn-app),
+.scope :global(.sn-app),
+.scope:global(.sn-app-body),
+.scope :global(.sn-app-body),
+.scope:global(.sn-page-header),
+.scope :global(.sn-page-header) {
+  min-width: 0;
+}
+
+.scope:global(.sn-page-title-block), .scope :global(.sn-page-title-block) {
+  min-width: 0;
+}
+
+.scope:global(.sn-page-subtitle), .scope :global(.sn-page-subtitle) {
+  margin: 0.45rem 0 0;
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.scope:global(button:focus-visible),
+.scope :global(button:focus-visible),
+.scope:global(.sn-button:focus-visible),
+.scope :global(.sn-button:focus-visible),
+.scope:global(.sn-icon-button:focus-visible),
+.scope :global(.sn-icon-button:focus-visible),
+.scope:global(.sn-chip:focus-visible),
+.scope :global(.sn-chip:focus-visible),
+.scope:global(.sn-tab:focus-visible),
+.scope :global(.sn-tab:focus-visible),
+.scope:global(.sn-input:focus-visible),
+.scope :global(.sn-input:focus-visible),
+.scope:global(.btn:focus-visible),
+.scope :global(.btn:focus-visible),
+.scope:global(.ui-icon-button:focus-visible),
+.scope :global(.ui-icon-button:focus-visible),
+.scope:global(.ui-tab:focus-visible),
+.scope :global(.ui-tab:focus-visible),
+.scope:global(.a11y-btn:focus-visible),
+.scope :global(.a11y-btn:focus-visible),
+.scope:global(.logo-btn:focus-visible),
+.scope :global(.logo-btn:focus-visible),
+.scope:global(.home-primary-news:focus-visible),
+.scope :global(.home-primary-news:focus-visible),
+.scope:global(.field:focus-visible),
+.scope :global(.field:focus-visible),
+.scope:global(.chip:focus-visible),
+.scope :global(.chip:focus-visible),
+.scope:global(.social-hub-area-tab:focus-visible),
+.scope :global(.social-hub-area-tab:focus-visible),
+.scope:global(.social-hub-person-button:focus-visible),
+.scope :global(.social-hub-person-button:focus-visible) {
+  outline: var(--focus-ring);
+  outline-offset: 3px;
+}
+
+/* Input */
+.scope:global(.field), .scope :global(.field) {
+  width: 100%;
+  min-height: 4rem;
+  height: auto;
+  padding: 0 1.25rem;
+  border: var(--border);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: var(--fs-base);
+  background: var(--card);
+  color: var(--ink);
+}
+.scope:global(textarea.field), .scope :global(textarea.field) { height: auto; padding: 1rem 1.25rem; resize: vertical; line-height: 1.6; }
+
+/* Utility */
+.scope:global(.row), .scope :global(.row) { display: flex; gap: 12px; align-items: center; }
+.scope:global(.col), .scope :global(.col) { display: flex; flex-direction: column; gap: 12px; }
+.scope:global(.spacer), .scope :global(.spacer) { flex: 1; }
+.scope:global(.card), .scope :global(.card) {
+  background: var(--card);
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+}
+
+.scope:global(.offline-overlay), .scope :global(.offline-overlay) {
+  position: absolute;
+  inset: 0;
+  z-index: 35;
+  background: rgba(26, 26, 26, 0.62);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.scope:global(.offline-panel), .scope :global(.offline-panel) {
+  width: min(720px, 100%);
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--border);
+  border-radius: 1.125rem;
+  padding: 2rem;
+  box-shadow: 10px 10px 0 0 var(--ink);
+}
+
+.scope:global(.offline-eyebrow), .scope :global(.offline-eyebrow) {
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  font-weight: 700;
+}
+
+.scope:global(.offline-panel h2), .scope :global(.offline-panel h2) {
+  font-size: var(--fs-xl);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  margin: 10px 0 12px;
+}
+
+.scope:global(.offline-panel p), .scope :global(.offline-panel p) {
+  margin: 0;
+  font-size: var(--fs-md);
+  color: var(--ink-2);
+}
+
+.scope:global(.offline-actions), .scope :global(.offline-actions) {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 1180px) {
+  .scope:global(.topbar), .scope :global(.topbar) {
+    align-items: flex-start;
+  }
+
+  .scope:global(.whoami-chip), .scope :global(.whoami-chip) {
+    min-width: 0;
+  }
+
+  .scope:global(.home), .scope :global(.home) {
+    padding: 2.25rem 2rem 1.75rem;
+  }
+
+  .scope:global(.home-greeting), .scope :global(.home-greeting) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .scope:global(.home-grid),
+  .scope :global(.home-grid),
+  .scope:global(.news-grid),
+  .scope :global(.news-grid) {
+    grid-template-columns: 1fr;
+  }
+
+  .scope:global(.news-article-image), .scope :global(.news-article-image) {
+    min-height: 220px;
+  }
+
+  .scope:global(.lotti-shell),
+  .scope :global(.lotti-shell),
+  .scope:global(.wiki-sidebar),
+  .scope :global(.wiki-sidebar) {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+}
+
+@media (max-width: 820px) {
+  .scope:global(.tablet-screen), .scope :global(.tablet-screen) {
+    width: 100vw;
+    min-height: 100vh;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .scope:global(.topbar), .scope :global(.topbar) {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .scope:global(.topbar .a11y), .scope :global(.topbar .a11y) {
+    margin-left: 0;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .scope:global(.topbar .time),
+  .scope :global(.topbar .time),
+  .scope:global(.whoami-chip),
+  .scope :global(.whoami-chip) {
+    width: 100%;
+  }
+
+  .scope:global(.home), .scope :global(.home) {
+    padding: 1.5rem 1rem 2rem;
+  }
+
+  .scope:global(.home-greeting h1), .scope :global(.home-greeting h1) {
+    font-size: calc(var(--fs-xl) * 1.05);
+  }
+
+  .scope:global(.news-app-shell),
+  .scope :global(.news-app-shell),
+  .scope:global(.app-header),
+  .scope :global(.app-header),
+  .scope:global(.lotti-shell),
+  .scope :global(.lotti-shell) {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .scope:global(.wiki-shell), .scope :global(.wiki-shell) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .scope:global(.wiki-sidebar), .scope :global(.wiki-sidebar) {
+    border-right: none;
+    border-bottom: var(--border-thin);
+    padding: 1.25rem 1rem;
+    overflow-y: visible;
+  }
+
+  .scope:global(.wiki-article), .scope :global(.wiki-article) {
+    padding: 1.25rem 1rem 2rem;
+  }
+
+  .scope:global(.news-article-body), .scope :global(.news-article-body) {
+    padding: 1.25rem;
+  }
+
+  .scope:global(.news-article h2),
+  .scope :global(.news-article h2),
+  .scope:global(.news-article-content),
+  .scope :global(.news-article-content) {
+    max-width: none;
+  }
+
+  .scope:global(.offline-panel), .scope :global(.offline-panel) {
+    padding: 24px;
+  }
+
+  .scope:global(.lotti-card), .scope :global(.lotti-card) {
+    min-height: calc(100vh - var(--topbar-height) - 11rem);
+    max-height: none;
+  }
+
+  .scope:global(.lotti-messages),
+  .scope :global(.lotti-messages),
+  .scope:global(.lotti-compose),
+  .scope :global(.lotti-compose) {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .scope:global(.lotti-compose-row), .scope :global(.lotti-compose-row) {
+    grid-template-columns: 1fr;
+  }
+
+  .scope:global(.lotti-send), .scope :global(.lotti-send) {
+    width: 100%;
+    min-height: 4.25rem;
+  }
+
+  .scope:global(.messaging-shell), .scope :global(.messaging-shell) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    height: calc(100vh - var(--topbar-height) - 7rem);
+  }
+
+  .scope:global(.messaging-sidebar), .scope :global(.messaging-sidebar) {
+    border-right: none;
+    border-bottom: var(--border-thin);
+  }
+
+  .scope:global(.messaging-contact-list), .scope :global(.messaging-contact-list) {
+    max-height: 18rem;
+  }
+
+  .scope:global(.messaging-compose), .scope :global(.messaging-compose) {
+    grid-template-columns: 1fr;
+  }
+
+  .scope:global(.messaging-contact-row), .scope :global(.messaging-contact-row) {
+    grid-template-columns: 1fr;
+    gap: 0.45rem;
+  }
+
+  .scope:global(.messaging-contact-notice),
+  .scope :global(.messaging-contact-notice),
+  .scope:global(.messaging-contact-notice-empty),
+  .scope :global(.messaging-contact-notice-empty) {
+    min-width: 0;
+    width: fit-content;
+    flex-direction: row;
+    min-height: 0;
+    padding: 0.35rem 0.7rem;
+    align-self: flex-start;
+  }
+
+  .scope:global(.messaging-send), .scope :global(.messaging-send) {
+    width: 100%;
+    min-height: 4.25rem;
+  }
+
+  .scope:global(.messaging-error), .scope :global(.messaging-error) {
+    position: static;
+    margin: 1rem;
+  }
+
+  .scope:global(.table-chat-shell), .scope :global(.table-chat-shell) {
+    padding: 0.75rem;
+  }
+
+  .scope:global(.table-chat-sidebar-section),
+  .scope :global(.table-chat-sidebar-section),
+  .scope:global(.table-chat-profile-card),
+  .scope :global(.table-chat-profile-card) {
+    padding: 0;
+  }
+
+  .scope:global(.table-chat-profile-overlay), .scope :global(.table-chat-profile-overlay) {
+    position: static;
+    padding: 0.25rem;
+  }
+
+  .scope:global(.table-chat-topic-list),
+  .scope :global(.table-chat-topic-list),
+  .scope:global(.messaging-contact-list),
+  .scope :global(.messaging-contact-list) {
+    gap: 0.65rem;
+  }
+
+  .scope:global(.table-chat-profile-row), .scope :global(.table-chat-profile-row) {
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .scope:global(.social-hub-header), .scope :global(.social-hub-header) {
+    gap: 1rem;
+  }
+
+  .scope:global(.social-hub-area-nav),
+  .scope :global(.social-hub-area-nav),
+  .scope:global(.social-hub-area-tab),
+  .scope :global(.social-hub-area-tab) {
+    width: 100%;
+  }
+
+  .scope:global(.social-hub-area-tab), .scope :global(.social-hub-area-tab) {
+    justify-content: center;
+  }
+
+  .scope:global(.social-hub-shell), .scope :global(.social-hub-shell) {
+    height: calc(100vh - var(--topbar-height) - 12rem);
+    padding: 0.75rem;
+  }
+
+  .scope:global(.social-hub-shell.tables), .scope :global(.social-hub-shell.tables) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .scope:global(.social-hub-sidebar),
+  .scope :global(.social-hub-sidebar),
+  .scope:global(.social-hub-shell .messaging-panel),
+  .scope :global(.social-hub-shell .messaging-panel),
+  .scope:global(.social-hub-profile-panel),
+  .scope :global(.social-hub-profile-panel) {
+    border-radius: 1rem;
+  }
+
+  .scope:global(.social-hub-shell.tables .messaging-panel), .scope :global(.social-hub-shell.tables .messaging-panel) {
+    border-right: var(--border-thin);
+    border-radius: 1rem;
+  }
+
+  .scope:global(.social-hub-sidebar-scroll), .scope :global(.social-hub-sidebar-scroll) {
+    max-height: 24rem;
+    padding: 0.75rem;
+  }
+
+  .scope:global(.social-hub-profile-backdrop), .scope :global(.social-hub-profile-backdrop) {
+    align-items: flex-end;
+    padding: 0.75rem;
+  }
+
+  .scope:global(.social-hub-profile-panel), .scope :global(.social-hub-profile-panel) {
+    width: 100%;
+    max-height: 70vh;
+  }
+
+  .scope:global(.social-hub-person-button), .scope :global(.social-hub-person-button) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .scope:global(.messaging-conversation-head),
+  .scope :global(.messaging-conversation-head),
+  .scope:global(.social-hub-conversation-titlebar),
+  .scope :global(.social-hub-conversation-titlebar) {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .scope:global(.social-hub-profile-toggle), .scope :global(.social-hub-profile-toggle) {
+    width: 100%;
+  }
+}

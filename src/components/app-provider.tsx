@@ -5,6 +5,7 @@
 import React from 'react';
 import { createTranslator, getLocaleTag, normalizeLanguage } from '@/lib/i18n';
 import { readJsonFromStorage, writeJsonToStorage } from '@/lib/shared/client-storage';
+import styles from "./app-provider.module.css";
 
 const NEWS_CACHE_KEY = 'seniornett-news-cache-v1';
 const TEXT_SIZE_KEY = 'seniornett-text-size-v1';
@@ -256,21 +257,23 @@ export function AppProvider({ children, loadNewsAction, initialIdentity }) {
 
   return (
     <AppStateContext.Provider value={value}>
-      {children}
-      {!isOnline && (
-        <div className="offline-overlay" role="status" aria-live="assertive">
-          <div className="offline-panel">
-            <div className="offline-eyebrow">{t('offline.eyebrow')}</div>
-            <h2>{t('offline.title')}</h2>
-            <p>{t('offline.body')}</p>
-            <div className="offline-actions">
-              <a className="btn btn-accent" href={`tel:${CAREGIVER_CONTACT.phone.replace(/\s+/g, '')}`}>
-                {t('offline.call', { name: CAREGIVER_CONTACT.name, phone: CAREGIVER_CONTACT.phone })}
-              </a>
+      <div className={styles.scope}>
+        {children}
+        {!isOnline && (
+          <div className="offline-overlay" role="status" aria-live="assertive">
+            <div className="offline-panel">
+              <div className="offline-eyebrow">{t('offline.eyebrow')}</div>
+              <h2>{t('offline.title')}</h2>
+              <p>{t('offline.body')}</p>
+              <div className="offline-actions">
+                <a className="btn btn-accent" href={`tel:${CAREGIVER_CONTACT.phone.replace(/\s+/g, '')}`}>
+                  {t('offline.call', { name: CAREGIVER_CONTACT.name, phone: CAREGIVER_CONTACT.phone })}
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </AppStateContext.Provider>
   );
 }

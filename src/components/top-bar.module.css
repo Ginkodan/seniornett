@@ -1,0 +1,124 @@
+.scope { display: contents; }
+
+/* Top bar — always present */
+.scope:global(.topbar), .scope :global(.topbar) {
+  min-height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.75rem;
+  border-bottom: var(--border-thin);
+  background: var(--paper);
+  gap: 1.25rem;
+  font-size: var(--fs-sm);
+  flex-wrap: wrap;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+}
+.scope:global(.topbar .logo-btn), .scope :global(.topbar .logo-btn) {
+  min-height: 3.5rem;
+  padding: 0.75rem 1.25rem;
+  border: var(--border-thin);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: var(--radius);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+.scope:global(.topbar .user-chip), .scope :global(.topbar .user-chip) {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 14px 8px 8px;
+  border: var(--border-thin);
+  border-radius: 999px;
+  font-size: var(--fs-sm);
+  background: var(--paper-2);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.scope:global(.topbar .user-chip > div > span), .scope :global(.topbar .user-chip > div > span) { white-space: nowrap; }
+.scope:global(.topbar .user-chip .avatar), .scope :global(.topbar .user-chip .avatar) {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--paper-3);
+  border: 1px solid var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: var(--fs-sm);
+}
+.scope:global(.topbar .time), .scope :global(.topbar .time) {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-weight: 700;
+}
+.scope:global(.topbar .spacer), .scope :global(.topbar .spacer) {
+  margin-left: auto;
+}
+.scope:global(.whoami-chip), .scope :global(.whoami-chip) {
+  border: var(--border-thin);
+  background: var(--paper-2);
+  border-radius: 999px;
+  padding: 0.75rem 1.125rem;
+  min-width: 0;
+}
+.scope:global(.whoami-main), .scope :global(.whoami-main) {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+/* A11y controls in top bar */
+.scope:global(.a11y), .scope :global(.a11y) {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: 1rem;
+}
+.scope:global(.a11y-btn), .scope :global(.a11y-btn) {
+  min-height: 3.5rem;
+  height: auto;
+  min-width: 3.5rem;
+  padding: 0.5rem 1rem;
+  border: var(--border-thin);
+  background: var(--paper);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: var(--radius);
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  white-space: normal;
+  line-height: 1.2;
+}
+.scope:global(.a11y-btn.active), .scope :global(.a11y-btn.active) { background: var(--ink); color: var(--paper); }
+.scope:global(.a11y-group), .scope :global(.a11y-group) {
+  display: inline-flex;
+  border: var(--border-thin);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.scope:global(.a11y-group .a11y-btn), .scope :global(.a11y-group .a11y-btn) {
+  border: none;
+  border-right: 1px solid var(--ink);
+  border-radius: 0;
+  height: 3.5rem;
+}
+.scope:global(.a11y-group .a11y-btn:last-child), .scope :global(.a11y-group .a11y-btn:last-child) { border-right: none; }
+.scope:global(.a11y-label), .scope :global(.a11y-label) {
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}

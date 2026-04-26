@@ -1,0 +1,172 @@
+.scope { display: contents; }
+
+/* Home screen */
+.scope:global(.home), .scope :global(.home) {
+  padding: 2.75rem 3.25rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  min-height: 100%;
+}
+.scope:global(.home-greeting), .scope :global(.home-greeting) {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+}
+.scope:global(.home-greeting.simple), .scope :global(.home-greeting.simple) {
+  justify-content: flex-start;
+}
+.scope:global(.home-greeting h1), .scope :global(.home-greeting h1) {
+  font-size: var(--fs-xxl);
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0 0 12px;
+}
+.scope:global(.home-greeting .date), .scope :global(.home-greeting .date) {
+  font-size: var(--fs-md);
+  color: var(--ink-3);
+  font-weight: 500;
+}
+.scope:global(.home-grid), .scope :global(.home-grid) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 1.25rem;
+  align-content: start;
+}
+
+.scope:global(.panel-eyebrow), .scope :global(.panel-eyebrow) {
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  font-weight: 700;
+}
+
+.scope:global(.panel-title), .scope :global(.panel-title) {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-top: 8px;
+}
+
+.scope:global(.status-pill), .scope :global(.status-pill) {
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: var(--border-thin);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  white-space: nowrap;
+  align-self: flex-start;
+}
+
+.scope:global(.status-pill.good), .scope :global(.status-pill.good) {
+  background: color-mix(in srgb, var(--good) 12%, var(--card));
+  color: var(--good);
+}
+
+.scope:global(.status-pill.warn), .scope :global(.status-pill.warn) {
+  background: color-mix(in srgb, var(--warn) 16%, var(--card));
+  color: #6A500B;
+}
+
+.scope:global(.connection-copy),
+.scope :global(.connection-copy),
+.scope:global(.news-app-meta),
+.scope :global(.news-app-meta) {
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+}
+
+.scope:global(.home-primary-news), .scope :global(.home-primary-news) {
+  width: 100%;
+  background: var(--card);
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  color: var(--ink);
+  text-align: left;
+  font-family: inherit;
+  min-height: 6.5rem;
+}
+
+.scope:global(.home-primary-news .icon), .scope :global(.home-primary-news .icon) {
+  width: 4.5rem;
+  height: 4.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper-2);
+  flex-shrink: 0;
+}
+
+.scope:global(.home-primary-news .icon svg), .scope :global(.home-primary-news .icon svg) {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.scope:global(.home-primary-news .tile-stack), .scope :global(.home-primary-news .tile-stack) {
+  flex: 1;
+}
+
+.scope:global(.news-empty-state),
+.scope :global(.news-empty-state),
+.scope:global(.news-app-warning),
+.scope :global(.news-app-warning) {
+  border: var(--border-thin);
+  background: var(--paper-2);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+}
+
+.scope:global(.connection-panel), .scope :global(.connection-panel) {
+  display: grid;
+  gap: 16px;
+}
+
+.scope:global(.connection-contact), .scope :global(.connection-contact) {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-top: 8px;
+  border-top: var(--border-thin);
+}
+
+.scope:global(.connection-contact svg), .scope :global(.connection-contact svg) {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.scope:global(.connection-name), .scope :global(.connection-name) {
+  font-weight: 700;
+}
+
+.scope:global(.connection-number), .scope :global(.connection-number) {
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+}
+
+.scope:global(.tile-label), .scope :global(.tile-label) {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-top: 0;
+  line-height: 1.1;
+}
+.scope:global(.tile-sub), .scope :global(.tile-sub) {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  margin-top: 4px;
+}
+.scope:global(.tile-stack), .scope :global(.tile-stack) { display: flex; flex-direction: column; }

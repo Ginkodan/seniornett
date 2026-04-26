@@ -5,6 +5,7 @@
 import React from 'react';
 import { Bike, Minus, Mountain, Plus, Search, X } from 'lucide-react';
 import { useAppState } from './app-provider';
+import styles from "./map-screen.module.css";
 
 const SWITZERLAND_CENTER = [46.8182, 8.2275];
 const SWITZERLAND_ZOOM = 8;
@@ -212,7 +213,7 @@ export function MapScreen() {
   }
 
   return (
-    <div className="app map-app">
+    <div className={`${styles.scope} app map-app`}>
       <div className="app-header">
         <h1 className="app-title">{t('map.title')}</h1>
         <div className="spacer" />

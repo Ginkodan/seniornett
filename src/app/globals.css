@@ -1,2 +1,114 @@
 @import "tailwindcss";
-@import "./app.css";
+
+/* SeniorNet — Swiss senior network */
+/* Design tokens */
+:root {
+  /* Warm paper palette */
+  --paper: #fffdf8;
+  --paper-2: #f5f2ea;
+  --paper-3: #ece6db;
+  --ink: #111111;
+  --ink-2: #1f1f1f;
+  --ink-3: #2b2b2b;
+  --ink-4: #585858;
+  --rule: #111111;
+  --accent: #8a0000;
+  --accent-ink: #680000;
+  --good: #154f29;
+  --warn: #6b4f00;
+  --card: #FFFFFF;
+  --card-edge: #111111;
+
+  /* Type scale — multiplied by --type-scale */
+  --type-scale: 1;
+  --fs-xs: calc(1rem * var(--type-scale));
+  --fs-sm: calc(1.125rem * var(--type-scale));
+  --fs-base: calc(1.25rem * var(--type-scale));
+  --fs-md: calc(1.5rem * var(--type-scale));
+  --fs-lg: calc(2rem * var(--type-scale));
+  --fs-xl: calc(2.75rem * var(--type-scale));
+  --fs-xxl: calc(4rem * var(--type-scale));
+
+  --radius: 0.5rem;
+  --radius-lg: 1rem;
+  --border: 2px solid var(--ink);
+  --border-thin: 1px solid var(--ink);
+  --focus-ring: 4px solid #111111;
+
+  --tap: 4rem;
+  --topbar-height: 5.5rem;
+}
+
+/* High contrast */
+.hc {
+  --paper: #FFFFFF;
+  --paper-2: #F2F2F2;
+  --paper-3: #E6E6E6;
+  --ink: #000000;
+  --ink-2: #000000;
+  --ink-3: #1F1F1F;
+  --ink-4: #5A5A5A;
+  --accent: #8A0000;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; padding: 0; min-height: 100%; }
+
+body {
+  font-family: 'Atkinson Hyperlegible', Arial, Helvetica, Verdana, sans-serif;
+  font-size: var(--fs-base);
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: 0;
+}
+.tablet-screen {
+  width: 100vw;
+  min-height: 100vh;
+  background: var(--paper);
+  border-radius: 0;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: none;
+  box-shadow: none;
+  padding-top: var(--topbar-height);
+}
+
+/* Content area */
+.content {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  min-height: 0;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.spacer { flex: 1; }
+
+/* Scrollbar hygiene */
+.content::-webkit-scrollbar, .app-body::-webkit-scrollbar { width: 12px; }
+.content::-webkit-scrollbar-track, .app-body::-webkit-scrollbar-track { background: var(--paper); }
+.content::-webkit-scrollbar-thumb, .app-body::-webkit-scrollbar-thumb { background: var(--ink-4); border-radius: 6px; }

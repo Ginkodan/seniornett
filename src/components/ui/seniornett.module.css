@@ -1,0 +1,393 @@
+.scope { display: contents; }
+
+/* Buttons */
+.scope:global(.sn-button),
+.scope :global(.sn-button),
+.scope:global(.btn),
+.scope :global(.btn) {
+  min-height: 3.75rem;
+  min-width: 2.75rem;
+  height: auto;
+  padding: 0.75rem 1.5rem;
+  border: var(--border);
+  background: var(--paper);
+  font-family: inherit;
+  font-size: var(--fs-base);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius);
+  color: var(--ink);
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  line-height: 1.2;
+  white-space: normal;
+}
+.scope:global(.sn-button), .scope :global(.sn-button) {
+  position: relative;
+  min-width: 44px;
+}
+.scope:global(.sn-button-icon),
+.scope :global(.sn-button-icon),
+.scope:global(.sn-icon-button-icon),
+.scope :global(.sn-icon-button-icon),
+.scope:global(.sn-tab-icon),
+.scope :global(.sn-tab-icon) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.scope:global(.sn-button-primary), .scope :global(.sn-button-primary) {
+  background: var(--ink);
+  color: var(--paper);
+}
+.scope:global(.sn-button-primary:hover), .scope :global(.sn-button-primary:hover) {
+  background: #000;
+}
+.scope:global(.sn-button-secondary), .scope :global(.sn-button-secondary) {
+  background: var(--paper);
+  color: var(--ink);
+}
+.scope:global(.sn-button-selected), .scope :global(.sn-button-selected) {
+  background: var(--ink);
+  color: var(--paper);
+  border-width: 4px;
+  box-shadow: inset 0 0 0 3px var(--paper);
+}
+.scope:global(.sn-button-danger), .scope :global(.sn-button-danger) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.scope:global(.sn-button-danger:hover), .scope :global(.sn-button-danger:hover) {
+  background: var(--accent-ink);
+  border-color: var(--accent-ink);
+}
+.scope:global(.sn-button-quiet), .scope :global(.sn-button-quiet) {
+  border-color: var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-weight: 700;
+}
+.scope:global(.sn-button-lg), .scope :global(.sn-button-lg) {
+  min-height: 4.5rem;
+  font-size: var(--fs-md);
+  padding: 1rem 2rem;
+}
+.scope:global(.sn-selected-label), .scope :global(.sn-selected-label) {
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0.15rem 0.45rem;
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  line-height: 1.1;
+  text-transform: none;
+  white-space: nowrap;
+}
+.scope:global(.btn:hover), .scope :global(.btn:hover) { background: var(--paper-2); }
+.scope:global(.btn-primary), .scope :global(.btn-primary) { background: var(--ink); color: var(--paper); }
+.scope:global(.btn-primary:hover), .scope :global(.btn-primary:hover) { background: #000; }
+.scope:global(.btn-lg), .scope :global(.btn-lg) { min-height: 4.5rem; height: auto; font-size: var(--fs-md); padding: 1rem 2rem; }
+.scope:global(.btn-accent), .scope :global(.btn-accent) { background: var(--accent); border-color: var(--accent); color: #fff; }
+.scope:global(.btn-accent:hover), .scope :global(.btn-accent:hover) { background: var(--accent-ink); border-color: var(--accent-ink); }
+
+.scope:global(.sn-icon-button),
+.scope :global(.sn-icon-button),
+.scope:global(.ui-icon-button),
+.scope :global(.ui-icon-button) {
+  min-height: 3.75rem;
+  min-width: 44px;
+  padding: 0.75rem 1rem;
+  border: var(--border);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  gap: 0.625rem;
+  font: inherit;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.scope:global(.sn-icon-button-selected),
+.scope :global(.sn-icon-button-selected),
+.scope:global(.ui-icon-button.active),
+.scope :global(.ui-icon-button.active),
+.scope:global(.ui-icon-button-primary),
+.scope :global(.ui-icon-button-primary) {
+  background: var(--ink);
+  color: var(--paper);
+  border-width: 4px;
+  box-shadow: inset 0 0 0 3px var(--paper);
+}
+.scope:global(.sn-icon-button-primary), .scope :global(.sn-icon-button-primary) {
+  background: var(--ink);
+  color: var(--paper);
+}
+.scope:global(.sn-icon-button-danger), .scope :global(.sn-icon-button-danger) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.scope:global(.sn-icon-button-quiet), .scope :global(.sn-icon-button-quiet) {
+  background: transparent;
+}
+.scope:global(.sn-icon-button-text), .scope :global(.sn-icon-button-text) {
+  display: inline-block;
+}
+
+.scope:global(.sn-field-label),
+.scope :global(.sn-field-label),
+.scope:global(.ui-field-label),
+.scope :global(.ui-field-label) {
+  display: block;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.scope:global(.sn-field), .scope :global(.sn-field) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  width: 100%;
+}
+
+.scope:global(.sn-input),
+.scope :global(.sn-input),
+.scope:global(.sn-textarea),
+.scope :global(.sn-textarea),
+.scope:global(.field),
+.scope :global(.field) {
+  min-height: 44px;
+}
+
+.scope:global(.sn-input), .scope :global(.sn-input) {
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  border: var(--border);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: var(--fs-base);
+  line-height: 1.4;
+  background: var(--card);
+  color: var(--ink);
+}
+
+.scope:global(.sn-textarea), .scope :global(.sn-textarea) {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.scope:global(.sn-field-help),
+.scope :global(.sn-field-help),
+.scope:global(.sn-field-error),
+.scope :global(.sn-field-error) {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
+.scope:global(.sn-field-help), .scope :global(.sn-field-help) {
+  color: var(--ink-3);
+}
+
+.scope:global(.sn-field-error), .scope :global(.sn-field-error) {
+  color: var(--accent-ink);
+}
+
+.scope:global(.sn-status),
+.scope :global(.sn-status),
+.scope:global(.ui-status),
+.scope :global(.ui-status) {
+  padding: 1rem 1.25rem;
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--paper-2);
+  color: var(--ink);
+  font-size: var(--fs-base);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.scope:global(.sn-status), .scope :global(.sn-status) {
+  align-items: flex-start;
+  flex-direction: column;
+  min-height: 44px;
+}
+.scope:global(.sn-status-title), .scope :global(.sn-status-title) {
+  font-size: var(--fs-base);
+  font-weight: 800;
+  line-height: 1.2;
+}
+.scope:global(.sn-status-body), .scope :global(.sn-status-body) {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+.scope:global(.sn-status-success), .scope :global(.sn-status-success) {
+  background: color-mix(in srgb, var(--good) 12%, var(--card));
+}
+.scope:global(.sn-status-warning),
+.scope :global(.sn-status-warning),
+.scope:global(.ui-status-warning),
+.scope :global(.ui-status-warning),
+.scope:global(.ui-status-error),
+.scope :global(.ui-status-error) {
+  background: #fff4f2;
+}
+.scope:global(.sn-status-error), .scope :global(.sn-status-error) {
+  border-color: var(--accent);
+  background: #fff4f2;
+}
+.scope:global(.sn-loading-row), .scope :global(.sn-loading-row) {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.scope:global(.sn-chip),
+.scope :global(.sn-chip),
+.scope:global(.chip),
+.scope :global(.chip) {
+  min-height: 3.5rem;
+  min-width: 44px;
+  padding: 0.85rem 1rem;
+  border: var(--border-thin);
+  border-radius: 999px;
+  background: var(--paper-2);
+  color: var(--ink);
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+.scope:global(.sn-chip-selected),
+.scope :global(.sn-chip-selected),
+.scope:global(.chip.active),
+.scope :global(.chip.active) {
+  background: var(--ink);
+  color: var(--paper);
+  border: 4px solid var(--ink);
+  box-shadow: inset 0 0 0 3px var(--paper);
+}
+
+.scope:global(.sn-tabs),
+.scope :global(.sn-tabs),
+.scope:global(.ui-tabs),
+.scope :global(.ui-tabs) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.scope:global(.sn-tab),
+.scope :global(.sn-tab),
+.scope:global(.ui-tab),
+.scope :global(.ui-tab) {
+  min-height: 3.75rem;
+  min-width: 44px;
+  padding: 0.75rem 1.125rem;
+  border: var(--border-thin);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  cursor: pointer;
+}
+.scope:global(.sn-tab-selected),
+.scope :global(.sn-tab-selected),
+.scope:global(.ui-tab.active),
+.scope :global(.ui-tab.active) {
+  background: var(--ink);
+  color: var(--paper);
+  border: 4px solid var(--ink);
+  box-shadow: inset 0 0 0 3px var(--paper);
+}
+
+.scope:global(.sn-card), .scope :global(.sn-card) {
+  background: var(--card);
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+}
+
+.scope:global(.sn-card-selected), .scope :global(.sn-card-selected) {
+  border-width: 4px;
+  box-shadow: inset 0 0 0 3px var(--paper), 0 0 0 2px var(--ink);
+}
+
+.scope:global(.sn-card-selected-label), .scope :global(.sn-card-selected-label) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  border: var(--border-thin);
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+}
+
+.scope:global(.sn-app),
+.scope :global(.sn-app),
+.scope:global(.sn-app-body),
+.scope :global(.sn-app-body),
+.scope:global(.sn-page-header),
+.scope :global(.sn-page-header) {
+  min-width: 0;
+}
+
+.scope:global(.sn-page-title-block), .scope :global(.sn-page-title-block) {
+  min-width: 0;
+}
+
+.scope:global(.sn-page-subtitle), .scope :global(.sn-page-subtitle) {
+  margin: 0.45rem 0 0;
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.scope:global(button:focus-visible),
+.scope :global(button:focus-visible),
+.scope:global(.sn-button:focus-visible),
+.scope :global(.sn-button:focus-visible),
+.scope:global(.sn-icon-button:focus-visible),
+.scope :global(.sn-icon-button:focus-visible),
+.scope:global(.sn-chip:focus-visible),
+.scope :global(.sn-chip:focus-visible),
+.scope:global(.sn-tab:focus-visible),
+.scope :global(.sn-tab:focus-visible),
+.scope:global(.sn-input:focus-visible),
+.scope :global(.sn-input:focus-visible),
+.scope:global(.btn:focus-visible),
+.scope :global(.btn:focus-visible),
+.scope:global(.ui-icon-button:focus-visible),
+.scope :global(.ui-icon-button:focus-visible),
+.scope:global(.ui-tab:focus-visible),
+.scope :global(.ui-tab:focus-visible),
+.scope:global(.a11y-btn:focus-visible),
+.scope :global(.a11y-btn:focus-visible),
+.scope:global(.logo-btn:focus-visible),
+.scope :global(.logo-btn:focus-visible),
+.scope:global(.home-primary-news:focus-visible),
+.scope :global(.home-primary-news:focus-visible),
+.scope:global(.field:focus-visible),
+.scope :global(.field:focus-visible),
+.scope:global(.chip:focus-visible),
+.scope :global(.chip:focus-visible),
+.scope:global(.social-hub-area-tab:focus-visible),
+.scope :global(.social-hub-area-tab:focus-visible),
+.scope:global(.social-hub-person-button:focus-visible),
+.scope :global(.social-hub-person-button:focus-visible) {
+  outline: var(--focus-ring);
+  outline-offset: 3px;
+}

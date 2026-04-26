@@ -9,6 +9,7 @@ import { getMediaBootstrap, searchMediaItemsAction, uploadMediaItemAction } from
 import { AppImage, ModalOverlay } from "./ui";
 import { MediaFocusViewer } from "./media-readers/media-focus-viewer";
 import { useAppState } from "./app-provider";
+import styles from "./fotos-papiere-screen.module.css";
 
 const EMPTY_ARRAY = [];
 const COLLECTION_NAME_KEYS = {
@@ -348,7 +349,7 @@ export function FotosPapiereScreen() {
   }
 
   return (
-    <div className="app">
+    <div className={`${styles.scope} app`}>
       <div className="app-header media-header">
         <div className="media-header-copy">
           <h1 className="app-title">{t("media.title")}</h1>

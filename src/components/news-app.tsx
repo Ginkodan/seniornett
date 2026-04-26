@@ -5,13 +5,14 @@
 import React from 'react';
 import { useAppState } from './app-provider';
 import { NewsArticleCard } from './news-article-card';
+import styles from "./news-app.module.css";
 
 export function NewsScreen() {
   const { news, isOnline, refreshNews, t } = useAppState();
   const articles = news?.items || [];
 
   return (
-    <div className="app">
+    <div className={`${styles.scope} app`}>
       <div className="app-header">
         <h1 className="app-title">{t('news.title')}</h1>
         <div className="spacer" />

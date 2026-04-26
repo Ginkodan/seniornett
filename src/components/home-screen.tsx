@@ -6,6 +6,7 @@ import React from 'react';
 import Link from 'next/link';
 import { MessageCircleHeart, MessagesSquare, Newspaper, BookOpen, CloudSun, Tv, Siren, Map, Radio, Images } from 'lucide-react';
 import { useAppState } from './app-provider';
+import styles from "./home-screen.module.css";
 
 const APPS = [
   { id: 'social-hub', href: '/social-hub', icon: <MessageCircleHeart size={36} strokeWidth={2.25} /> },
@@ -29,7 +30,7 @@ export function HomeScreen() {
   }));
 
   return (
-    <div className="home">
+    <div className={`${styles.scope} home`}>
       <div className="home-greeting simple">
         <div>
           <h1>{t('home.greeting', { name: identity?.loading ? '...' : firstName })}</h1>

@@ -1,38 +1,38 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import styles from "./seniornett.module.css";
 
-type ButtonVariant = "secondary" | "primary" | "accent";
+type ButtonVariant = "primary" | "secondary" | "selected" | "danger" | "quiet";
 type ButtonSize = "md" | "lg";
 
-export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+export type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className"> & {
   variant?: ButtonVariant;
   size?: ButtonSize;
   icon?: ReactNode;
+  selectedLabel?: string;
 };
 
+// SeniorNett use: primary for the one main action, secondary for normal actions,
+// selected for chosen options, danger for risky actions, quiet for low-emphasis cancel/back actions.
 export function Button({
   variant = "secondary",
   size = "md",
   icon,
-  className = "",
+  selectedLabel = "Ausgewählt",
   children,
   type = "button",
   ...props
 }: ButtonProps) {
-  const classes = [
-    "btn",
-    variant === "primary" ? "btn-primary" : "",
-    variant === "accent" ? "btn-accent" : "",
-    size === "lg" ? "btn-lg" : "",
-    className,
-  ]
+  const classes = [styles.scope, "sn-button", `sn-button-${variant}`, size === "lg" ? "sn-button-lg" : ""]
     .filter(Boolean)
     .join(" ");
+  const isSelected = variant === "selected";
+  const pressedState = props["aria-pressed"] ?? (isSelected ? true : undefined);
 
   return (
-    <button type={type} className={classes} {...props}>
-      {icon}
-      {children}
+    <button type={type} className={classes} aria-pressed={pressedState} {...props}>
+      {icon ? <span className="sn-button-icon" aria-hidden="true">{icon}</span> : null}
+      <span className="sn-button-text">{children}</span>
+      {isSelected ? <span className="sn-selected-label">{selectedLabel}</span> : null}
     </button>
   );
 }
-

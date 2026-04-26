@@ -1,0 +1,99 @@
+.scope { display: contents; }
+
+.scope:global(.lotti-shell), .scope :global(.lotti-shell) {
+  padding: 48px 56px 64px;
+  max-width: 980px;
+  margin: 0 auto;
+  height: 100%;
+  min-height: 0;
+}
+
+.scope:global(.lotti-card), .scope :global(.lotti-card) {
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: calc(100vh - var(--topbar-height) - 13rem);
+  max-height: calc(100vh - var(--topbar-height) - 7rem);
+  height: 100%;
+}
+
+.scope:global(.lotti-messages), .scope :global(.lotti-messages) {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 2rem;
+  overflow: auto;
+  min-height: 0;
+}
+
+.scope:global(.lotti-message), .scope :global(.lotti-message) {
+  max-width: 46rem;
+  padding: 1rem 1.25rem;
+  border: var(--border-thin);
+  border-radius: 1rem;
+  background: var(--paper);
+}
+
+.scope:global(.lotti-message.assistant), .scope :global(.lotti-message.assistant) {
+  align-self: flex-start;
+  background: var(--paper-2);
+}
+
+.scope:global(.lotti-message.user), .scope :global(.lotti-message.user) {
+  align-self: flex-end;
+  background: var(--card);
+}
+
+.scope:global(.lotti-message.pending), .scope :global(.lotti-message.pending) {
+  opacity: 0.8;
+}
+
+.scope:global(.lotti-message-text), .scope :global(.lotti-message-text) {
+  font-size: var(--fs-base);
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+.scope:global(.lotti-empty-state), .scope :global(.lotti-empty-state) {
+  border: var(--border-thin);
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--paper);
+  color: var(--ink-3);
+  max-width: 28rem;
+}
+
+.scope:global(.lotti-compose), .scope :global(.lotti-compose) {
+  border-top: var(--border-thin);
+  padding: 1rem 1.25rem 1.25rem;
+  background: var(--card);
+}
+
+.scope:global(.lotti-label), .scope :global(.lotti-label) {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.scope:global(.lotti-compose-row), .scope :global(.lotti-compose-row) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.875rem;
+  align-items: end;
+}
+
+.scope:global(.lotti-input), .scope :global(.lotti-input) {
+  min-height: 5.5rem;
+  max-height: 11rem;
+  padding: 1rem 1.25rem;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.scope:global(.lotti-send), .scope :global(.lotti-send) {
+  min-width: 12rem;
+  min-height: 5.5rem;
+}

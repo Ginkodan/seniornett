@@ -1,0 +1,686 @@
+.scope { display: contents; }
+
+.scope:global(.messaging-shell), .scope :global(.messaging-shell) {
+  display: grid;
+  grid-template-columns: minmax(18rem, 24rem) minmax(0, 1fr);
+  gap: 0;
+  height: calc(100vh - var(--topbar-height) - 7rem);
+  min-height: 0;
+}
+
+.scope:global(.messaging-sidebar), .scope :global(.messaging-sidebar) {
+  border-right: var(--border-thin);
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.scope:global(.messaging-conversation-head),
+.scope :global(.messaging-conversation-head),
+.scope:global(.messaging-compose),
+.scope :global(.messaging-compose) {
+  padding: 1.5rem;
+}
+
+.scope:global(.messaging-conversation-head p), .scope :global(.messaging-conversation-head p) {
+  margin: 0.35rem 0 0;
+  font-size: var(--fs-sm);
+  color: var(--ink-4);
+}
+
+.scope:global(.messaging-contact-list), .scope :global(.messaging-contact-list) {
+  padding: 1rem 1rem 1.5rem;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  min-height: 0;
+}
+
+.scope:global(.messaging-contact-row), .scope :global(.messaging-contact-row) {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.scope:global(.messaging-contact-notice), .scope :global(.messaging-contact-notice) {
+  min-width: 3rem;
+  min-height: 3rem;
+  padding: 0.35rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--ink));
+  background: color-mix(in srgb, var(--accent) 5%, var(--paper));
+  color: var(--accent-ink);
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  align-self: center;
+}
+
+.scope:global(.messaging-contact-notice-empty), .scope :global(.messaging-contact-notice-empty) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scope:global(.messaging-contact-dot), .scope :global(.messaging-contact-dot) {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--accent);
+  display: inline-block;
+}
+
+.scope:global(.messaging-contact), .scope :global(.messaging-contact) {
+  width: 100%;
+  text-align: left;
+  border: var(--border-thin);
+  border-radius: 1rem;
+  background: var(--card);
+  color: var(--ink);
+  padding: 1.1rem 1.2rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 5.5rem;
+}
+
+.scope:global(.messaging-contact.active), .scope :global(.messaging-contact.active) {
+  background: var(--paper-2);
+  border-color: var(--ink);
+}
+
+.scope:global(.messaging-contact-name), .scope :global(.messaging-contact-name) {
+  font-size: var(--fs-base);
+  font-weight: 700;
+}
+
+.scope:global(.messaging-panel), .scope :global(.messaging-panel) {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 0;
+  background: linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.scope:global(.messaging-conversation-head), .scope :global(.messaging-conversation-head) {
+  border-bottom: var(--border-thin);
+  background: rgba(255, 255, 255, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.scope:global(.messaging-conversation-head h2), .scope :global(.messaging-conversation-head h2) {
+  margin: 0.2rem 0 0;
+  font-size: var(--fs-lg);
+  line-height: 1.1;
+}
+
+.scope:global(.messaging-timeline), .scope :global(.messaging-timeline) {
+  overflow: auto;
+  padding: 1.5rem;
+  padding-bottom: 8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 0;
+}
+
+.scope:global(.messaging-bubble), .scope :global(.messaging-bubble) {
+  max-width: 40rem;
+  border: var(--border-thin);
+  border-radius: 1rem;
+  padding: 0.95rem 1.15rem 0.8rem;
+  background: var(--card);
+}
+
+.scope:global(.messaging-bubble.other), .scope :global(.messaging-bubble.other) {
+  align-self: flex-start;
+}
+
+.scope:global(.messaging-bubble.own), .scope :global(.messaging-bubble.own) {
+  align-self: flex-end;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.scope:global(.messaging-bubble-text), .scope :global(.messaging-bubble-text) {
+  font-size: var(--fs-base);
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.scope:global(.messaging-bubble-time), .scope :global(.messaging-bubble-time) {
+  margin-top: 0.45rem;
+  font-size: var(--fs-sm);
+  opacity: 0.82;
+}
+
+.scope:global(.messaging-compose), .scope :global(.messaging-compose) {
+  border-top: var(--border-thin);
+  background: var(--paper);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: end;
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  box-shadow: 0 -12px 24px rgba(17, 17, 17, 0.05);
+}
+
+.scope:global(.messaging-input), .scope :global(.messaging-input) {
+  min-height: 6rem;
+  max-height: 12rem;
+}
+
+.scope:global(.messaging-send), .scope :global(.messaging-send) {
+  min-width: 12rem;
+  min-height: 6rem;
+}
+
+.scope:global(.messaging-placeholder),
+.scope :global(.messaging-placeholder),
+.scope:global(.messaging-panel-empty),
+.scope :global(.messaging-panel-empty),
+.scope:global(.messaging-empty-state),
+.scope :global(.messaging-empty-state) {
+  border: var(--border-thin);
+  border-radius: 1rem;
+  background: var(--card);
+  color: var(--ink-3);
+  padding: 1.25rem;
+}
+
+.scope:global(.messaging-placeholder), .scope :global(.messaging-placeholder) {
+  margin: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.scope:global(.messaging-empty-state), .scope :global(.messaging-empty-state) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  align-self: center;
+}
+
+.scope:global(.messaging-panel-empty), .scope :global(.messaging-panel-empty) {
+  margin: auto;
+}
+
+.scope:global(.messaging-error), .scope :global(.messaging-error) {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 8.5rem;
+  max-width: 28rem;
+  border: var(--border);
+  border-radius: 1rem;
+  background: #fff0ef;
+  color: var(--accent-ink);
+  padding: 1rem 1.1rem;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.scope:global(.table-chat-app), .scope :global(.table-chat-app) {
+  background: linear-gradient(180deg, #fffdf7 0%, #f6ead7 100%);
+}
+
+.scope:global(.table-chat-shell), .scope :global(.table-chat-shell) {
+  height: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.scope:global(.table-chat-sidebar-section),
+.scope :global(.table-chat-sidebar-section),
+.scope:global(.table-chat-profile-card),
+.scope :global(.table-chat-profile-card) {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.scope:global(.table-chat-sidebar-section + .table-chat-sidebar-section),
+.scope :global(.table-chat-sidebar-section + .table-chat-sidebar-section),
+.scope:global(.table-chat-profile-card),
+.scope :global(.table-chat-profile-card) {
+  margin-top: 1.25rem;
+}
+
+.scope:global(.table-chat-section-title), .scope :global(.table-chat-section-title) {
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 800;
+  color: var(--ink-3);
+}
+
+.scope:global(.table-chat-topic-list), .scope :global(.table-chat-topic-list) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.8rem;
+}
+
+.scope:global(.table-chat-topic-chip), .scope :global(.table-chat-topic-chip) {
+  width: 100%;
+  text-align: left;
+  border: var(--border-thin);
+  border-radius: 0.9rem;
+  background: var(--card);
+  color: var(--ink);
+  padding: 1rem 1.05rem;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.scope:global(.table-chat-topic-chip.active), .scope :global(.table-chat-topic-chip.active) {
+  background: var(--paper-2);
+  border-color: var(--ink);
+}
+
+.scope:global(.table-chat-topic-chip-title),
+.scope :global(.table-chat-topic-chip-title),
+.scope:global(.table-chat-profile-name),
+.scope :global(.table-chat-profile-name) {
+  font-size: var(--fs-base);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.scope:global(.table-chat-topic-chip-subtitle),
+.scope :global(.table-chat-topic-chip-subtitle),
+.scope:global(.table-chat-topic-chip-count),
+.scope :global(.table-chat-topic-chip-count),
+.scope:global(.table-chat-profile-label),
+.scope :global(.table-chat-profile-label) {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  line-height: 1.35;
+}
+
+.scope:global(.table-chat-topic-chip-count), .scope :global(.table-chat-topic-chip-count) {
+  font-weight: 700;
+}
+
+.scope:global(.table-chat-contact-link), .scope :global(.table-chat-contact-link) {
+  font-size: var(--fs-sm);
+  color: var(--accent-ink);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.scope:global(.table-chat-profile-overlay), .scope :global(.table-chat-profile-overlay) {
+  position: sticky;
+  bottom: 0.75rem;
+  margin-top: 1rem;
+  padding: 0.4rem;
+  border-radius: 1.25rem;
+  background: rgba(255, 253, 248, 0.88);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 14px 30px rgba(69, 43, 11, 0.12);
+  border: 1px solid rgba(17, 17, 17, 0.18);
+}
+
+.scope:global(.table-chat-profile-overlay-label), .scope :global(.table-chat-profile-overlay-label) {
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 800;
+  color: var(--ink-3);
+  padding: 0.2rem 0.25rem 0.65rem;
+}
+
+.scope:global(.table-chat-profile-card), .scope :global(.table-chat-profile-card) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 0;
+  background: transparent;
+}
+
+.scope:global(.table-chat-profile-empty), .scope :global(.table-chat-profile-empty) {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.scope:global(.table-chat-profile-head), .scope :global(.table-chat-profile-head) {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+
+.scope:global(.table-chat-profile-grid), .scope :global(.table-chat-profile-grid) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.scope:global(.table-chat-profile-row), .scope :global(.table-chat-profile-row) {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+}
+
+.scope:global(.table-chat-profile-row span), .scope :global(.table-chat-profile-row span) {
+  color: var(--ink-3);
+}
+
+.scope:global(.table-chat-profile-note), .scope :global(.table-chat-profile-note) {
+  border-top: var(--border-thin);
+  padding-top: 0.8rem;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.scope:global(.table-chat-private-btn), .scope :global(.table-chat-private-btn) {
+  width: 100%;
+}
+
+.scope:global(.messaging-contact-main), .scope :global(.messaging-contact-main) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.scope:global(.messaging-contact-snippet), .scope :global(.messaging-contact-snippet) {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  line-height: 1.35;
+}
+
+.scope:global(.messaging-contact-note), .scope :global(.messaging-contact-note) {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  line-height: 1.35;
+  flex: 1;
+}
+
+.scope:global(.table-chat-message-author), .scope :global(.table-chat-message-author) {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink-3);
+  margin-bottom: 0.35rem;
+}
+
+.scope:global(.social-hub-message-author), .scope :global(.social-hub-message-author) {
+  display: inline-flex;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  cursor: pointer;
+}
+
+.scope:global(.social-hub-app), .scope :global(.social-hub-app) {
+  background: linear-gradient(180deg, var(--paper) 0%, #f7efe1 100%);
+}
+
+.scope:global(.social-hub-header), .scope :global(.social-hub-header) {
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  min-height: 8rem;
+}
+
+.scope:global(.social-hub-subtitle), .scope :global(.social-hub-subtitle) {
+  margin: 0.35rem 0 0;
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+  line-height: 1.35;
+}
+
+.scope:global(.social-hub-area-nav), .scope :global(.social-hub-area-nav) {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.scope:global(.social-hub-area-tab), .scope :global(.social-hub-area-tab) {
+  min-height: 4rem;
+  padding: 0.75rem 1.25rem;
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--fs-base);
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.scope:global(.social-hub-area-tab.active), .scope :global(.social-hub-area-tab.active) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.scope:global(.social-hub-shell), .scope :global(.social-hub-shell) {
+  height: calc(100vh - var(--topbar-height) - 8rem);
+  padding: 1rem;
+  grid-template-columns: minmax(18rem, 25rem) minmax(0, 1fr);
+}
+
+.scope:global(.social-hub-shell.tables), .scope :global(.social-hub-shell.tables) {
+  grid-template-columns: minmax(18rem, 26rem) minmax(0, 1fr);
+}
+
+.scope:global(.social-hub-sidebar), .scope :global(.social-hub-sidebar) {
+  border: none;
+  border-right: var(--border-thin);
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.scope:global(.social-hub-sidebar-scroll), .scope :global(.social-hub-sidebar-scroll) {
+  overflow: auto;
+  padding: 1rem;
+  min-height: 0;
+}
+
+.scope:global(.social-hub-shell .messaging-panel), .scope :global(.social-hub-shell .messaging-panel) {
+  border-top: var(--border-thin);
+  border-right: var(--border-thin);
+  border-bottom: var(--border-thin);
+  border-radius: 0 1.25rem 1.25rem 0;
+}
+
+.scope:global(.social-hub-shell.tables .messaging-panel), .scope :global(.social-hub-shell.tables .messaging-panel) {
+  border-right: var(--border-thin);
+  border-radius: 0 1.25rem 1.25rem 0;
+}
+
+.scope:global(.social-hub-inline-placeholder), .scope :global(.social-hub-inline-placeholder) {
+  margin: 1rem 0 0;
+}
+
+.scope:global(.social-hub-people-section), .scope :global(.social-hub-people-section) {
+  margin-top: 1rem;
+}
+
+.scope:global(.social-hub-person-list), .scope :global(.social-hub-person-list) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.8rem;
+}
+
+.scope:global(.social-hub-person-button), .scope :global(.social-hub-person-button) {
+  width: 100%;
+  min-height: 3.75rem;
+  border: var(--border-thin);
+  border-radius: 1rem;
+  background: var(--card);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  padding: 0.75rem 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.scope:global(.social-hub-person-button.active), .scope :global(.social-hub-person-button.active) {
+  background: var(--paper-2);
+  border-color: var(--ink);
+}
+
+.scope:global(.social-hub-person-button span), .scope :global(.social-hub-person-button span) {
+  font-size: var(--fs-base);
+  font-weight: 800;
+}
+
+.scope:global(.social-hub-person-button strong), .scope :global(.social-hub-person-button strong) {
+  color: var(--accent-ink);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+}
+
+.scope:global(.social-hub-topic-selected), .scope :global(.social-hub-topic-selected) {
+  align-self: flex-start;
+  border: var(--border-thin);
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.scope:global(.social-hub-table-search), .scope :global(.social-hub-table-search) {
+  min-height: 3.5rem;
+  margin-top: 0.85rem;
+  font-size: var(--fs-sm);
+}
+
+.scope:global(.social-hub-join-panel), .scope :global(.social-hub-join-panel) {
+  overflow: auto;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.scope:global(.social-hub-join-card), .scope :global(.social-hub-join-card) {
+  max-width: 38rem;
+  align-items: flex-start;
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.scope:global(.social-hub-join-card strong), .scope :global(.social-hub-join-card strong) {
+  display: block;
+  font-size: var(--fs-md);
+  color: var(--ink);
+  margin-bottom: 0.35rem;
+}
+
+.scope:global(.social-hub-join-card p), .scope :global(.social-hub-join-card p) {
+  margin: 0;
+  color: var(--ink-3);
+  line-height: 1.45;
+}
+
+.scope:global(.social-hub-join-button), .scope :global(.social-hub-join-button) {
+  min-height: 4.5rem;
+  min-width: 16rem;
+}
+
+.scope:global(.social-hub-people-toggle), .scope :global(.social-hub-people-toggle) {
+  min-height: 3.5rem;
+  padding: 0.65rem 1rem;
+  flex-shrink: 0;
+}
+
+.scope:global(.social-hub-profile-overlay), .scope :global(.social-hub-profile-overlay) {
+  margin-top: 1rem;
+}
+
+.scope:global(.social-hub-profile-card), .scope :global(.social-hub-profile-card) {
+  box-shadow: none;
+}
+
+.scope:global(.social-hub-profile-panel), .scope :global(.social-hub-profile-panel) {
+  border: var(--border-thin);
+  border-radius: 1.25rem;
+  background: var(--paper);
+  padding: 1rem;
+  overflow: auto;
+  width: min(28rem, calc(100vw - 2rem));
+  max-height: calc(100vh - var(--topbar-height) - 2rem);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.18);
+}
+
+.scope:global(.social-hub-profile-backdrop), .scope :global(.social-hub-profile-backdrop) {
+  position: fixed;
+  inset: var(--topbar-height) 0 0 0;
+  z-index: 35;
+  background: rgba(17, 17, 17, 0.18);
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+  padding: 1rem;
+}
+
+.scope:global(.social-hub-profile-panel .table-chat-profile-overlay-label), .scope :global(.social-hub-profile-panel .table-chat-profile-overlay-label) {
+  padding: 0 0 0.8rem;
+}
+
+.scope:global(.social-hub-conversation-head), .scope :global(.social-hub-conversation-head) {
+  align-items: stretch;
+  flex-direction: column;
+}
+
+.scope:global(.social-hub-conversation-titlebar), .scope :global(.social-hub-conversation-titlebar) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.scope:global(.social-hub-private-profile), .scope :global(.social-hub-private-profile) {
+  max-width: 42rem;
+}
+
+.scope:global(.social-hub-profile-toggle), .scope :global(.social-hub-profile-toggle) {
+  min-height: 3.5rem;
+  padding: 0.65rem 1rem;
+  flex-shrink: 0;
+}
+
+.scope:global(.social-hub-profile-close), .scope :global(.social-hub-profile-close) {
+  width: 100%;
+  min-height: 3.25rem;
+}

@@ -5,6 +5,7 @@
 import React from "react";
 import { useAppState } from "./app-provider";
 import { AppImage } from "./ui";
+import styles from "./video-screen.module.css";
 
 function formatDate(value, localeTag) {
   if (!value) return "";
@@ -88,7 +89,7 @@ export function VideoScreen({ loadVideoAction }) {
     !loading && !data.error && data.sections && data.sections.some((s) => s.episodes.length > 0);
 
   return (
-    <div className="app">
+    <div className={`${styles.scope} app`}>
       <div className="app-header">
         <h1 className="app-title">{t("video.title")}</h1>
         <div className="spacer" />

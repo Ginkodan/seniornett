@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { searchWikipediaAction } from '../app/actions/wikipedia';
+import styles from "./wikipedia-screen.module.css";
 
 export function WikipediaScreen() {
   const [query, setQuery] = React.useState('');
@@ -35,7 +36,7 @@ export function WikipediaScreen() {
   const noResults = results !== null && results.length === 0;
 
   return (
-    <div className="app">
+    <div className={`${styles.scope} app`}>
       <div className="app-header">
         <h1 className="app-title">Lexikon</h1>
       </div>

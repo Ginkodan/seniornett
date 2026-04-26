@@ -4,6 +4,7 @@
 
 import React from "react";
 import { useAppState } from "./app-provider";
+import styles from "./weather-screen.module.css";
 
 export function WeatherScreen({ fetchWeatherAction, searchLocationsAction }) {
   const { t, locale } = useAppState();
@@ -101,7 +102,7 @@ export function WeatherScreen({ fetchWeatherAction, searchLocationsAction }) {
   }
 
   return (
-    <div className="weather-screen">
+    <div className={`${styles.scope} weather-screen`}>
       <div className="weather-header">
         <h1 className="weather-city">{result?.city || t("weather.title")}</h1>
         <p className="weather-subtitle">{t("weather.subtitle")}</p>

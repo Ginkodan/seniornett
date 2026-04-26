@@ -1,0 +1,227 @@
+.scope { display: contents; }
+
+/* Map / Karte */
+.scope:global(.map-app), .scope :global(.map-app) {
+  height: calc(100dvh - var(--topbar-height));
+  min-height: calc(100dvh - var(--topbar-height));
+}
+
+.scope:global(.map-app-body), .scope :global(.map-app-body) {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--paper-2);
+}
+
+.scope:global(.map-screen), .scope :global(.map-screen) {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.scope:global(.map-panel), .scope :global(.map-panel) {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.scope:global(.map-title-actions), .scope :global(.map-title-actions) {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.scope:global(.map-toggle-btn), .scope :global(.map-toggle-btn) {
+  width: 3.75rem;
+  height: 3.75rem;
+  border: var(--border-thin);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.scope:global(.map-toggle-btn.active), .scope :global(.map-toggle-btn.active) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.scope:global(.map-controls), .scope :global(.map-controls) {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  z-index: 700;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.scope:global(.map-frame), .scope :global(.map-frame) {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--paper-2);
+}
+
+.scope:global(.map-control-btn), .scope :global(.map-control-btn) {
+  width: 4.25rem;
+  height: 4.25rem;
+  border: var(--border);
+  border-radius: var(--radius);
+  background: rgba(255, 253, 248, 0.95);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 0 0 var(--ink);
+}
+
+.scope:global(.map-control-btn:hover), .scope :global(.map-control-btn:hover) {
+  background: var(--paper);
+}
+
+.scope:global(.map-toggle-btn:hover), .scope :global(.map-toggle-btn:hover) {
+  background: var(--paper-2);
+}
+
+.scope:global(.map-toggle-btn.active:hover), .scope :global(.map-toggle-btn.active:hover) {
+  background: var(--ink-2);
+}
+
+.scope:global(.swiss-map-canvas), .scope :global(.swiss-map-canvas) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.scope:global(.swiss-map-canvas.leaflet-container), .scope :global(.swiss-map-canvas.leaflet-container) {
+  background: var(--paper-2);
+  font-family: inherit;
+}
+
+/* Tailwind preflight sets img max-width/height and can break Leaflet tiles. */
+.scope:global(.swiss-map-canvas.leaflet-container .leaflet-tile),
+.scope :global(.swiss-map-canvas.leaflet-container .leaflet-tile),
+.scope:global(.swiss-map-canvas.leaflet-container .leaflet-marker-icon),
+.scope :global(.swiss-map-canvas.leaflet-container .leaflet-marker-icon),
+.scope:global(.swiss-map-canvas.leaflet-container .leaflet-marker-shadow),
+.scope :global(.swiss-map-canvas.leaflet-container .leaflet-marker-shadow) {
+  max-width: none !important;
+  max-height: none !important;
+}
+
+.scope:global(.swiss-map-canvas.leaflet-container img.leaflet-tile), .scope :global(.swiss-map-canvas.leaflet-container img.leaflet-tile) {
+  width: 256px;
+  height: 256px;
+}
+
+.scope:global(.swiss-map-canvas .leaflet-control-container), .scope :global(.swiss-map-canvas .leaflet-control-container) {
+  display: none;
+}
+
+/* Map search overlay */
+.scope:global(.map-search), .scope :global(.map-search) {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 700;
+  width: clamp(17rem, 38%, 24rem);
+}
+
+.scope:global(.map-search-bar), .scope :global(.map-search-bar) {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 4.25rem;
+  padding: 0 0.85rem;
+  background: rgba(255, 253, 248, 0.97);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 0 0 var(--ink);
+}
+
+.scope:global(.map-search-icon), .scope :global(.map-search-icon) {
+  color: var(--ink-3);
+  flex-shrink: 0;
+}
+
+.scope:global(.map-search-input), .scope :global(.map-search-input) {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: var(--fs-base);
+  font-family: inherit;
+  color: var(--ink);
+  outline: none;
+  line-height: 1.4;
+}
+
+.scope:global(.map-search-input::placeholder), .scope :global(.map-search-input::placeholder) {
+  color: var(--ink-3);
+}
+
+.scope:global(.map-search-clear), .scope :global(.map-search-clear) {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-3);
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+}
+
+.scope:global(.map-search-clear:hover), .scope :global(.map-search-clear:hover) {
+  color: var(--ink);
+}
+
+.scope:global(.map-search-results), .scope :global(.map-search-results) {
+  margin-top: 0.5rem;
+  padding: 0;
+  list-style: none;
+  background: rgba(255, 253, 248, 0.97);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 0 0 var(--ink);
+  overflow-y: auto;
+  max-height: 20rem;
+}
+
+.scope:global(.map-search-result-item), .scope :global(.map-search-result-item) {
+  padding: 0.9rem 1rem;
+  font-size: var(--fs-base);
+  color: var(--ink);
+  cursor: pointer;
+  border-bottom: var(--border-thin);
+  line-height: 1.4;
+}
+
+.scope:global(.map-search-result-item:last-child), .scope :global(.map-search-result-item:last-child) {
+  border-bottom: none;
+}
+
+.scope:global(.map-search-result-item:hover), .scope :global(.map-search-result-item:hover) {
+  background: var(--paper-2);
+}
+
+.scope:global(.map-control-btn:focus-visible), .scope :global(.map-control-btn:focus-visible) {
+  outline: var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.scope:global(.map-toggle-btn:focus-visible), .scope :global(.map-toggle-btn:focus-visible) {
+  outline: var(--focus-ring);
+  outline-offset: 3px;
+}

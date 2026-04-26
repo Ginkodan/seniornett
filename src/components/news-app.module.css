@@ -1,0 +1,92 @@
+.scope { display: contents; }
+
+.scope:global(.news-app-shell), .scope :global(.news-app-shell) {
+  padding: 48px 56px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 1040px;
+  margin: 0 auto;
+  align-items: center;
+}
+
+.scope:global(.news-grid), .scope :global(.news-grid) {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 28px;
+  width: min(100%, 840px);
+}
+
+.scope:global(.news-article), .scope :global(.news-article) {
+  background: var(--card);
+  border: var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  width: 100%;
+  box-shadow: 0 0 0 0 var(--ink);
+}
+
+.scope:global(.news-article-image), .scope :global(.news-article-image) {
+  position: relative;
+  min-height: 280px;
+  background: linear-gradient(135deg, var(--paper-3), var(--paper-2));
+  border: var(--border-thin);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-3);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  overflow: hidden;
+  filter: grayscale(1) contrast(1.08);
+}
+
+.scope:global(.news-article-image img), .scope :global(.news-article-image img) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: inherit;
+}
+
+.scope:global(.news-article-body), .scope :global(.news-article-body) {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.scope:global(.news-article-source), .scope :global(.news-article-source) {
+  font-size: var(--fs-xs);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 700;
+}
+
+.scope:global(.news-article h2), .scope :global(.news-article h2) {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 2.65rem);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  max-width: 22ch;
+}
+
+.scope:global(.news-article p), .scope :global(.news-article p) {
+  margin: 0;
+  color: var(--ink-2);
+}
+
+.scope:global(.news-article-content), .scope :global(.news-article-content) {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 34em;
+}
+
+.scope:global(.news-article-content p), .scope :global(.news-article-content p) {
+  font-size: var(--fs-base);
+  line-height: 1.72;
+}

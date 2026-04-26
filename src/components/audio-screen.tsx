@@ -6,6 +6,7 @@ import React from "react";
 import { BookOpen, Headphones, Pause, Play, Radio, Square } from "lucide-react";
 import { AUDIOBOOK_GENRES, BOOK_FILTER_ALL } from "../lib/audio/genres";
 import { useAppState } from "./app-provider";
+import styles from "./audio-screen.module.css";
 
 const TABS = [
   { id: "radio", key: "radio", icon: Radio },
@@ -369,7 +370,7 @@ export function AudioScreen({ loadAudioAction }) {
           .join(" · ");
 
   return (
-    <div className="app">
+    <div className={`${styles.scope} app`}>
       <div className="app-body">
         <div className="audio-shell">
           <div className="audio-sticky-stack">

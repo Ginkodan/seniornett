@@ -6,6 +6,7 @@ import React from "react";
 import { getMessagingBootstrap, sendMessageAction } from "@/app/actions/messaging";
 import { LoaderCircle, MessageCircleMore } from "lucide-react";
 import { useAppState } from "./app-provider";
+import styles from "./messaging-social.module.css";
 
 function formatTime(value, localeTag) {
   if (!value) {
@@ -168,7 +169,7 @@ export function MessagingScreen({ initialContactId = "" }) {
   }, [draft, selectedConversation, sending, loadBootstrap, t]);
 
   return (
-    <div className="app">
+    <div className={`${styles.scope} app`}>
       <div className="app-header">
         <h1 className="app-title">{t("messaging.title")}</h1>
       </div>

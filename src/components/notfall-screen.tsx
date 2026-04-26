@@ -6,6 +6,7 @@ import React from "react";
 import { PhoneCall } from "lucide-react";
 import { PROFILE_FIELDS, normalizeProfile } from "@/lib/profile";
 import { useAppState } from "./app-provider";
+import styles from "./notfall-screen.module.css";
 
 const EMERGENCY_NUMBERS = [
   { number: "117", key: "police" },
@@ -113,7 +114,7 @@ export function NotfallScreen(props) {
   }));
 
   return (
-    <div className="app">
+    <div className={`${styles.scope} app`}>
       <div className="app-header">
         <h1 className="app-title">{t("emergency.title")}</h1>
       </div>
