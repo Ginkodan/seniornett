@@ -1,8 +1,7 @@
 "use server";
 
 import { normalizeLanguage } from "@/lib/i18n";
-
-const LottiApiUrl = "https://inference.kube.megazord.studio/infer";
+import { inferText } from "@/lib/inference";
 
 const COPY = {
   de: {
@@ -79,30 +78,6 @@ function sanitizeAssistantText(text: string, message: string, language: keyof ty
   return normalized;
 }
 
-function extractAssistantText(payload: unknown): string {
-  if (!payload) return "";
-  if (typeof payload === "string") return payload.trim();
-
-  if (typeof payload !== "object") return "";
-
-  const record = payload as Record<string, unknown>;
-  const directKeys = ["assistant", "output", "text", "response", "answer", "generated_text", "result"];
-  for (const key of directKeys) {
-    const value = record[key];
-    if (typeof value === "string" && value.trim()) return value.trim();
-  }
-
-  const choices = record.choices;
-  if (Array.isArray(choices) && choices.length > 0) {
-    const choice = choices[0] as Record<string, unknown> | undefined;
-    if (typeof choice?.text === "string") return choice.text.trim();
-    const message = choice?.message as Record<string, unknown> | undefined;
-    if (typeof message?.content === "string") return message.content.trim();
-  }
-
-  return "";
-}
-
 type HistoryEntry = { role: "user" | "assistant"; text: string };
 
 function buildPrompt(message: string, history: HistoryEntry[], language: keyof typeof COPY) {
@@ -142,32 +117,13 @@ export async function askLottiAction(message: string, history: HistoryEntry[] = 
   }
 
   try {
-    const response = await fetch(LottiApiUrl, {
-      method: "POST",
-      cache: "no-store",
-      headers: {
-        "Content-Type": "application/json",
+    const { text } = await inferText(buildPrompt(trimmedMessage, history, languageKey), {
+      generation_options: {
+        max_new_tokens: 320,
+        temperature: 0.25,
+        top_p: 0.85,
       },
-      body: JSON.stringify({
-        prompt: buildPrompt(trimmedMessage, history, languageKey),
-        generation_options: {
-          max_new_tokens: 320,
-          temperature: 0.25,
-          top_p: 0.85,
-        },
-      }),
     });
-
-    if (!response.ok) {
-      throw new Error(`Inference request failed with status ${response.status}`);
-    }
-
-    const payload = await response.json();
-    const text = extractAssistantText(payload);
-
-    if (!text) {
-      throw new Error("Inference response did not include assistant text.");
-    }
 
     const sanitizedText = sanitizeAssistantText(text, trimmedMessage, languageKey);
 

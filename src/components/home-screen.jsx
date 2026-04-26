@@ -2,11 +2,12 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { MessageCircleHeart, MessagesSquare, Newspaper, BookOpen, CloudSun, Tv, Siren, Map, Radio } from 'lucide-react';
+import { MessageCircleHeart, MessagesSquare, Newspaper, BookOpen, CloudSun, Tv, Siren, Map, Radio, Images } from 'lucide-react';
 import { useAppState } from './app-provider.jsx';
 
 const APPS = [
   { id: 'social-hub', href: '/social-hub', icon: <MessageCircleHeart size={36} strokeWidth={2.25} /> },
+  { id: 'media', href: '/fotos-papiere', icon: <Images size={36} strokeWidth={2.25} /> },
   { id: 'audio', href: '/audio', icon: <Radio size={36} strokeWidth={2.25} /> },
   { id: 'news', href: '/news', icon: <Newspaper size={36} strokeWidth={2.25} /> },
   { id: 'lotti-live', href: '/lotti-live', icon: <MessagesSquare size={36} strokeWidth={2.25} /> },

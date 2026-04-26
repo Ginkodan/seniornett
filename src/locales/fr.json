@@ -27,6 +27,7 @@
     "greeting": "Bonjour, {name}.",
     "apps": {
       "social-hub": "Point rencontre",
+      "media": "Photos et papiers",
       "audio": "Audio et musique",
       "news": "Journal",
       "lotti-live": "Demander à Lotti",
@@ -290,6 +291,79 @@
       "news": "Je peux vous aider. Ouvrez les messages pour voir les nouvelles de manière calme et lisible. Si vous voulez, je peux aussi expliquer un titre en mots simples.",
       "person": "Je suis une IA et je n'ai pas de lieu de vie réel. Le ton chaleureux de la ferme suisse est simplement mon style, pour que la conversation reste douce et familière. Je peux cependant vous aider très concrètement.",
       "breakfast": "C'est très bien. Je n'ai pas de vraie ferme ni de vraie cuisine, mais je peux volontiers vous proposer des idées de petit-déjeuner simples. Vous préférez quelque chose de salé ou de léger ?"
+    }
+  },
+  "media": {
+    "title": "Photos et papiers",
+    "subtitle": "Regarder des images et retrouver des papiers importants",
+    "filters": {
+      "collections": "Rangement",
+      "all": "Tout",
+      "allSummary": "éléments"
+    },
+    "collections": {
+      "inbox": "Boîte d'arrivée",
+      "photoAlbum": "Album photos",
+      "paperBinder": "Dossier",
+      "health": "Santé",
+      "insurance": "Assurances",
+      "moneyBills": "Argent et factures",
+      "housing": "Logement",
+      "travel": "Voyages",
+      "emergency": "Urgence"
+    },
+    "helper": {
+      "eyebrow": "Lotti Helper",
+      "title": "Chercher, trouver, regarder.",
+      "body": "Une phrase suffit."
+    },
+    "list": {
+      "eyebrow": "Nouveau et important",
+      "title": "Vos photos et papiers",
+      "empty": "Aucune chose n'a encore été enregistrée ici."
+    },
+    "search": {
+      "placeholder": "Montre-moi des photos de Nina",
+      "submit": "Demander à Lotti",
+      "error": "Lotti n'a rien trouvé pour le moment."
+    },
+    "actions": {
+      "view": "Voir",
+      "lotti": "Demander à Lotti"
+    },
+    "card": {
+      "from": "De",
+      "unknownSender": "Inconnu"
+    },
+    "detail": {
+      "eyebrow": "Carte Lotti",
+      "from": "De",
+      "received": "Arrivé le",
+      "where": "Déposé dans",
+      "labels": "Mots-clés",
+      "empty": "Choisissez d'abord une photo ou un papier à gauche.",
+      "previewFallback": "L'aperçu s'affiche dès que le papier est chargé.",
+      "photoNote": "Ceci est une photo. Vous pouvez la regarder ou demander à Lotti à son sujet.",
+      "documentNote": "Ceci est un papier. Vous pouvez le faire lire ou demander à Nina."
+    },
+    "upload": {
+      "eyebrow": "Pour l'assistance",
+      "title": "Téléverser un fichier",
+      "owner": "Pour qui ?",
+      "titleField": "Titre",
+      "titlePlaceholder": "p. ex. Assurance maladie 2026",
+      "labels": "Mots-clés",
+      "labelsPlaceholder": "p. ex. Nina, enfants, jardin",
+      "summary": "Résumé",
+      "summaryPlaceholder": "Expliquer brièvement en mots simples",
+      "description": "Note supplémentaire",
+      "descriptionPlaceholder": "Pourquoi est-ce important ?",
+      "category": "Classeur papier",
+      "categoryEmpty": "Choisir une catégorie",
+      "file": "Téléverser un fichier",
+      "submit": "Téléverser",
+      "saving": "Téléversement ...",
+      "error": "La photo ou le papier n'a pas pu être téléversé."
     }
   },
   "video": {

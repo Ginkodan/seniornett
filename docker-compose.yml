@@ -1,16 +1,60 @@
 services:
+  garage:
+    image: dxflrs/garage:v2.0.0
+    working_dir: /srv
+    entrypoint: ["/garage"]
+    command: ["-c", "/etc/garage.toml", "server"]
+    environment:
+      GARAGE_ADMIN_TOKEN: seniornett-garage-admin-token
+    volumes:
+      - ./docker/garage/garage.toml:/etc/garage.toml:ro
+      - garage_meta:/var/lib/garage/meta
+      - garage_data:/var/lib/garage/data
+    ports:
+      - "3900:3900"
+      - "3901:3901"
+      - "3902:3902"
+      - "3903:3903"
+
+  garage-init:
+    build:
+      context: .
+      dockerfile: docker/garage/Dockerfile.init
+    image: seniornett-garage-init
+    working_dir: /srv
+    command: ["/bin/sh", "/init.sh"]
+    depends_on:
+      - garage
+    volumes:
+      - ./docker/garage/garage.toml:/etc/garage.toml:ro
+      - ./docker/garage/init.sh:/init.sh:ro
+      - garage_meta:/var/lib/garage/meta:ro
+    restart: "no"
+
   app:
     image: node:20-alpine
     working_dir: /app
     command: sh -c "npm install && npm run dev"
     environment:
       DATABASE_URL: postgres://seniornett:seniornett_dev@postgres:5432/seniornett
+      SENIORNETT_MEDIA_S3_ENDPOINT: http://garage:3900
+      SENIORNETT_MEDIA_S3_REGION: garage
+      SENIORNETT_MEDIA_S3_BUCKET: seniornett-media
+      SENIORNETT_MEDIA_S3_ACCESS_KEY_ID: GK5173a1b2c3d4e5f6a7b8c9da
+      SENIORNETT_MEDIA_S3_SECRET_ACCESS_KEY: 8d5a5a0b3d8a4b0fbce97e62b4e9d7a6f1b3c2d4e5f60718293a4b5c6d7e8f90
+      SENIORNETT_MEDIA_S3_FORCE_PATH_STYLE: "true"
+      SENIORNETT_MEDIA_SEED_DIR: /seed/dummy-assets
     depends_on:
       postgres:
         condition: service_healthy
+      garage:
+        condition: service_started
+      garage-init:
+        condition: service_completed_successfully
     volumes:
       - ./:/app
       - app_node_modules:/app/node_modules
+      - ./assets:/seed/dummy-assets:ro
     expose:
       - "5176"
 
@@ -51,6 +95,7 @@ services:
     depends_on:
       - app
       - identity-api
+      - garage
     ports:
       - "5173-5185:5173-5185"
     volumes:
@@ -59,3 +104,5 @@ services:
 volumes:
   app_node_modules:
   postgres_data:
+  garage_meta:
+  garage_data:

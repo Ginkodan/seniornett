@@ -1,6 +1,14 @@
 DROP TABLE IF EXISTS table_chat_messages;
 DROP TABLE IF EXISTS table_chat_presence;
 DROP TABLE IF EXISTS table_chat_topics;
+DROP TABLE IF EXISTS media_events;
+DROP TABLE IF EXISTS media_text_index;
+DROP TABLE IF EXISTS media_labels;
+DROP TABLE IF EXISTS media_embeddings;
+DROP TABLE IF EXISTS media_item_collections;
+DROP TABLE IF EXISTS media_collections;
+DROP TABLE IF EXISTS media_blobs;
+DROP TABLE IF EXISTS media_items;
 DROP TABLE IF EXISTS chat_messages;
 DROP TABLE IF EXISTS chat_relationships;
 DROP TABLE IF EXISTS users;
@@ -40,6 +48,88 @@ CREATE TABLE chat_messages (
 
 CREATE INDEX chat_messages_pair_created_idx
   ON chat_messages (sender_user_id, recipient_user_id, created_at DESC);
+
+CREATE TABLE media_items (
+  id               TEXT        PRIMARY KEY,
+  owner_user_id    TEXT        NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  kind             TEXT        NOT NULL CHECK (kind IN ('photo', 'document', 'audio', 'video', 'unknown')),
+  title            TEXT        NOT NULL,
+  senior_label     TEXT        NOT NULL DEFAULT '',
+  plain_description TEXT       NOT NULL DEFAULT '',
+  plain_summary    TEXT        NOT NULL DEFAULT '',
+  source_kind      TEXT        NOT NULL DEFAULT 'upload',
+  source_person_id TEXT        REFERENCES users(user_id) ON DELETE SET NULL,
+  received_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  sensitivity      TEXT        NOT NULL DEFAULT 'normal',
+  lifecycle_state  TEXT        NOT NULL DEFAULT 'arrived',
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE media_blobs (
+  id               TEXT        PRIMARY KEY,
+  media_item_id    TEXT        NOT NULL REFERENCES media_items(id) ON DELETE CASCADE,
+  bucket           TEXT        NOT NULL,
+  object_key       TEXT        NOT NULL,
+  mime_type        TEXT        NOT NULL,
+  byte_size        BIGINT      NOT NULL,
+  checksum         TEXT        NOT NULL,
+  variant          TEXT        NOT NULL,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE media_collections (
+  id               TEXT        PRIMARY KEY,
+  owner_user_id    TEXT        NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  name             TEXT        NOT NULL,
+  kind             TEXT        NOT NULL,
+  visibility       TEXT        NOT NULL DEFAULT 'private',
+  sort_order       INTEGER     NOT NULL DEFAULT 0,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (owner_user_id, name)
+);
+
+CREATE TABLE media_item_collections (
+  media_item_id    TEXT        NOT NULL REFERENCES media_items(id) ON DELETE CASCADE,
+  collection_id    TEXT        NOT NULL REFERENCES media_collections(id) ON DELETE CASCADE,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (media_item_id, collection_id)
+);
+
+CREATE TABLE media_labels (
+  id               TEXT        PRIMARY KEY,
+  media_item_id    TEXT        NOT NULL REFERENCES media_items(id) ON DELETE CASCADE,
+  label            TEXT        NOT NULL,
+  label_type       TEXT        NOT NULL,
+  source           TEXT        NOT NULL,
+  confidence       NUMERIC     NOT NULL DEFAULT 1,
+  confirmed_by_user_id TEXT    REFERENCES users(user_id) ON DELETE SET NULL,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE media_text_index (
+  media_item_id    TEXT        PRIMARY KEY REFERENCES media_items(id) ON DELETE CASCADE,
+  searchable_text  TEXT        NOT NULL DEFAULT '',
+  language         TEXT        NOT NULL DEFAULT 'de'
+);
+
+CREATE TABLE media_events (
+  id               TEXT        PRIMARY KEY,
+  media_item_id    TEXT        NOT NULL REFERENCES media_items(id) ON DELETE CASCADE,
+  actor_user_id    TEXT        REFERENCES users(user_id) ON DELETE SET NULL,
+  event_type       TEXT        NOT NULL,
+  event_payload    JSONB       NOT NULL DEFAULT '{}'::jsonb,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE media_embeddings (
+  id               TEXT        PRIMARY KEY,
+  media_item_id    TEXT        NOT NULL REFERENCES media_items(id) ON DELETE CASCADE,
+  embedding_kind   TEXT        NOT NULL,
+  vector           JSONB       NOT NULL,
+  model            TEXT        NOT NULL,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 
 -- Seed data (mirrors former users.db.json)
 INSERT INTO users (

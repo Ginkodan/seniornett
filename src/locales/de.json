@@ -27,6 +27,7 @@
     "greeting": "Grüezi, {name}.",
     "apps": {
       "social-hub": "Treffpunkt",
+      "media": "Fotos & Papiere",
       "audio": "Audio & Musik",
       "news": "Zeitung",
       "lotti-live": "Frag Lotti",
@@ -290,6 +291,79 @@
       "news": "Ich helfe gern. Öffne Nachrichten, dann siehst du die Meldungen ruhig und gut lesbar. Wenn du möchtest, erkläre ich dir auch eine einzelne Überschrift in einfachen Worten.",
       "person": "Ich bin eine KI und habe keinen echten Wohnort. Der warme Schweizer Hof-Ton ist mein Stil, damit sich das Gespräch freundlich und vertraut anfühlt. Ich helfe dir aber sehr gern konkret weiter.",
       "breakfast": "Das klingt fein. Ich habe zwar keinen echten Hof oder eine echte Küche, aber ich helfe dir sehr gern mit einfachen Frühstücksideen. Möchtest du etwas Herzhaftes oder eher etwas Leichtes?"
+    }
+  },
+  "media": {
+    "title": "Fotos & Papiere",
+    "subtitle": "Bilder anschauen und wichtige Papiere finden",
+    "filters": {
+      "collections": "Ablage",
+      "all": "Alle Sachen",
+      "allSummary": "Sachen"
+    },
+    "collections": {
+      "inbox": "Eingangskorb",
+      "photoAlbum": "Fotoalbum",
+      "paperBinder": "Papiermappe",
+      "health": "Gesundheit",
+      "insurance": "Versicherung",
+      "moneyBills": "Geld & Rechnungen",
+      "housing": "Wohnen",
+      "travel": "Reisen",
+      "emergency": "Notfall"
+    },
+    "helper": {
+      "eyebrow": "Lotti Helper",
+      "title": "Fragen, finden, anschauen.",
+      "body": "Ein Satz genügt."
+    },
+    "list": {
+      "eyebrow": "Neues und Wichtiges",
+      "title": "Deine Sachen",
+      "empty": "Hier sind im Moment noch keine Sachen eingetragen."
+    },
+    "search": {
+      "placeholder": "Zeig mir Fotos von Nina",
+      "submit": "Lotti fragen",
+      "error": "Lotti konnte gerade nichts finden."
+    },
+    "actions": {
+      "view": "Anschauen",
+      "lotti": "Lotti fragen"
+    },
+    "card": {
+      "from": "Von",
+      "unknownSender": "Unbekannt"
+    },
+    "detail": {
+      "eyebrow": "Lotti-Karte",
+      "from": "Von",
+      "received": "Angekommen",
+      "where": "Liegt in",
+      "labels": "Stichworte",
+      "empty": "Wähle links ein Foto oder Papier aus.",
+      "previewFallback": "Vorschau wird angezeigt, sobald das Papier geladen ist.",
+      "photoNote": "Das ist ein Foto. Du kannst es anschauen oder Lotti danach fragen.",
+      "documentNote": "Das ist ein Papier. Du kannst es vorlesen lassen oder Nina fragen."
+    },
+    "upload": {
+      "eyebrow": "Für die Betreuung",
+      "title": "Datei hochladen",
+      "owner": "Für wen ist es?",
+      "titleField": "Titel",
+      "titlePlaceholder": "z. B. Krankenkasse 2026",
+      "labels": "Stichworte",
+      "labelsPlaceholder": "z. B. Nina, Kinder, Garten",
+      "summary": "Zusammenfassung",
+      "summaryPlaceholder": "Kurz in einfachen Worten erklären",
+      "description": "Zusätzliche Notiz",
+      "descriptionPlaceholder": "Warum ist das wichtig?",
+      "category": "Papiermappe",
+      "categoryEmpty": "Kategorie wählen",
+      "file": "Datei hochladen",
+      "submit": "Hochladen",
+      "saving": "Wird hochgeladen ...",
+      "error": "Das Foto oder Papier konnte nicht hochgeladen werden."
     }
   },
   "video": {
