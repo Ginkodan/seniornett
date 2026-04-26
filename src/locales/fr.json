@@ -17,6 +17,7 @@
     "stop": "Arrêter",
     "play": "Lire",
     "pause": "Pause",
+    "selected": "Sélectionné",
     "noSelection": "Aucune sélection",
     "liveRadio": "Radio en direct",
     "loadingDots": "Chargement ...",
@@ -25,17 +26,30 @@
   },
   "home": {
     "greeting": "Bonjour, {name}.",
+    "prompt": "Que souhaitez-vous faire maintenant ?",
     "apps": {
-      "social-hub": "Point rencontre",
+      "social-hub": "Parler avec quelqu’un",
       "media": "Photos et papiers",
       "audio": "Audio et musique",
       "news": "Journal",
       "lotti-live": "Demander à Lotti",
-      "lexikon": "Lexique",
+      "lexikon": "Expliquer des mots",
       "wetter": "Météo",
       "karte": "Carte",
       "video": "Télévision",
       "notfall": "Urgence"
+    },
+    "appDescriptions": {
+      "social-hub": "Joindre la famille, les amis et l’accompagnement.",
+      "media": "Voir des photos et retrouver des papiers importants.",
+      "audio": "Écouter la radio, des émissions et des livres audio.",
+      "news": "Lire les nouvelles calmement, sans publicité.",
+      "lotti-live": "Poser une question simple.",
+      "lexikon": "Chercher un mot en langage simple.",
+      "wetter": "Voir le temps d’aujourd’hui et de demain.",
+      "karte": "Regarder les lieux, chemins et environs.",
+      "video": "Voir des émissions et des conférences.",
+      "notfall": "Appeler rapidement de l’aide et montrer les informations."
     }
   },
   "topbar": {
@@ -94,8 +108,15 @@
       "loadingError": "Le profil n'a pas pu être chargé."
     },
     "fields": {
+      "vorname": "Prénom",
+      "nachname": "Nom",
       "geburtsdatum": "Né(e) le",
       "blutgruppe": "Groupe sanguin",
+      "krankenkasse": "Assurance maladie",
+      "kv_nummer": "Numéro d'assuré",
+      "allergien": "Allergies",
+      "medikamente": "Médicaments",
+      "hausarzt": "Médecin traitant",
       "notfallkontakt": "Contact"
     }
   },
@@ -107,6 +128,7 @@
     "searchPlaceholder": "p. ex. Berne, Bâle ou Lucerne",
     "loadingButton": "Chargement ...",
     "searchButton": "Rechercher",
+    "loadingTitle": "Nous cherchons la météo.",
     "loading": "Chargement des données météo ...",
     "error": "Les données météo n'ont pas pu être chargées. Veuillez réessayer plus tard.",
     "conditions": {
@@ -291,7 +313,14 @@
   },
   "lotti": {
     "title": "Demander à Lotti",
-    "empty": "Votre conversation apparaîtra ici.",
+    "emptyTitle": "Je suis Lotti.",
+    "empty": "Je vous aide avec des questions simples. Écrivez une question ci-dessous ou choisissez un exemple.",
+    "examplesLabel": "Exemples de questions",
+    "examples": {
+      "0": "Quel temps fera-t-il demain ?",
+      "1": "Où puis-je trouver mes photos ?",
+      "2": "Que dit cette lettre ?"
+    },
     "pending": "Un instant s'il vous plaît ...",
     "label": "Votre question à Lotti",
     "placeholder": "Saisissez votre question ici",
@@ -330,13 +359,31 @@
       "title": "Chercher, trouver, regarder.",
       "body": "Une phrase suffit."
     },
+    "tasks": {
+      "aria": "Choisir une tâche",
+      "view": {
+        "title": "Voir mes documents",
+        "body": "Parcourir les photos et papiers calmement."
+      },
+      "search": {
+        "title": "Chercher dans les documents",
+        "body": "Saisir un mot ou un thème."
+      },
+      "lotti": {
+        "title": "Demander à Lotti pour un document",
+        "body": "Par exemple faire expliquer une lettre."
+      },
+      "resultsTitle": "Photos et papiers trouvés"
+    },
     "list": {
       "eyebrow": "Nouveau et important",
       "title": "Vos photos et papiers",
-      "empty": "Aucune chose n'a encore été enregistrée ici."
+      "empty": "Aucune chose n'a encore été enregistrée ici.",
+      "loadingHelp": "Nous regardons ce qui est prêt pour vous."
     },
     "search": {
       "placeholder": "Demande à Lotti : où est ma lettre d'assurance maladie ?",
+      "lottiPlaceholder": "Par exemple : que dit cette lettre ?",
       "submit": "Demander à Lotti",
       "error": "Lotti n'a rien trouvé pour le moment."
     },
@@ -393,6 +440,7 @@
     "title": "Télévision et conférences",
     "reload": "Recharger",
     "loading": "Chargement ...",
+    "loadingTitle": "Nous cherchons des émissions adaptées.",
     "loadingEpisodes": "Chargement des émissions …",
     "error": "Le contenu n'a pas pu être chargé.",
     "empty": "Aucune émission n'a pu être chargée pour le moment. Veuillez réessayer plus tard.",
@@ -407,6 +455,13 @@
     "title": "Carte",
     "layers": "Couches de la carte",
     "controls": "Commandes de la carte",
+    "presets": "Vue rapide de la carte",
+    "switzerland": "Suisse",
+    "loadingTitle": "La carte est préparée.",
+    "loadingBody": "Vous verrez bientôt la Suisse avec des chemins bien lisibles.",
+    "legendTitle": "Que montre la carte ?",
+    "hikingLegend": "Les sentiers sont dessinés comme des lignes colorées. Utilisez la recherche seulement si vous cherchez un lieu précis.",
+    "cyclingLegend": "Les itinéraires vélo sont dessinés comme des lignes colorées. Utilisez la recherche seulement si vous cherchez un lieu précis.",
     "hiking": "Sentiers de randonnée",
     "cycling": "Réseau cyclable",
     "zoomIn": "Agrandir",

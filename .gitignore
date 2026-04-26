@@ -8,3 +8,5 @@ out
 .vercel
 .env.local
 .env*.local
+test-results
+visual-audit

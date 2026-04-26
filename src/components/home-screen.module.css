@@ -2,11 +2,13 @@
 
 /* Home screen */
 .scope:global(.home), .scope :global(.home) {
-  padding: 2.75rem 3.25rem 2.25rem;
+  padding: 2.75rem clamp(1.5rem, 4vw, 4rem) 2.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.75rem;
+  gap: 2rem;
   min-height: 100%;
+  background:
+    linear-gradient(180deg, var(--paper-2) 0, var(--paper) 18rem);
 }
 .scope:global(.home-greeting), .scope :global(.home-greeting) {
   display: flex;
@@ -21,8 +23,15 @@
   font-size: var(--fs-xxl);
   line-height: 1.05;
   font-weight: 800;
-  letter-spacing: -0.03em;
   margin: 0 0 12px;
+}
+.scope:global(.home-greeting p), .scope :global(.home-greeting p) {
+  margin: 0;
+  max-width: 44rem;
+  font-size: var(--fs-md);
+  line-height: 1.45;
+  color: var(--ink-2);
+  font-weight: 700;
 }
 .scope:global(.home-greeting .date), .scope :global(.home-greeting .date) {
   font-size: var(--fs-md);
@@ -31,7 +40,7 @@
 }
 .scope:global(.home-grid), .scope :global(.home-grid) {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(20rem, 1fr));
   grid-auto-rows: 1fr;
   gap: 1.25rem;
   align-content: start;
@@ -87,15 +96,30 @@
   background: var(--card);
   border: var(--border);
   border-radius: var(--radius-lg);
-  padding: 1.75rem 1.5rem;
+  padding: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
   cursor: pointer;
   color: var(--ink);
   text-align: left;
   font-family: inherit;
-  min-height: 6.5rem;
+  min-height: 8.25rem;
+  text-decoration: none;
+  box-shadow: 0 4px 0 var(--ink);
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.scope:global(.home-primary-news:hover), .scope :global(.home-primary-news:hover) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--ink);
+  background: var(--paper);
+}
+
+.scope:global(.home-primary-news.urgent), .scope :global(.home-primary-news.urgent) {
+  border-color: var(--accent);
+  background: #fff5f5;
+  box-shadow: 0 4px 0 var(--accent);
 }
 
 .scope:global(.home-primary-news .icon), .scope :global(.home-primary-news .icon) {
@@ -106,8 +130,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--paper-2);
+  background: var(--paper);
   flex-shrink: 0;
+}
+
+.scope:global(.home-primary-news.urgent .icon), .scope :global(.home-primary-news.urgent .icon) {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .scope:global(.home-primary-news .icon svg), .scope :global(.home-primary-news .icon svg) {
@@ -160,13 +189,20 @@
 .scope:global(.tile-label), .scope :global(.tile-label) {
   font-size: var(--fs-lg);
   font-weight: 700;
-  letter-spacing: -0.01em;
   margin-top: 0;
   line-height: 1.1;
 }
 .scope:global(.tile-sub), .scope :global(.tile-sub) {
-  font-size: var(--fs-sm);
-  color: var(--ink-3);
-  margin-top: 4px;
+  font-size: var(--fs-base);
+  color: var(--ink-2);
+  margin-top: 0.45rem;
+  line-height: 1.4;
+  font-weight: 600;
 }
 .scope:global(.tile-stack), .scope :global(.tile-stack) { display: flex; flex-direction: column; }
+
+@media (max-width: 900px) {
+  .scope:global(.home-grid), .scope :global(.home-grid) {
+    grid-template-columns: 1fr;
+  }
+}

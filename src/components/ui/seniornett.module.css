@@ -356,6 +356,25 @@
   line-height: 1.45;
 }
 
+.scope:global(.sn-page-actions), .scope :global(.sn-page-actions) {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.875rem;
+  flex-wrap: wrap;
+}
+
+.scope:global(.sn-page-primary-action),
+.scope :global(.sn-page-primary-action),
+.scope:global(.sn-page-secondary-actions),
+.scope :global(.sn-page-secondary-actions) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .scope:global(button:focus-visible),
 .scope :global(button:focus-visible),
 .scope:global(.sn-button:focus-visible),

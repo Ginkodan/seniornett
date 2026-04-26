@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { useAppState } from './app-provider';
+import { SeniorNetPage } from './ui';
 import styles from "./lotti-live-screen.module.css";
 
 export function LottiLiveScreen({ askLottiAction }) {
@@ -64,19 +65,33 @@ export function LottiLiveScreen({ askLottiAction }) {
     }
   };
 
-  return (
-    <div className={`${styles.scope} app`}>
-      <div className="app-header">
-        <h1 className="app-title">{t('lotti.title')}</h1>
-      </div>
+  const fillExample = (text) => {
+    if (pending) return;
+    setDraft(text);
+  };
 
-      <div className="app-body">
+  return (
+    <SeniorNetPage title={t('lotti.title')}>
+      <div className={styles.scope}>
         <div className="lotti-shell">
           <div className="lotti-card">
             <div className="lotti-messages" ref={listRef}>
               {!messages.length && !pending && (
                 <div className="lotti-empty-state">
-                  {t('lotti.empty')}
+                  <div className="lotti-empty-intro">
+                    <h2>{t('lotti.emptyTitle')}</h2>
+                    <p>{t('lotti.empty')}</p>
+                  </div>
+                  <div className="lotti-example-list" aria-label={t('lotti.examplesLabel')}>
+                    {[0, 1, 2].map((index) => {
+                      const text = t(`lotti.examples.${index}`);
+                      return (
+                        <button key={text} type="button" className="lotti-example-button" onClick={() => fillExample(text)}>
+                          {text}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
@@ -120,6 +135,6 @@ export function LottiLiveScreen({ askLottiAction }) {
           </div>
         </div>
       </div>
-    </div>
+    </SeniorNetPage>
   );
 }

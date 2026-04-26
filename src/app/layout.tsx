@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { loadNewsAction } from "./actions/news";
 import { AppProvider } from "../components/app-provider";
-import { TopBar } from "../components/top-bar";
+import { SeniorNetGlobalShell } from "../components/ui/senior-net-layout";
 import { createTranslator, getLocaleTag, normalizeLanguage } from "@/lib/i18n";
 
 export const metadata: Metadata = {
@@ -36,10 +36,7 @@ export default async function RootLayout({
     <html lang={getLocaleTag(language)} suppressHydrationWarning>
       <body>
         <AppProvider loadNewsAction={loadNewsAction} initialIdentity={initialIdentity}>
-          <div className="tablet-screen">
-            <TopBar />
-            <main className="content">{children}</main>
-          </div>
+          <SeniorNetGlobalShell>{children}</SeniorNetGlobalShell>
         </AppProvider>
       </body>
     </html>

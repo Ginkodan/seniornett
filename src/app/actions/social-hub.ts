@@ -12,10 +12,10 @@ import {
 } from "@/lib/social-hub";
 import { requireIdentityHeaders } from "@/lib/request-auth";
 
-export async function getSocialHubBootstrap() {
+export async function getSocialHubBootstrap(topicId?: string) {
   const requestHeaders = await headers();
   const identity = requireIdentityHeaders(requestHeaders);
-  return buildSocialHubBootstrap(identity);
+  return buildSocialHubBootstrap(identity, topicId);
 }
 
 export async function setSocialHubTopicAction(topicId: string) {

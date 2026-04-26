@@ -4,7 +4,7 @@
 
 import React from "react";
 import { useAppState } from "./app-provider";
-import { AppImage } from "./ui";
+import { AppImage, Button, SeniorNetPage } from "./ui";
 import styles from "./video-screen.module.css";
 
 function formatDate(value, localeTag) {
@@ -89,21 +89,23 @@ export function VideoScreen({ loadVideoAction }) {
     !loading && !data.error && data.sections && data.sections.some((s) => s.episodes.length > 0);
 
   return (
-    <div className={`${styles.scope} app`}>
-      <div className="app-header">
-        <h1 className="app-title">{t("video.title")}</h1>
-        <div className="spacer" />
-        <button className="btn" onClick={loadData} disabled={loading}>
+    <SeniorNetPage
+      title={t("video.title")}
+      primaryAction={
+        <Button onClick={loadData} disabled={loading}>
           {loading ? t("video.loading") : t("video.reload")}
-        </button>
-      </div>
-
-      <div className="app-body">
+        </Button>
+      }
+    >
+      <div className={styles.scope}>
         <div className="video-shell">
           {data.error && <div className="video-warning">{data.error}</div>}
 
           {loading && (
-            <p className="video-loading">{t("video.loadingEpisodes")}</p>
+            <div className="video-loading" role="status">
+              <strong>{t("video.loadingTitle")}</strong>
+              <span>{t("video.loadingEpisodes")}</span>
+            </div>
           )}
 
           {data.sections && data.sections.map((section) =>
@@ -156,41 +158,41 @@ export function VideoScreen({ loadVideoAction }) {
             </div>
           )}
         </div>
-      </div>
 
-      {player.open && (
-        <div className="video-player-overlay" role="dialog" aria-modal="true" aria-label={player.title}>
-          <div className="video-player-panel">
-            <div className="video-player-head">
-              <h3>{player.title}</h3>
-              <button className="btn" onClick={closePlayer}>
-                {t("video.close")}
-              </button>
-            </div>
-            <div className="video-player-frame-wrap">
-              {player.mode === "video" ? (
-                <video
-                  key={player.url}
-                  ref={videoRef}
-                  className="video-player-frame"
-                  src={player.url}
-                  controls
-                  autoPlay
-                  playsInline
-                />
-              ) : (
-                <iframe
-                  title={player.title}
-                  src={player.url}
-                  allow="autoplay; fullscreen; picture-in-picture"
-                  allowFullScreen
-                  className="video-player-frame"
-                />
-              )}
+        {player.open && (
+          <div className="video-player-overlay" role="dialog" aria-modal="true" aria-label={player.title}>
+            <div className="video-player-panel">
+              <div className="video-player-head">
+                <h3>{player.title}</h3>
+                <button className="btn" onClick={closePlayer}>
+                  {t("video.close")}
+                </button>
+              </div>
+              <div className="video-player-frame-wrap">
+                {player.mode === "video" ? (
+                  <video
+                    key={player.url}
+                    ref={videoRef}
+                    className="video-player-frame"
+                    src={player.url}
+                    controls
+                    autoPlay
+                    playsInline
+                  />
+                ) : (
+                  <iframe
+                    title={player.title}
+                    src={player.url}
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowFullScreen
+                    className="video-player-frame"
+                  />
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </SeniorNetPage>
   );
 }

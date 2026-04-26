@@ -5,6 +5,7 @@
 import React from 'react';
 import { useAppState } from './app-provider';
 import { NewsArticleCard } from './news-article-card';
+import { Button, SeniorNetPage } from './ui';
 import styles from "./news-app.module.css";
 
 export function NewsScreen() {
@@ -12,16 +13,15 @@ export function NewsScreen() {
   const articles = news?.items || [];
 
   return (
-    <div className={`${styles.scope} app`}>
-      <div className="app-header">
-        <h1 className="app-title">{t('news.title')}</h1>
-        <div className="spacer" />
-        <button className="btn" onClick={refreshNews} disabled={!isOnline && !news?.updatedAt}>
+    <SeniorNetPage
+      title={t('news.title')}
+      primaryAction={
+        <Button onClick={refreshNews} disabled={!isOnline && !news?.updatedAt}>
           {t('news.reload')}
-        </button>
-      </div>
-
-      <div className="app-body">
+        </Button>
+      }
+    >
+      <div className={styles.scope}>
         <div className="news-app-shell">
           {news?.error && (
             <div className="news-app-warning">
@@ -39,6 +39,6 @@ export function NewsScreen() {
           </div>
         </div>
       </div>
-    </div>
+    </SeniorNetPage>
   );
 }

@@ -7,26 +7,26 @@
   height: 100%;
   min-height: 100%;
   min-height: 0;
-}
-.scope:global(.app-header), .scope :global(.app-header) {
-  padding: 1.75rem 3.5rem 1.25rem;
-  display: flex;
-  align-items: center;
-  min-height: 7rem;
-  gap: 1.25rem;
-  border-bottom: var(--border-thin);
   background: var(--paper);
 }
+.scope:global(.app-header), .scope :global(.app-header) {
+  padding: 1.75rem clamp(1.5rem, 4vw, 4rem) 1.35rem;
+  display: flex;
+  align-items: center;
+  min-height: 7.5rem;
+  gap: 1.5rem;
+  border-bottom: var(--border-thin);
+  background: linear-gradient(180deg, var(--paper-2), var(--paper));
+}
 .scope:global(.app-title), .scope :global(.app-title) {
-  font-size: var(--fs-lg);
+  font-size: clamp(var(--fs-lg), 3vw, var(--fs-xl));
   font-weight: 800;
-  letter-spacing: -0.02em;
   margin: 0;
   line-height: 1.1;
 }
 .scope:global(.app-body), .scope :global(.app-body) {
   flex: 1;
-  overflow: hidden;
+  overflow: auto;
   min-height: 0;
 }
 

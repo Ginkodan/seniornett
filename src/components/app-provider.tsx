@@ -15,7 +15,44 @@ const CAREGIVER_CONTACT = {
   phone: '079 555 12 34',
 };
 
-const AppStateContext = React.createContext(null);
+type AppIdentity = {
+  loading: boolean;
+  userName: string;
+  deviceId: string;
+  vpnIp: string;
+  role: string;
+  language: ReturnType<typeof normalizeLanguage>;
+  source: string;
+};
+
+type AppStateValue = {
+  CAREGIVER_CONTACT: typeof CAREGIVER_CONTACT;
+  textSize: number;
+  setTextSize: React.Dispatch<React.SetStateAction<number>>;
+  isOnline: boolean;
+  identity: AppIdentity;
+  locale: ReturnType<typeof normalizeLanguage>;
+  localeTag: string;
+  t: ReturnType<typeof createTranslator>;
+  news: {
+    loading: boolean;
+    items: Array<{
+      id: string;
+      title: string;
+      summary: string;
+      source: string;
+      publishedAt: string;
+      image: string | null;
+    }>;
+    updatedAt: string | null;
+    source: string;
+    error: string | null;
+  };
+  refreshNews: () => Promise<void>;
+  readAloud: () => void;
+};
+
+const AppStateContext = React.createContext<AppStateValue | null>(null);
 
 function readNewsCache() {
   return readJsonFromStorage(NEWS_CACHE_KEY, null);
@@ -278,7 +315,7 @@ export function AppProvider({ children, loadNewsAction, initialIdentity }) {
   );
 }
 
-export function useAppState() {
+export function useAppState(): AppStateValue {
   const context = React.useContext(AppStateContext);
 
   if (!context) {

@@ -6,6 +6,7 @@ import React from "react";
 import { BookOpen, Headphones, Pause, Play, Radio, Square } from "lucide-react";
 import { AUDIOBOOK_GENRES, BOOK_FILTER_ALL } from "../lib/audio/genres";
 import { useAppState } from "./app-provider";
+import { SeniorNetPage } from "./ui";
 import styles from "./audio-screen.module.css";
 
 const TABS = [
@@ -370,14 +371,12 @@ export function AudioScreen({ loadAudioAction }) {
           .join(" · ");
 
   return (
-    <div className={`${styles.scope} app`}>
-      <div className="app-body">
+    <SeniorNetPage title={t("audio.title")}>
+      <div className={styles.scope}>
         <div className="audio-shell">
           <div className="audio-sticky-stack">
             <div className="audio-page-header">
-              <h1 className="app-title">{t("audio.title")}</h1>
-
-              <div className="audio-tabs" role="tablist" aria-label={t("audio.title")}>
+              <div className="audio-tabs" role="group" aria-label={t("audio.title")}>
                 {TABS.map((tab) => (
                   <TabButton
                     key={tab.id}
@@ -469,7 +468,7 @@ export function AudioScreen({ loadAudioAction }) {
                   <h2>{t("audio.tabs.programs")}</h2>
                 </div>
 
-                <div className="audio-filter-row" role="tablist" aria-label={t("audio.tabs.programs")}>
+                <div className="audio-filter-row" role="group" aria-label={t("audio.tabs.programs")}>
                   {data.audioPrograms.map((program) => (
                     <button
                       key={program.id}
@@ -519,7 +518,7 @@ export function AudioScreen({ loadAudioAction }) {
                   <h2>{t("audio.tabs.books")}</h2>
                 </div>
 
-                <div className="audio-filter-row" role="tablist" aria-label={t("audio.tabs.books")}>
+                <div className="audio-filter-row" role="group" aria-label={t("audio.tabs.books")}>
                   {visibleBookFilters.map((filter) => (
                     <button
                       key={filter.id}
@@ -569,6 +568,6 @@ export function AudioScreen({ loadAudioAction }) {
           </div>
         </div>
       </div>
-    </div>
+    </SeniorNetPage>
   );
 }

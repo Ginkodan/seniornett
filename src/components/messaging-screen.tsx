@@ -6,6 +6,7 @@ import React from "react";
 import { getMessagingBootstrap, sendMessageAction } from "@/app/actions/messaging";
 import { LoaderCircle, MessageCircleMore } from "lucide-react";
 import { useAppState } from "./app-provider";
+import { SeniorNetPage } from "./ui";
 import styles from "./messaging-social.module.css";
 
 function formatTime(value, localeTag) {
@@ -169,12 +170,8 @@ export function MessagingScreen({ initialContactId = "" }) {
   }, [draft, selectedConversation, sending, loadBootstrap, t]);
 
   return (
-    <div className={`${styles.scope} app`}>
-      <div className="app-header">
-        <h1 className="app-title">{t("messaging.title")}</h1>
-      </div>
-
-      <div className="app-body">
+    <SeniorNetPage title={t("messaging.title")}>
+      <div className={styles.scope}>
         <div className="messaging-shell">
           <aside className="messaging-sidebar" aria-label={t("messaging.contacts.aria")}>
             {loading ? (
@@ -297,6 +294,6 @@ export function MessagingScreen({ initialContactId = "" }) {
           </section>
         </div>
       </div>
-    </div>
+    </SeniorNetPage>
   );
 }

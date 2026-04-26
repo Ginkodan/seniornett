@@ -17,6 +17,7 @@
     "stop": "Stoppen",
     "play": "Abspielen",
     "pause": "Pause",
+    "selected": "Ausgewählt",
     "noSelection": "Nichts ausgewählt",
     "liveRadio": "Live-Radio",
     "loadingDots": "Lädt ...",
@@ -25,17 +26,30 @@
   },
   "home": {
     "greeting": "Grüezi, {name}.",
+    "prompt": "Was möchten Sie jetzt tun?",
     "apps": {
-      "social-hub": "Treffpunkt",
+      "social-hub": "Mit Menschen sprechen",
       "media": "Fotos & Papiere",
       "audio": "Audio & Musik",
       "news": "Zeitung",
-      "lotti-live": "Frag Lotti",
-      "lexikon": "Lexikon",
+      "lotti-live": "Lotti fragen",
+      "lexikon": "Wörter erklären",
       "wetter": "Wetter",
       "karte": "Karte",
       "video": "Fernsehen",
       "notfall": "Notfall"
+    },
+    "appDescriptions": {
+      "social-hub": "Familie, Freunde und Betreuung erreichen.",
+      "media": "Fotos ansehen und wichtige Papiere finden.",
+      "audio": "Radio, Sendungen und Hörbücher hören.",
+      "news": "Nachrichten ruhig und ohne Werbung lesen.",
+      "lotti-live": "Eine einfache Frage stellen.",
+      "lexikon": "Ein Wort in einfacher Sprache nachschlagen.",
+      "wetter": "Sehen, wie das Wetter heute und morgen wird.",
+      "karte": "Orte, Wege und Umgebung anschauen.",
+      "video": "Sendungen und Vorträge ansehen.",
+      "notfall": "Schnell Hilfe anrufen und Angaben zeigen."
     }
   },
   "topbar": {
@@ -94,8 +108,15 @@
       "loadingError": "Profil konnte nicht geladen werden."
     },
     "fields": {
+      "vorname": "Vorname",
+      "nachname": "Nachname",
       "geburtsdatum": "Geboren",
       "blutgruppe": "Blutgruppe",
+      "krankenkasse": "Krankenkasse",
+      "kv_nummer": "Versichertennummer",
+      "allergien": "Allergien",
+      "medikamente": "Medikamente",
+      "hausarzt": "Hausarzt",
       "notfallkontakt": "Kontakt"
     }
   },
@@ -107,6 +128,7 @@
     "searchPlaceholder": "z. B. Bern, Basel oder Luzern",
     "loadingButton": "Lädt ...",
     "searchButton": "Suchen",
+    "loadingTitle": "Wir holen das Wetter.",
     "loading": "Wetterdaten werden geladen ...",
     "error": "Wetterdaten konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
     "conditions": {
@@ -290,8 +312,15 @@
     }
   },
   "lotti": {
-    "title": "Frag Lotti",
-    "empty": "Deine Unterhaltung erscheint hier.",
+    "title": "Lotti fragen",
+    "emptyTitle": "Ich bin Lotti.",
+    "empty": "Ich helfe dir bei einfachen Fragen. Tippe unten eine Frage ein oder wähle ein Beispiel.",
+    "examplesLabel": "Beispielfragen",
+    "examples": {
+      "0": "Wie wird das Wetter morgen?",
+      "1": "Wo finde ich meine Fotos?",
+      "2": "Was steht in diesem Brief?"
+    },
     "pending": "Einen Moment bitte ...",
     "label": "Ihre Frage an Lotti",
     "placeholder": "Frage hier eingeben",
@@ -330,13 +359,31 @@
       "title": "Fragen, finden, anschauen.",
       "body": "Ein Satz genügt."
     },
+    "tasks": {
+      "aria": "Aufgabe wählen",
+      "view": {
+        "title": "Meine Dokumente ansehen",
+        "body": "Fotos und Papiere ruhig durchblättern."
+      },
+      "search": {
+        "title": "In Dokumenten suchen",
+        "body": "Ein Wort oder Thema eingeben."
+      },
+      "lotti": {
+        "title": "Lotti zu einem Dokument fragen",
+        "body": "Zum Beispiel einen Brief erklären lassen."
+      },
+      "resultsTitle": "Gefundene Fotos und Papiere"
+    },
     "list": {
       "eyebrow": "Neues und Wichtiges",
       "title": "Deine Sachen",
-      "empty": "Hier sind im Moment noch keine Sachen eingetragen."
+      "empty": "Hier sind im Moment noch keine Sachen eingetragen.",
+      "loadingHelp": "Wir schauen kurz nach, was für Sie bereitliegt."
     },
     "search": {
       "placeholder": "Frag Lotti: Wo ist mein Krankenkassenbrief?",
+      "lottiPlaceholder": "Zum Beispiel: Was steht in diesem Brief?",
       "submit": "Lotti fragen",
       "error": "Lotti konnte gerade nichts finden."
     },
@@ -393,6 +440,7 @@
     "title": "Fernsehen & Vorträge",
     "reload": "Neu laden",
     "loading": "Lädt ...",
+    "loadingTitle": "Wir holen passende Sendungen.",
     "loadingEpisodes": "Sendungen werden geladen …",
     "error": "Inhalte konnten nicht geladen werden.",
     "empty": "Zurzeit konnten keine Sendungen geladen werden. Bitte später nochmals versuchen.",
@@ -407,6 +455,13 @@
     "title": "Karte",
     "layers": "Kartenebenen",
     "controls": "Kartensteuerung",
+    "presets": "Schnelle Kartenansicht",
+    "switzerland": "Schweiz",
+    "loadingTitle": "Die Karte wird vorbereitet.",
+    "loadingBody": "Gleich sehen Sie die Schweiz mit gut lesbaren Wegen.",
+    "legendTitle": "Was zeigt die Karte?",
+    "hikingLegend": "Wanderwege sind als farbige Linien eingezeichnet. Nutzen Sie die Suche nur, wenn Sie einen bestimmten Ort möchten.",
+    "cyclingLegend": "Velorouten sind als farbige Linien eingezeichnet. Nutzen Sie die Suche nur, wenn Sie einen bestimmten Ort möchten.",
     "hiking": "Wanderwege",
     "cycling": "Veloland",
     "zoomIn": "Vergrössern",

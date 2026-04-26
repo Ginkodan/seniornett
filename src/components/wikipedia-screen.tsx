@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { searchWikipediaAction } from '../app/actions/wikipedia';
+import { SeniorNetPage } from './ui';
 import styles from "./wikipedia-screen.module.css";
 
 export function WikipediaScreen() {
@@ -22,7 +23,6 @@ export function WikipediaScreen() {
     try {
       const data = await searchWikipediaAction(text);
       setResults(data);
-      if (data?.length) setSelected(data[0]);
     } finally {
       setPending(false);
     }
@@ -36,18 +36,15 @@ export function WikipediaScreen() {
   const noResults = results !== null && results.length === 0;
 
   return (
-    <div className={`${styles.scope} app`}>
-      <div className="app-header">
-        <h1 className="app-title">Lexikon</h1>
-      </div>
-
-      <div className="app-body">
+    <SeniorNetPage title="Wörter erklären" subtitle="Ein Begriff, eine einfache Erklärung.">
+      <div className={styles.scope}>
         <div className="wiki-shell">
 
-          {/* Left: search + result list */}
-          <div className="wiki-sidebar">
+          <div className="wiki-search-panel">
+            <h2>Was möchten Sie verstehen?</h2>
+            <p>Geben Sie ein Wort ein. SeniorNett zeigt nur die Erklärung, keine Links nach draussen.</p>
             <div className="wiki-search-row">
-              <label className="sr-only" htmlFor="wiki-query">Suchbegriff</label>
+              <label className="wiki-label" htmlFor="wiki-query">Suchbegriff</label>
               <input
                 id="wiki-query"
                 className="field wiki-field"
@@ -66,19 +63,20 @@ export function WikipediaScreen() {
                 Nachschlagen
               </button>
             </div>
+          </div>
 
-            {pending && (
-              <p className="wiki-status">Einen Moment bitte …</p>
-            )}
+          {pending && (
+            <p className="wiki-status">Einen Moment bitte …</p>
+          )}
 
-            {noResults && !pending && (
-              <p className="wiki-status">Dazu wurde nichts gefunden. Versuch einen anderen Begriff.</p>
-            )}
+          {noResults && !pending && (
+            <p className="wiki-status">Dazu wurde nichts gefunden. Versuch einen anderen Begriff.</p>
+          )}
 
-            {results && results.length > 0 && !pending && (
-              <div className="wiki-results-section">
-                <p className="wiki-results-label">{results.length === 1 ? '1 Treffer' : `${results.length} Treffer`}</p>
-                <ul className="wiki-result-list">
+          {results && results.length > 0 && !pending && !selected && (
+            <div className="wiki-results-section">
+              <p className="wiki-results-label">{results.length === 1 ? '1 Treffer' : `${results.length} Treffer`}</p>
+              <ul className="wiki-result-list">
                 {results.map((item) => (
                   <li key={item.title}>
                     <button
@@ -89,19 +87,18 @@ export function WikipediaScreen() {
                     </button>
                   </li>
                 ))}
-                </ul>
-              </div>
-            )}
-          </div>
+              </ul>
+            </div>
+          )}
 
-          {/* Right: full article */}
           <div className="wiki-article" ref={articleRef}>
-            {!selected && !pending && (
-              <p className="wiki-empty">Gib oben einen Begriff ein und wähle dann einen Eintrag aus.</p>
-            )}
             {selected && (
               <>
+                <button type="button" className="btn wiki-back-btn" onClick={() => setSelected(null)}>
+                  Zurück zu den Treffern
+                </button>
                 <h2 className="wiki-article-title">{selected.title}</h2>
+                <h3 className="wiki-section-title">Kurze Erklärung</h3>
                 <div
                   className="wiki-article-body"
                   dangerouslySetInnerHTML={{ __html: selected.extract }}
@@ -112,6 +109,6 @@ export function WikipediaScreen() {
 
         </div>
       </div>
-    </div>
+    </SeniorNetPage>
   );
 }

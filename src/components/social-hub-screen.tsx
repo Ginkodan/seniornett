@@ -13,6 +13,7 @@ import {
   setSocialHubTopicAction,
 } from "@/app/actions/social-hub";
 import { useAppState } from "./app-provider";
+import { SeniorNetPage } from "./ui";
 import styles from "./messaging-social.module.css";
 
 const AREAS = {
@@ -431,6 +432,7 @@ export function SocialHubScreen({ initialContactId = "", initialArea = "" }) {
   const [sendingTable, setSendingTable] = React.useState(false);
   const [joiningTable, setJoiningTable] = React.useState(false);
   const [connecting, setConnecting] = React.useState(false);
+  const [switchingGroupTopic, setSwitchingGroupTopic] = React.useState(false);
 
   const applyBootstrap = React.useCallback((payload) => {
     setBootstrap(payload);
@@ -478,7 +480,7 @@ export function SocialHubScreen({ initialContactId = "", initialArea = "" }) {
         return currentTopicId;
       }
 
-      return publicTopics[0]?.id || "";
+      return "";
     });
 
     setSelectedGroupTopicId((currentTopicId) => {
@@ -488,11 +490,11 @@ export function SocialHubScreen({ initialContactId = "", initialArea = "" }) {
         return currentTopicId;
       }
 
-      return payload.table?.currentTopic?.id || joinedTopicIds[0] || "";
+      return "";
     });
   }, [initialContactId]);
 
-  const loadBootstrap = React.useCallback(async (showLoader = false) => {
+  const loadBootstrap = React.useCallback(async (showLoader = false, topicId = "") => {
     if (showLoader) {
       setLoading(true);
     }
@@ -500,7 +502,7 @@ export function SocialHubScreen({ initialContactId = "", initialArea = "" }) {
     setError("");
 
     try {
-      const payload = await getSocialHubBootstrap();
+      const payload = await getSocialHubBootstrap(topicId || undefined);
       applyBootstrap(payload);
     } catch {
       setError(t("socialHub.errors.load"));
@@ -516,10 +518,10 @@ export function SocialHubScreen({ initialContactId = "", initialArea = "" }) {
 
     // Initial data loading belongs in an effect because this is a client screen.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadBootstrap(true).then(() => {
+    loadBootstrap(true, activeArea === AREAS.GROUPS ? selectedGroupTopicId : "").then(() => {
       if (!cancelled) {
         refreshTimerRef.current = window.setInterval(() => {
-          loadBootstrap(false);
+          loadBootstrap(false, activeArea === AREAS.GROUPS ? selectedGroupTopicId : "");
         }, 3000);
       }
     });
@@ -532,7 +534,7 @@ export function SocialHubScreen({ initialContactId = "", initialArea = "" }) {
         refreshTimerRef.current = null;
       }
     };
-  }, [loadBootstrap]);
+  }, [activeArea, loadBootstrap, selectedGroupTopicId]);
 
   const caretakers = bootstrap?.caretakers || [];
   const friends = bootstrap?.friends || [];
@@ -540,11 +542,10 @@ export function SocialHubScreen({ initialContactId = "", initialArea = "" }) {
   const joinedTopicIds = bootstrap?.table?.joinedTopicIds || [];
   const joinedTopics = topics.filter((topic) => joinedTopicIds.includes(topic.id));
   const publicTopics = topics.filter((topic) => !joinedTopicIds.includes(topic.id));
-  const currentTableTopic = bootstrap?.table?.currentTopic || null;
-  const joinedTopic =
-    currentTableTopic && joinedTopicIds.includes(currentTableTopic.id) ? currentTableTopic : joinedTopics[0] || null;
-  const selectedGroupTopic = joinedTopics.find((topic) => topic.id === selectedGroupTopicId) || joinedTopic;
-  const previewTopic = publicTopics.find((topic) => topic.id === previewTopicId) || publicTopics[0] || null;
+  const selectedGroupTopic = joinedTopics.find((topic) => topic.id === selectedGroupTopicId) || null;
+  const previewTopic = publicTopics.find((topic) => topic.id === previewTopicId) || null;
+  const selectedGroupMessages =
+    selectedGroupTopic?.id && bootstrap?.table?.currentTopic?.id === selectedGroupTopic.id ? bootstrap?.table?.messages || [] : [];
   const normalizedTableSearch = tableSearch.trim().toLowerCase();
   const visibleTopics = normalizedTableSearch
     ? publicTopics.filter((topic) =>
@@ -593,7 +594,7 @@ export function SocialHubScreen({ initialContactId = "", initialArea = "" }) {
     if (activeArea === AREAS.GROUPS && tableEndRef.current) {
       tableEndRef.current.scrollIntoView({ block: "end" });
     }
-  }, [activeArea, joinedTopic?.id, bootstrap?.table?.messages?.length]);
+  }, [activeArea, selectedGroupTopic?.id, bootstrap?.table?.messages?.length]);
 
   function switchArea(nextArea) {
     setActiveArea(nextArea);
@@ -611,11 +612,11 @@ export function SocialHubScreen({ initialContactId = "", initialArea = "" }) {
     }
 
     if (nextArea === AREAS.PUBLIC) {
-      setPreviewTopicId((currentTopicId) => currentTopicId || publicTopics[0]?.id || "");
+      setPreviewTopicId("");
     }
 
     if (nextArea === AREAS.GROUPS) {
-      setSelectedGroupTopicId((currentTopicId) => currentTopicId || joinedTopics[0]?.id || "");
+      setSelectedGroupTopicId("");
     }
   }
 
@@ -631,7 +632,7 @@ export function SocialHubScreen({ initialContactId = "", initialArea = "" }) {
   }
 
   async function selectGroupTopic(topicId) {
-    if (!topicId || topicId === joinedTopic?.id) {
+    if (!topicId || topicId === selectedGroupTopic?.id || switchingGroupTopic) {
       return;
     }
 
@@ -639,6 +640,7 @@ export function SocialHubScreen({ initialContactId = "", initialArea = "" }) {
     setSelectedGroupTopicId(topicId);
     setShowTableProfile(false);
     setShowGroupPeople(false);
+    setSwitchingGroupTopic(true);
 
     try {
       const payload = await selectSocialHubGroupTopicAction(topicId);
@@ -646,6 +648,8 @@ export function SocialHubScreen({ initialContactId = "", initialArea = "" }) {
       setSelectedPersonId(payload.table.people[0]?.id || "");
     } catch {
       setError(t("socialHub.errors.topic"));
+    } finally {
+      setSwitchingGroupTopic(false);
     }
   }
 
@@ -738,13 +742,11 @@ export function SocialHubScreen({ initialContactId = "", initialArea = "" }) {
   }
 
   return (
-    <div className={`${styles.scope} app social-hub-app`}>
-      <div className="app-header social-hub-header">
-        <div>
-          <h1 className="app-title">{t("socialHub.title")}</h1>
-          <p className="social-hub-subtitle">{t("socialHub.subtitle")}</p>
-        </div>
-
+    <SeniorNetPage
+      title={t("socialHub.title")}
+      subtitle={t("socialHub.subtitle")}
+    >
+      <div className={`${styles.scope} social-hub-app`}>
         <nav className="social-hub-area-nav" aria-label={t("socialHub.navigation.aria")}>
           <button
             type="button"
@@ -779,9 +781,7 @@ export function SocialHubScreen({ initialContactId = "", initialArea = "" }) {
             {t("socialHub.navigation.public")}
           </button>
         </nav>
-      </div>
 
-      <div className="app-body">
         <div className={`messaging-shell social-hub-shell ${isTableArea ? "tables" : ""}`}>
           <aside className="messaging-sidebar social-hub-sidebar" aria-label={t("socialHub.sidebar.aria")}>
             {loading ? (
@@ -806,7 +806,7 @@ export function SocialHubScreen({ initialContactId = "", initialArea = "" }) {
                         <TopicButton
                           key={topic.id}
                           topic={topic}
-                          active={joinedTopic?.id === topic.id}
+                          active={selectedGroupTopic?.id === topic.id}
                           t={t}
                           onSelect={() => selectGroupTopic(topic.id)}
                         />
@@ -884,10 +884,10 @@ export function SocialHubScreen({ initialContactId = "", initialArea = "" }) {
               <TableConversation
                 topic={selectedGroupTopic}
                 joined={Boolean(selectedGroupTopic)}
-                messages={bootstrap?.table?.messages || []}
+                messages={selectedGroupMessages}
                 draft={tableDraft}
                 error={error}
-                sending={sendingTable}
+                sending={sendingTable || switchingGroupTopic}
                 joining={false}
                 canJoin={false}
                 timelineEndRef={tableEndRef}
@@ -996,6 +996,6 @@ export function SocialHubScreen({ initialContactId = "", initialArea = "" }) {
           )}
         </div>
       </div>
-    </div>
+    </SeniorNetPage>
   );
 }

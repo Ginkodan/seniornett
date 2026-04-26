@@ -6,7 +6,7 @@ import React from "react";
 import { Eye, FileImage, FileText, LoaderCircle, Users } from "lucide-react";
 
 import { getMediaBootstrap, searchMediaItemsAction, uploadMediaItemAction } from "@/app/actions/media";
-import { AppImage, ModalOverlay } from "./ui";
+import { AppImage, ModalOverlay, SeniorNetPage } from "./ui";
 import { MediaFocusViewer } from "./media-readers/media-focus-viewer";
 import { useAppState } from "./app-provider";
 import styles from "./fotos-papiere-screen.module.css";
@@ -349,14 +349,8 @@ export function FotosPapiereScreen() {
   }
 
   return (
-    <div className={`${styles.scope} app`}>
-      <div className="app-header media-header">
-        <div className="media-header-copy">
-          <h1 className="app-title">{t("media.title")}</h1>
-        </div>
-      </div>
-
-      <div className="app-body">
+    <SeniorNetPage title={t("media.title")}>
+      <div className={styles.scope}>
         <div className="media-shell">
           <section className="media-hero">
             <form className="media-hero-actions media-searchbox" onSubmit={handleSearchSubmit}>
@@ -368,10 +362,10 @@ export function FotosPapiereScreen() {
                 className="field media-helper-input"
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
-                placeholder={t("media.search.placeholder")}
+                placeholder={t("media.search.lottiPlaceholder")}
               />
               <button type="submit" className="btn btn-primary media-helper-submit">
-                {t("media.search.submit")}
+                {t("media.actions.lotti")}
               </button>
             </form>
           </section>
@@ -456,7 +450,9 @@ export function FotosPapiereScreen() {
 
               {loading ? (
                 <div className="media-empty">
-                  <LoaderCircle size={18} className="spin" /> {t("common.loading")}
+                  <LoaderCircle size={24} className="spin" />
+                  <strong>{t("common.loading")}</strong>
+                  <span>{t("media.list.loadingHelp")}</span>
                 </div>
               ) : filteredItems.length ? (
                 <div className="media-grid">
@@ -549,6 +545,6 @@ export function FotosPapiereScreen() {
           />
         </div>
       </div>
-    </div>
+    </SeniorNetPage>
   );
 }

@@ -4,6 +4,7 @@
 
 import React from "react";
 import { useAppState } from "./app-provider";
+import { SeniorNetPage } from "./ui";
 import styles from "./weather-screen.module.css";
 
 export function WeatherScreen({ fetchWeatherAction, searchLocationsAction }) {
@@ -102,12 +103,11 @@ export function WeatherScreen({ fetchWeatherAction, searchLocationsAction }) {
   }
 
   return (
-    <div className={`${styles.scope} weather-screen`}>
-      <div className="weather-header">
-        <h1 className="weather-city">{result?.city || t("weather.title")}</h1>
-        <p className="weather-subtitle">{t("weather.subtitle")}</p>
-        <p className="weather-source">{t("weather.source")}</p>
-      </div>
+    <SeniorNetPage title={result?.city || t("weather.title")} subtitle={t("weather.subtitle")}>
+      <div className={`${styles.scope} weather-screen`}>
+        <div className="weather-header">
+          <p className="weather-source">{t("weather.source")}</p>
+        </div>
 
       <form className="weather-search" onSubmit={handleSearchSubmit}>
         <label className="weather-search-label" htmlFor="weather-place-input">
@@ -126,7 +126,7 @@ export function WeatherScreen({ fetchWeatherAction, searchLocationsAction }) {
               placeholder={t("weather.searchPlaceholder")}
               autoComplete="off"
               aria-autocomplete="list"
-              aria-controls="weather-suggestions"
+              aria-controls={showSuggestions ? "weather-suggestions" : undefined}
               aria-activedescendant={
                 activeIndex >= 0 ? `weather-suggestion-${activeIndex}` : undefined
               }
@@ -166,6 +166,7 @@ export function WeatherScreen({ fetchWeatherAction, searchLocationsAction }) {
 
       {loading && (
         <div className="weather-loading">
+          <strong>{t("weather.loadingTitle")}</strong>
           <p>{t("weather.loading")}</p>
         </div>
       )}
@@ -210,6 +211,7 @@ export function WeatherScreen({ fetchWeatherAction, searchLocationsAction }) {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </SeniorNetPage>
   );
 }

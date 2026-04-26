@@ -11,14 +11,14 @@ import styles from "./home-screen.module.css";
 const APPS = [
   { id: 'social-hub', href: '/social-hub', icon: <MessageCircleHeart size={36} strokeWidth={2.25} /> },
   { id: 'media', href: '/fotos-papiere', icon: <Images size={36} strokeWidth={2.25} /> },
+  { id: 'lotti-live', href: '/lotti-live', icon: <MessagesSquare size={36} strokeWidth={2.25} /> },
   { id: 'audio', href: '/audio', icon: <Radio size={36} strokeWidth={2.25} /> },
   { id: 'news', href: '/news', icon: <Newspaper size={36} strokeWidth={2.25} /> },
-  { id: 'lotti-live', href: '/lotti-live', icon: <MessagesSquare size={36} strokeWidth={2.25} /> },
-  { id: 'lexikon', href: '/lexikon', icon: <BookOpen size={36} strokeWidth={2.25} /> },
   { id: 'wetter', href: '/wetter', icon: <CloudSun size={36} strokeWidth={2.25} /> },
+  { id: 'lexikon', href: '/lexikon', icon: <BookOpen size={36} strokeWidth={2.25} /> },
   { id: 'karte', href: '/karte', icon: <Map size={36} strokeWidth={2.25} /> },
   { id: 'video', href: '/video', icon: <Tv size={36} strokeWidth={2.25} /> },
-  { id: 'notfall', href: '/notfall', icon: <Siren size={36} strokeWidth={2.25} /> },
+  { id: 'notfall', href: '/notfall', icon: <Siren size={36} strokeWidth={2.25} />, urgent: true },
 ];
 
 export function HomeScreen() {
@@ -27,6 +27,7 @@ export function HomeScreen() {
   const apps = APPS.map((app) => ({
     ...app,
     label: t(`home.apps.${app.id}`),
+    description: t(`home.appDescriptions.${app.id}`),
   }));
 
   return (
@@ -34,15 +35,17 @@ export function HomeScreen() {
       <div className="home-greeting simple">
         <div>
           <h1>{t('home.greeting', { name: identity?.loading ? '...' : firstName })}</h1>
+          <p>{t('home.prompt')}</p>
         </div>
       </div>
 
       <div className="home-grid">
         {apps.map((app) => (
-          <Link key={app.id} className="home-primary-news" href={app.href}>
+          <Link key={app.id} className={`home-primary-news ${app.urgent ? 'urgent' : ''}`} href={app.href}>
             <div className="icon">{app.icon}</div>
             <div className="tile-stack">
               <div className="tile-label">{app.label}</div>
+              <div className="tile-sub">{app.description}</div>
             </div>
           </Link>
         ))}

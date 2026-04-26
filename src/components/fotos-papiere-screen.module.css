@@ -16,16 +16,14 @@
 .scope:global(.media-shell), .scope :global(.media-shell) {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 2rem 3.5rem 3rem;
+  gap: 1.5rem;
+  padding: 2rem clamp(1.25rem, 4vw, 4rem) 3rem;
   min-height: 100%;
   overflow: auto;
 }
 
 .scope:global(.media-hero), .scope :global(.media-hero) {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
+  display: grid;
   gap: 1rem;
 }
 
@@ -539,12 +537,23 @@
 }
 
 .scope:global(.media-empty), .scope :global(.media-empty) {
-  padding: 1.25rem;
+  min-height: 7rem;
+  border: var(--border);
   border-radius: var(--radius-lg);
-  border: var(--border-thin);
   background: var(--paper-2);
-  color: var(--ink-3);
+  padding: 1.25rem;
+  display: grid;
+  gap: 0.35rem;
+  align-content: center;
+  color: var(--ink);
+  font-size: var(--fs-base);
 }
+
+.scope:global(.media-empty span), .scope :global(.media-empty span) {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
 
 .scope:global(.media-upload-grid), .scope :global(.media-upload-grid) {
   display: grid;

@@ -2,14 +2,16 @@
 
 /* Map / Karte */
 .scope:global(.map-app), .scope :global(.map-app) {
-  height: calc(100dvh - var(--topbar-height));
-  min-height: calc(100dvh - var(--topbar-height));
+  display: flex;
+  height: calc(100dvh - var(--topbar-height) - 7.5rem);
+  min-height: 32rem;
 }
 
 .scope:global(.map-app-body), .scope :global(.map-app-body) {
   position: relative;
   display: flex;
   flex: 1;
+  height: 100%;
   min-height: 0;
   overflow: hidden;
   background: var(--paper-2);
@@ -135,6 +137,8 @@
   right: 1.25rem;
   z-index: 700;
   width: clamp(17rem, 38%, 24rem);
+  display: grid;
+  gap: 0.75rem;
 }
 
 .scope:global(.map-search-bar), .scope :global(.map-search-bar) {
@@ -220,6 +224,33 @@
   outline: var(--focus-ring);
   outline-offset: 3px;
 }
+
+.scope:global(.map-loading-panel), .scope :global(.map-loading-panel) {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 650;
+  transform: translate(-50%, -50%);
+  width: min(32rem, calc(100% - 2rem));
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--paper);
+  color: var(--ink);
+  padding: 1.5rem;
+  display: grid;
+  gap: 0.35rem;
+  box-shadow: 0 4px 0 var(--ink);
+}
+
+.scope:global(.map-loading-panel strong), .scope :global(.map-loading-panel strong) {
+  font-size: var(--fs-md);
+  line-height: 1.2;
+}
+
+.scope:global(.map-loading-panel span), .scope :global(.map-loading-panel span) {
+  font-weight: 700;
+}
+
 
 .scope:global(.map-toggle-btn:focus-visible), .scope :global(.map-toggle-btn:focus-visible) {
   outline: var(--focus-ring);

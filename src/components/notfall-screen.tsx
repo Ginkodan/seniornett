@@ -6,6 +6,7 @@ import React from "react";
 import { PhoneCall } from "lucide-react";
 import { PROFILE_FIELDS, normalizeProfile } from "@/lib/profile";
 import { useAppState } from "./app-provider";
+import { SeniorNetPage } from "./ui";
 import styles from "./notfall-screen.module.css";
 
 const EMERGENCY_NUMBERS = [
@@ -61,7 +62,7 @@ function ProfileCard({ initialProfile, initialProfileError }) {
 
       {hasData ? (
         <>
-          <div className="notfall-profile-summary" aria-label={t("emergency.profile.summaryLabel")}>
+          <div className="notfall-profile-summary" role="group" aria-label={t("emergency.profile.summaryLabel")}>
             {PROFILE_SUMMARY_FIELDS.filter((key) => profile[key] && key !== "notfallkontakt").map((key) => (
               <div key={key} className="notfall-profile-pill">
                 <span className="notfall-profile-pill-label">{t(`emergency.fields.${key}`)}</span>
@@ -114,12 +115,8 @@ export function NotfallScreen(props) {
   }));
 
   return (
-    <div className={`${styles.scope} app`}>
-      <div className="app-header">
-        <h1 className="app-title">{t("emergency.title")}</h1>
-      </div>
-
-      <div className="app-body">
+    <SeniorNetPage title={t("emergency.title")}>
+      <div className={styles.scope}>
         <div className="notfall-shell">
           <div className="notfall-stack">
             <section className="notfall-quick-section" aria-labelledby="notfall-sofort">
@@ -137,6 +134,6 @@ export function NotfallScreen(props) {
           </div>
         </div>
       </div>
-    </div>
+    </SeniorNetPage>
   );
 }

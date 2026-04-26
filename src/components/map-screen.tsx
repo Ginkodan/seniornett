@@ -5,6 +5,7 @@
 import React from 'react';
 import { Bike, Minus, Mountain, Plus, Search, X } from 'lucide-react';
 import { useAppState } from './app-provider';
+import { IconButton, SeniorNetPage } from './ui';
 import styles from "./map-screen.module.css";
 
 const SWITZERLAND_CENTER = [46.8182, 8.2275];
@@ -43,6 +44,7 @@ export function MapScreen() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [searchResults, setSearchResults] = React.useState([]);
   const [searchOpen, setSearchOpen] = React.useState(false);
+  const [mapReady, setMapReady] = React.useState(false);
   const searchMarkerRef = React.useRef(null);
   const searchTimeoutRef = React.useRef(null);
 
@@ -81,11 +83,13 @@ export function MapScreen() {
 
       const invalidateMap = () => map.invalidateSize();
 
-      map.whenReady(() => {
-        invalidateMap();
-      });
+      map.whenReady(invalidateMap);
       window.requestAnimationFrame(invalidateMap);
       window.setTimeout(invalidateMap, 120);
+      window.setTimeout(() => {
+        invalidateMap();
+        setMapReady(true);
+      }, 250);
       window.addEventListener('resize', invalidateMap);
 
       cleanup = () => {
@@ -95,6 +99,7 @@ export function MapScreen() {
         leafletRef.current = null;
         baseLayerRef.current = null;
         overlayLayersRef.current = {};
+        setMapReady(false);
       };
     }
 
@@ -213,35 +218,27 @@ export function MapScreen() {
   }
 
   return (
-    <div className={`${styles.scope} app map-app`}>
-      <div className="app-header">
-        <h1 className="app-title">{t('map.title')}</h1>
-        <div className="spacer" />
+    <SeniorNetPage
+      title={t('map.title')}
+      secondaryActions={
         <div className="map-title-actions" aria-label={t('map.layers')}>
-          <button
-            className={`map-toggle-btn ${activeOverlay === 'hiking' ? 'active' : ''}`}
-            type="button"
-            aria-label={t('map.hiking')}
-            aria-pressed={activeOverlay === 'hiking'}
-            title={t('map.hiking')}
+          <IconButton
+            icon={<Mountain size={24} strokeWidth={2.4} />}
+            label={t('map.hiking')}
+            active={activeOverlay === 'hiking'}
             onClick={() => setActiveOverlay('hiking')}
-          >
-            <Mountain size={24} strokeWidth={2.4} />
-          </button>
-          <button
-            className={`map-toggle-btn ${activeOverlay === 'cycling' ? 'active' : ''}`}
-            type="button"
-            aria-label={t('map.cycling')}
-            aria-pressed={activeOverlay === 'cycling'}
-            title={t('map.cycling')}
+          />
+          <IconButton
+            icon={<Bike size={24} strokeWidth={2.4} />}
+            label={t('map.cycling')}
+            active={activeOverlay === 'cycling'}
             onClick={() => setActiveOverlay('cycling')}
-          >
-            <Bike size={24} strokeWidth={2.4} />
-          </button>
+          />
         </div>
-      </div>
-
-      <div className="app-body map-app-body">
+      }
+    >
+      <div className={`${styles.scope} map-app`}>
+      <div className="map-app-body">
         <div className="map-screen">
           <div className="map-panel">
             <div className="map-frame">
@@ -316,6 +313,12 @@ export function MapScreen() {
                 role="application"
                 aria-label={t('map.aria')}
               />
+              {!mapReady ? (
+                <div className="map-loading-panel" role="status">
+                  <strong>{t('map.loadingTitle')}</strong>
+                  <span>{t('map.loadingBody')}</span>
+                </div>
+              ) : null}
               <span className="sr-only">
                 {t('map.instructions')}
               </span>
@@ -323,6 +326,7 @@ export function MapScreen() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </SeniorNetPage>
   );
 }

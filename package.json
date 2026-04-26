@@ -7,7 +7,10 @@
     "dev": "next dev --webpack --hostname 0.0.0.0 --port 5176",
     "build": "next build --webpack",
     "start": "next start --hostname 0.0.0.0 --port 5176",
-    "lint": "eslint"
+    "lint": "eslint",
+    "visual:install": "playwright install chromium",
+    "visual:audit": "playwright test tests/visual/visual-audit.spec.ts",
+    "visual:report": "node tests/visual/print-report.mjs"
   },
   "dependencies": {
     "@fontsource/atkinson-hyperlegible": "^5.2.8",
@@ -25,11 +28,13 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/pg": "^8.11.11",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "axe-core": "^4.11.3",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",

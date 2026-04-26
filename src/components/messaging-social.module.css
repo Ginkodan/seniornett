@@ -454,17 +454,18 @@
 }
 
 .scope:global(.social-hub-area-nav), .scope :global(.social-hub-area-nav) {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.75rem;
-  flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
+  padding: 1rem clamp(1rem, 3vw, 2rem) 0;
 }
 
 .scope:global(.social-hub-area-tab), .scope :global(.social-hub-area-tab) {
-  min-height: 4rem;
-  padding: 0.75rem 1.25rem;
+  min-height: 5.25rem;
+  padding: 1rem;
   border: var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius-lg);
   background: var(--card);
   color: var(--ink);
   font-family: inherit;
@@ -473,18 +474,23 @@
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.55rem;
+  text-align: center;
+  box-shadow: 0 3px 0 var(--ink);
 }
 
 .scope:global(.social-hub-area-tab.active), .scope :global(.social-hub-area-tab.active) {
   background: var(--ink);
   color: var(--paper);
+  box-shadow: inset 0 0 0 3px var(--paper), 0 3px 0 var(--ink);
 }
 
 .scope:global(.social-hub-shell), .scope :global(.social-hub-shell) {
-  height: calc(100vh - var(--topbar-height) - 8rem);
-  padding: 1rem;
+  height: calc(100vh - var(--topbar-height) - 14rem);
+  padding: 1rem clamp(1rem, 3vw, 2rem) 1.5rem;
   grid-template-columns: minmax(18rem, 25rem) minmax(0, 1fr);
+  gap: 1rem;
 }
 
 .scope:global(.social-hub-shell.tables), .scope :global(.social-hub-shell.tables) {
@@ -492,10 +498,15 @@
 }
 
 .scope:global(.social-hub-sidebar), .scope :global(.social-hub-sidebar) {
-  border: none;
-  border-right: var(--border-thin);
-  border-radius: 0;
+  border: var(--border);
+  border-radius: var(--radius-lg);
   overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .scope:global(.social-hub-area-nav), .scope :global(.social-hub-area-nav) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .scope:global(.social-hub-sidebar-scroll), .scope :global(.social-hub-sidebar-scroll) {

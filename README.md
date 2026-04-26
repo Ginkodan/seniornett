@@ -62,3 +62,14 @@ docker compose up --build
 ```
 
 No app or proxy code change is needed for ports in that range.
+
+## UI Screenshots
+
+```bash
+# install browser drivers
+npm run visual:install
+
+# create screnshots and generate report
+npm run visual:audit
+npm run visual:report
+```
