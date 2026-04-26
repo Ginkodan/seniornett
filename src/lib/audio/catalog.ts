@@ -63,7 +63,7 @@ const RADIO_STATIONS = [
 
 const AUDIO_SHOWS = [
   {
-    id: "audio-nachrichten",
+    id: "audio-news",
     title: "Nachrichten",
     description: "Die aktuelle Nachrichtenuebersicht zum Nachhoeren.",
     showId: "4d8995b0-8492-4e6c-b97d-1030781d815f",
@@ -75,8 +75,8 @@ const AUDIO_SHOWS = [
     showId: "28549e81-c453-4671-92ad-cb28796d06a8",
   },
   {
-    id: "audio-treffpunkt",
-    title: "Treffpunkt",
+    id: "audio-meeting-point",
+    title: "Meeting point",
     description: "Gespraeche und Geschichten aus dem Alltag.",
     showId: "d2169ee6-574c-4360-b705-2913fad14603",
   },

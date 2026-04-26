@@ -4,7 +4,7 @@ For every change consider the `design-guide.md` before implementing a todo.
 
 ## Apps & Features
 
-- [ ] Dorfbeiz - Leute online kennenlernen, soziale Kontakte knüpfen
+- [x] Dorfbeiz - Leute online kennenlernen, soziale Kontakte knüpfen
 - [ ] Facebook-artige App zum teilen von Eindrücken
 - [ ] Reisebüro für Kreuzfahrt, Busreise, Seminare etc...
 - [ ] Spiele (unter anderem Brainfitness)

@@ -11,7 +11,7 @@ import { createTranslator, getLocaleTag, normalizeLanguage } from "@/lib/i18n";
 
 export const metadata: Metadata = {
   title: "SeniorNett",
-  description: "SeniorNett ist ein ruhiger, gut lesbarer Treffpunkt fuer Seniorinnen und Senioren.",
+  description: "SeniorNett is a calm, readable social and support space for seniors.",
 };
 
 export default async function RootLayout({

@@ -121,7 +121,7 @@ function fallbackReply(message: string, language: keyof typeof COPY) {
     return COPY[language].fallbackCall;
   }
 
-  if (lower.includes("news") || lower.includes("nachrichten")) {
+  if (lower.includes("news")) {
     return COPY[language].fallbackNews;
   }
 

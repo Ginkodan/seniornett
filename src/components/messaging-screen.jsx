@@ -36,13 +36,13 @@ function getLastIncomingTimestamp(contact, currentUserId) {
   return "";
 }
 
-export function MessagingScreen() {
+export function MessagingScreen({ initialContactId = "" }) {
   const { t, localeTag } = useAppState();
   const refreshTimerRef = React.useRef(null);
   const [lastReadByContact, setLastReadByContact] = React.useState({});
   const [bootstrap, setBootstrap] = React.useState(null);
   const [conversations, setConversations] = React.useState([]);
-  const [selectedContactId, setSelectedContactId] = React.useState("");
+  const [selectedContactId, setSelectedContactId] = React.useState(initialContactId);
   const [draft, setDraft] = React.useState("");
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");

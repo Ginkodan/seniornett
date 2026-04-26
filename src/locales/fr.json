@@ -26,7 +26,7 @@
   "home": {
     "greeting": "Bonjour, {name}.",
     "apps": {
-      "nachrichten": "Messages",
+      "social-hub": "Point rencontre",
       "audio": "Audio et musique",
       "news": "Journal",
       "lotti-live": "Demander à Lotti",
@@ -193,6 +193,87 @@
       "selectContact": "Choisissez une personne à gauche.",
       "loadError": "Les messages n'ont pas pu être chargés.",
       "sendError": "Le message n'a pas pu être envoyé."
+    }
+  },
+  "socialHub": {
+    "title": "Point rencontre",
+    "subtitle": "Assistance, amis et groupes ouverts.",
+    "navigation": {
+      "aria": "Choisir une zone",
+      "care": "Assistance",
+      "friends": "Amis",
+      "groups": "Groupes",
+      "public": "Groupes ouverts",
+      "tables": "Groupes"
+    },
+    "sidebar": {
+      "aria": "Sélection du point rencontre"
+    },
+    "common": {
+      "send": "Envoyer",
+      "sending": "Envoi ...",
+      "new": "Nouveau"
+    },
+    "care": {
+      "lead": "Votre assistance",
+      "empty": "Aucune assistance enregistrée."
+    },
+    "friends": {
+      "lead": "Discussion privée",
+      "empty": "Aucun ami enregistré pour le moment."
+    },
+    "private": {
+      "aria": "Discussion privée",
+      "label": "Écrire un message",
+      "placeholder": "Saisir un message",
+      "noMessages": "La conversation commence ici."
+    },
+    "tables": {
+      "aria": "Conversation de groupe",
+      "title": "Groupes ouverts",
+      "peopleCount": "{count} personnes",
+      "selected": "Sélectionnée",
+      "searchLabel": "Chercher un groupe",
+      "searchPlaceholder": "Chercher un groupe",
+      "noResults": "Aucun groupe trouvé.",
+      "joinTitle": "Rejoindre le groupe ?",
+      "joinText": "En rejoignant ce groupe, votre profil sera visible pour les personnes dans ce groupe.",
+      "join": "Rejoindre le groupe",
+      "joining": "Entrée ...",
+      "emptyTitle": "Choisis un groupe",
+      "emptyLead": "Les groupes ouverts sont à gauche.",
+      "noMessages": "La conversation commence ici.",
+      "label": "Écrire au groupe",
+      "placeholder": "Écris quelque chose au groupe ..."
+    },
+    "groups": {
+      "title": "Mes groupes",
+      "empty": "Aucun groupe pour le moment.",
+      "emptyHint": "Dans « Groupes ouverts », vous pouvez rejoindre un groupe public."
+    },
+    "people": {
+      "title": "Personnes dans le groupe",
+      "button": "{count} personnes",
+      "empty": "Personne n'est visible pour le moment."
+    },
+    "profile": {
+      "title": "Profil",
+      "button": "Profil",
+      "show": "Voir le profil",
+      "empty": "Choisis une personne.",
+      "genericLabel": "Du quartier",
+      "location": "Lieu",
+      "age": "Âge",
+      "interests": "Aime",
+      "privateChat": "Écrire en privé",
+      "openChat": "Ouvrir les messages"
+    },
+    "errors": {
+      "load": "Le point rencontre n'a pas pu être chargé.",
+      "sendPrivate": "Le message n'a pas pu être envoyé.",
+      "sendTable": "Le message au groupe n'a pas pu être envoyé.",
+      "topic": "Le groupe n'a pas pu être changé.",
+      "privateChat": "La discussion privée n'a pas pu être ouverte."
     }
   },
   "lotti": {

@@ -6,7 +6,7 @@ import { MessageCircleHeart, MessagesSquare, Newspaper, BookOpen, CloudSun, Tv, 
 import { useAppState } from './app-provider.jsx';
 
 const APPS = [
-  { id: 'nachrichten', href: '/nachrichten', icon: <MessageCircleHeart size={36} strokeWidth={2.25} /> },
+  { id: 'social-hub', href: '/social-hub', icon: <MessageCircleHeart size={36} strokeWidth={2.25} /> },
   { id: 'audio', href: '/audio', icon: <Radio size={36} strokeWidth={2.25} /> },
   { id: 'news', href: '/news', icon: <Newspaper size={36} strokeWidth={2.25} /> },
   { id: 'lotti-live', href: '/lotti-live', icon: <MessagesSquare size={36} strokeWidth={2.25} /> },

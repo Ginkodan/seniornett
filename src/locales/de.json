@@ -26,7 +26,7 @@
   "home": {
     "greeting": "Grüezi, {name}.",
     "apps": {
-      "nachrichten": "Nachrichten",
+      "social-hub": "Treffpunkt",
       "audio": "Audio & Musik",
       "news": "Zeitung",
       "lotti-live": "Frag Lotti",
@@ -193,6 +193,87 @@
       "selectContact": "Waehle links eine Person aus.",
       "loadError": "Nachrichten konnten nicht geladen werden.",
       "sendError": "Die Nachricht konnte nicht gesendet werden."
+    }
+  },
+  "socialHub": {
+    "title": "Treffpunkt",
+    "subtitle": "Betreuung, Freunde und offene Gruppen.",
+    "navigation": {
+      "aria": "Bereich wählen",
+      "care": "Betreuung",
+      "friends": "Freunde",
+      "groups": "Gruppen",
+      "public": "Offene Gruppen",
+      "tables": "Gruppen"
+    },
+    "sidebar": {
+      "aria": "Auswahl im Treffpunkt"
+    },
+    "common": {
+      "send": "Senden",
+      "sending": "Wird gesendet ...",
+      "new": "Neu"
+    },
+    "care": {
+      "lead": "Deine Betreuung",
+      "empty": "Noch keine Betreuung eingetragen."
+    },
+    "friends": {
+      "lead": "Privates Gespräch",
+      "empty": "Noch keine Freunde eingetragen."
+    },
+    "private": {
+      "aria": "Privates Gespräch",
+      "label": "Nachricht schreiben",
+      "placeholder": "Nachricht eingeben",
+      "noMessages": "Die Unterhaltung beginnt hier."
+    },
+    "tables": {
+      "aria": "Gespräch in der Gruppe",
+      "title": "Offene Gruppen",
+      "peopleCount": "{count} Personen",
+      "selected": "Ausgewählt",
+      "searchLabel": "Gruppe suchen",
+      "searchPlaceholder": "Gruppe suchen",
+      "noResults": "Keine Gruppe gefunden.",
+      "joinTitle": "Gruppe beitreten?",
+      "joinText": "Wenn du beitrittst, ist dein Profil für Menschen in dieser Gruppe sichtbar.",
+      "join": "Gruppe beitreten",
+      "joining": "Beitreten ...",
+      "emptyTitle": "Wähle eine Gruppe",
+      "emptyLead": "Links findest du die offenen Gruppen.",
+      "noMessages": "Hier startet das Gespräch.",
+      "label": "Nachricht an die Gruppe schreiben",
+      "placeholder": "Schreib etwas an die Gruppe ..."
+    },
+    "groups": {
+      "title": "Meine Gruppen",
+      "empty": "Noch keine Gruppen.",
+      "emptyHint": "Unter «Offene Gruppen» kannst du einer öffentlichen Gruppe beitreten."
+    },
+    "people": {
+      "title": "Personen in der Gruppe",
+      "button": "{count} Personen",
+      "empty": "Zurzeit ist niemand sichtbar."
+    },
+    "profile": {
+      "title": "Profil",
+      "button": "Profil",
+      "show": "Profil anzeigen",
+      "empty": "Wähle eine Person.",
+      "genericLabel": "Aus dem Quartier",
+      "location": "Ort",
+      "age": "Alter",
+      "interests": "Mag gern",
+      "privateChat": "Privat schreiben",
+      "openChat": "Nachrichten öffnen"
+    },
+    "errors": {
+      "load": "Der Treffpunkt konnte nicht geladen werden.",
+      "sendPrivate": "Die Nachricht konnte nicht gesendet werden.",
+      "sendTable": "Die Nachricht an die Gruppe konnte nicht gesendet werden.",
+      "topic": "Die Gruppe konnte nicht gewechselt werden.",
+      "privateChat": "Der private Chat konnte nicht geöffnet werden."
     }
   },
   "lotti": {
