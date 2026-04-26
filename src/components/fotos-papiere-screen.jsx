@@ -42,11 +42,6 @@ function getCardSenderLabel(item, localeTag, t) {
   return formatDate(item.receivedAt, localeTag);
 }
 
-function getPrimaryCollectionLabel(item, t) {
-  const preferred = item.collections.find((name) => name !== "Eingangskorb" && name !== "Fotoalbum") || item.collections[0] || "";
-  return preferred ? translateCollectionName(preferred, t) : "";
-}
-
 function getCardPurposeLabel(item, t) {
   if (item.kind === "photo") {
     const label = item.labels.slice(0, 2).join(" · ") || item.collections.find((name) => name !== "Eingangskorb" && name !== "Fotoalbum");
@@ -294,29 +289,6 @@ export function FotosPapiereScreen() {
 
   function closeViewer() {
     setViewerItemId("");
-  }
-
-  async function askLottiAboutItem(item) {
-    const query = [item.title, ...item.labels.slice(0, 2), getPrimaryCollectionLabel(item, t)]
-      .filter(Boolean)
-      .join(" ");
-
-    setSearchInput(query);
-    try {
-      const matches = await searchMediaItemsAction(selectedOwnerId, query);
-      if (!matches.length) {
-        setStatus(t("media.search.error"));
-        return;
-      }
-
-      setSearchResults(matches);
-      setSelectedCollectionId("all");
-      setSelectedItemId(matches[0].id);
-      setViewerItemId("");
-      setStatus(`Ich habe ${matches.length} passende Sachen gefunden.`);
-    } catch {
-      setStatus(t("media.search.error"));
-    }
   }
 
   function askNinaAboutItem() {
@@ -603,14 +575,7 @@ export function FotosPapiereScreen() {
                   </dl>
 
                   <div className="media-detail-actions">
-                    <button type="button" className="btn btn-primary media-card-action" onClick={() => void askLottiAboutItem(viewerItem)}>
-                      {t("media.actions.lotti")}
-                    </button>
-                    {canChooseOwners ? (
-                      <button type="button" className="btn media-card-action" onClick={askNinaAboutItem}>
-                        {t("media.actions.askNina")}
-                      </button>
-                    ) : null}
+                    {canChooseOwners ? <button type="button" className="btn media-card-action" onClick={askNinaAboutItem}>{t("media.actions.askNina")}</button> : null}
                   </div>
                 </div>
               </div>
