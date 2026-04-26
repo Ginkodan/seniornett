@@ -7,7 +7,6 @@ For every change consider the `design-guide.md` before implementing a todo.
 - [ ] Dorfbeiz - Leute online kennenlernen, soziale Kontakte knüpfen
 - [ ] Facebook-artige App zum teilen von Eindrücken
 - [ ] Reisebüro für Kreuzfahrt, Busreise, Seminare etc...
-- [ ] Musik Player
 - [ ] Spiele (unter anderem Brainfitness)
 - [ ] Caregiveer Chat (evtl. Spitex integration oder ähnlich)
 - [ ] Fotos und Dokumente
