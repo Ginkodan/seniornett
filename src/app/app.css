@@ -760,6 +760,141 @@ textarea.field { height: auto; padding: 1rem 1.25rem; resize: vertical; line-hei
   color: var(--ink);
 }
 
+/* Map / Karte */
+.map-app {
+  height: calc(100dvh - var(--topbar-height));
+  min-height: calc(100dvh - var(--topbar-height));
+}
+
+.map-app-body {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--paper-2);
+}
+
+.map-screen {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.map-panel {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.map-title-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.map-toggle-btn {
+  width: 3.75rem;
+  height: 3.75rem;
+  border: var(--border-thin);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.map-toggle-btn.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.map-controls {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  z-index: 700;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.map-frame {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--paper-2);
+}
+
+.map-control-btn {
+  width: 4.25rem;
+  height: 4.25rem;
+  border: var(--border);
+  border-radius: var(--radius);
+  background: rgba(255, 253, 248, 0.95);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 0 0 var(--ink);
+}
+
+.map-control-btn:hover {
+  background: var(--paper);
+}
+
+.map-toggle-btn:hover {
+  background: var(--paper-2);
+}
+
+.map-toggle-btn.active:hover {
+  background: var(--ink-2);
+}
+
+.swiss-map-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.swiss-map-canvas.leaflet-container {
+  background: var(--paper-2);
+  font-family: inherit;
+}
+
+/* Tailwind preflight sets img max-width/height and can break Leaflet tiles. */
+.swiss-map-canvas.leaflet-container .leaflet-tile,
+.swiss-map-canvas.leaflet-container .leaflet-marker-icon,
+.swiss-map-canvas.leaflet-container .leaflet-marker-shadow {
+  max-width: none !important;
+  max-height: none !important;
+}
+
+.swiss-map-canvas.leaflet-container img.leaflet-tile {
+  width: 256px;
+  height: 256px;
+}
+
+.swiss-map-canvas .leaflet-control-container {
+  display: none;
+}
+
+.map-control-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.map-toggle-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 3px;
+}
+
 .wiki-article-body h4 {
   font-size: var(--fs-base);
   font-weight: 600;

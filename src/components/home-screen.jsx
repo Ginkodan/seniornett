@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { MessageCircleHeart, MessagesSquare, Newspaper, BookOpen, CloudSun, Tv, Siren } from 'lucide-react';
+import { MessageCircleHeart, MessagesSquare, Newspaper, BookOpen, CloudSun, Tv, Siren, Map } from 'lucide-react';
 import { useAppState } from './app-provider.jsx';
 
 export const APPS = [
@@ -11,6 +11,7 @@ export const APPS = [
   { id: 'lotti-live', href: '/lotti-live', icon: <MessagesSquare size={36} strokeWidth={2.25} />, label: 'Frag Lotti' },
   { id: 'lexikon', href: '/lexikon', icon: <BookOpen size={36} strokeWidth={2.25} />, label: 'Lexikon' },
   { id: 'wetter', href: '/wetter', icon: <CloudSun size={36} strokeWidth={2.25} />, label: 'Wetter' },
+  { id: 'karte', href: '/karte', icon: <Map size={36} strokeWidth={2.25} />, label: 'Karte' },
   { id: 'video', href: '/video', icon: <Tv size={36} strokeWidth={2.25} />, label: 'Fernsehen' },
   { id: 'notfall', href: '/notfall', icon: <Siren size={36} strokeWidth={2.25} />, label: 'Notfall' },
 ];

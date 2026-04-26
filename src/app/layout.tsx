@@ -1,6 +1,7 @@
 import "@fontsource/atkinson-hyperlegible/400.css";
 import "@fontsource/atkinson-hyperlegible/700.css";
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
 import type { Metadata } from "next";
 import { loadNewsAction } from "./actions/news";
 import { AppProvider } from "../components/app-provider.jsx";
