@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS chat_messages;
+DROP TABLE IF EXISTS chat_relationships;
 DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
@@ -13,6 +15,27 @@ CREATE TABLE users (
   created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at         TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE chat_relationships (
+  user_id          TEXT        NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  contact_user_id  TEXT        NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  label            TEXT,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (user_id, contact_user_id),
+  CHECK (user_id <> contact_user_id)
+);
+
+CREATE TABLE chat_messages (
+  id               BIGSERIAL   PRIMARY KEY,
+  sender_user_id   TEXT        NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  recipient_user_id TEXT       NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  body             TEXT        NOT NULL,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CHECK (sender_user_id <> recipient_user_id)
+);
+
+CREATE INDEX chat_messages_pair_created_idx
+  ON chat_messages (sender_user_id, recipient_user_id, created_at DESC);
 
 -- Seed data (mirrors former users.db.json)
 INSERT INTO users (
@@ -72,3 +95,20 @@ VALUES
     }'::jsonb
   ),
   ('user-caregiver-001','nina',   'Nina',   'caregiver', 'caregiver-tablet', 'wg-pub-caregiver-demo', '10.44.0.27', 5175, '{}'::jsonb);
+
+INSERT INTO chat_relationships (user_id, contact_user_id, label)
+VALUES
+  ('user-parent-001', 'user-caregiver-001', 'Tochter & Betreuung'),
+  ('user-caregiver-001', 'user-parent-001', 'Mutter'),
+  ('user-grandpa-001', 'user-caregiver-001', 'Tochter & Betreuung'),
+  ('user-caregiver-001', 'user-grandpa-001', 'Vater');
+
+INSERT INTO chat_messages (sender_user_id, recipient_user_id, body, created_at)
+VALUES
+  ('user-parent-001', 'user-caregiver-001', 'Hallo Nina', NOW() - INTERVAL '2 hours'),
+  ('user-caregiver-001', 'user-parent-001', 'Hellooo', NOW() - INTERVAL '1 hour 50 minutes'),
+  ('user-caregiver-001', 'user-parent-001', 'Blibal', NOW() - INTERVAL '1 hour 49 minutes'),
+  ('user-parent-001', 'user-caregiver-001', 'Hallo Heidi', NOW() - INTERVAL '30 minutes'),
+  ('user-caregiver-001', 'user-parent-001', 'Hi!', NOW() - INTERVAL '29 minutes'),
+  ('user-grandpa-001', 'user-caregiver-001', 'Bisch du do?', NOW() - INTERVAL '20 minutes'),
+  ('user-caregiver-001', 'user-grandpa-001', 'Ja, ich bin da.', NOW() - INTERVAL '19 minutes');
