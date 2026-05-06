@@ -40,7 +40,7 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ toLower(github.repository) }}:latest
+            ghcr.io/${{ toLower(github.repository) }}:${{ github.sha }}
+          cache-from: type=registry,ref=ghcr.io/${{ toLower(github.repository) }}:latest
           cache-to: type=inline
