@@ -4,7 +4,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { MessageCircleHeart, MessagesSquare, Newspaper, BookOpen, CloudSun, Tv, Siren, Map, Radio, Images, Gift } from 'lucide-react';
+import { MessageCircleHeart, MessagesSquare, Newspaper, BookOpen, CloudSun, Tv, Siren, Map, Radio, Images, Gift, Train } from 'lucide-react';
 import { useAppState } from './app-provider';
 import styles from "./home-screen.module.css";
 
@@ -16,6 +16,7 @@ const APPS = [
   { id: 'audio', href: '/audio', icon: <Radio size={36} strokeWidth={2.25} /> },
   { id: 'news', href: '/news', icon: <Newspaper size={36} strokeWidth={2.25} /> },
   { id: 'wetter', href: '/wetter', icon: <CloudSun size={36} strokeWidth={2.25} /> },
+  { id: 'sbb', href: '/sbb', icon: <Train size={36} strokeWidth={2.25} /> },
   { id: 'lexikon', href: '/lexikon', icon: <BookOpen size={36} strokeWidth={2.25} /> },
   { id: 'karte', href: '/karte', icon: <Map size={36} strokeWidth={2.25} /> },
   { id: 'video', href: '/video', icon: <Tv size={36} strokeWidth={2.25} /> },

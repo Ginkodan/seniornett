@@ -36,6 +36,7 @@
       "lotti-live": "Lotti fragen",
       "lexikon": "Wörter erklären",
       "wetter": "Wetter",
+      "sbb": "Zug",
       "karte": "Karte",
       "video": "Fernsehen",
       "notfall": "Notfall"
@@ -49,6 +50,7 @@
       "lotti-live": "Eine einfache Frage stellen.",
       "lexikon": "Ein Wort in einfacher Sprache nachschlagen.",
       "wetter": "Sehen, wie das Wetter heute und morgen wird.",
+      "sbb": "Zugverbindungen und Fahrpläne anschauen.",
       "karte": "Orte, Wege und Umgebung anschauen.",
       "video": "Sendungen und Vorträge ansehen.",
       "notfall": "Schnell Hilfe anrufen und Angaben zeigen."
@@ -542,6 +544,27 @@
       "loadError": "Der Marktplatz konnte gerade nicht geladen werden.",
       "attention": "Bitte prüfen",
       "good": "Alles bereit"
+    }
+  },
+  "sbb": {
+    "title": "Zugverbindungen",
+    "from": "Von",
+    "to": "Nach",
+    "date": "Datum",
+    "time": "Zeit",
+    "departure": "Abfahrt",
+    "arrival": "Ankunft",
+    "search": "Suchen",
+    "loadingConnections": "Verbindungen werden geladen ...",
+    "connectionSingular": "Verbindung",
+    "connectionPlural": "Verbindungen",
+    "previousConnections": "Frühere Verbindungen",
+    "nextConnections": "Spätere Verbindungen",
+    "connectionNavigation": "Verbindungen durchblättern",
+    "enterStations": "Bitte geben Sie Start- und Zielbahnhof ein.",
+    "errors": {
+      "missingStations": "Bitte geben Sie Start- und Zielbahnhof ein.",
+      "noConnections": "Es wurden keine Verbindungen gefunden. Bitte überprüfen Sie Ihre Angaben."
     }
   }
 }

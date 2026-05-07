@@ -36,6 +36,7 @@
       "lotti-live": "Demander à Lotti",
       "lexikon": "Expliquer des mots",
       "wetter": "Météo",
+      "sbb": "Train",
       "karte": "Carte",
       "video": "Télévision",
       "notfall": "Urgence"
@@ -49,6 +50,7 @@
       "lotti-live": "Poser une question simple.",
       "lexikon": "Chercher un mot en langage simple.",
       "wetter": "Voir le temps d’aujourd’hui et de demain.",
+      "sbb": "Regarder les connexions de train et les horaires.", 
       "karte": "Regarder les lieux, chemins et environs.",
       "video": "Voir des émissions et des conférences.",
       "notfall": "Appeler rapidement de l’aide et montrer les informations."
@@ -542,6 +544,27 @@
       "loadError": "Le marché n'a pas pu être chargé pour le moment.",
       "attention": "À vérifier",
       "good": "C'est bon"
+    }
+  },
+  "sbb": {
+    "title": "Connexions de train",
+    "from": "De",
+    "to": "À",
+    "date": "Date",
+    "time": "Heure",
+    "departure": "Départ",
+    "arrival": "Arrivée",
+    "search": "Chercher",
+    "loadingConnections": "Les connexions se chargent ...",
+    "connectionSingular": "Connexion",
+    "connectionPlural": "Connexions",
+    "previousConnections": "Connexions précédentes",
+    "nextConnections": "Connexions suivantes",
+    "connectionNavigation": "Parcourir les connexions",
+    "enterStations": "Veuillez entrer les gares de départ et d'arrivée.",
+    "errors": {
+      "missingStations": "Veuillez entrer les gares de départ et d'arrivée.",
+      "noConnections": "Aucune connexion trouvée. Veuillez vérifier vos données."
     }
   }
 }

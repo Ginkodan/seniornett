@@ -1,0 +1,729 @@
+.scope { display: contents; }
+
+/* ─── SBB Train Timetable Screen ───────────────────────────────────────── */
+
+.scope:global(.sbb-shell), .scope :global(.sbb-shell) {
+  display: flex;
+  flex-direction: column;
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 2rem clamp(1.25rem, 4vw, 3rem) 4rem;
+  gap: 2rem;
+}
+
+/* Form */
+.scope:global(.sbb-form), .scope :global(.sbb-form) {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+  background: var(--paper-2);
+  border-radius: 0.5rem;
+  border: var(--border-thin);
+}
+
+.scope:global(.sbb-form-row), .scope :global(.sbb-form-row) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1.5rem;
+}
+
+.scope:global(.sbb-form-group), .scope :global(.sbb-form-group) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.scope:global(.sbb-label), .scope :global(.sbb-label) {
+  font-size: var(--fs-base);
+  font-weight: 700;
+  color: var(--ink);
+  display: block;
+}
+
+.scope:global(.sbb-input), .scope :global(.sbb-input) {
+  font-size: var(--fs-base);
+  padding: 0.75rem 1rem;
+  border: var(--border-thin);
+  border-radius: 0.375rem;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: inherit;
+  min-height: 3rem;
+  font-weight: 500;
+}
+
+.scope:global(.sbb-input)::placeholder, .scope :global(.sbb-input)::placeholder {
+  color: var(--ink-4);
+}
+
+.scope:global(.sbb-input):focus, .scope :global(.sbb-input):focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Autocomplete */
+.scope:global(.sbb-autocomplete), .scope :global(.sbb-autocomplete) {
+  position: relative;
+}
+
+.scope:global(.sbb-suggestions), .scope :global(.sbb-suggestions) {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  background: var(--paper);
+  border: var(--border-thin);
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-height: 15rem;
+  overflow-y: auto;
+}
+
+.scope:global(.sbb-suggestion-item), .scope :global(.sbb-suggestion-item) {
+  margin: 0;
+  padding: 0;
+}
+
+.scope:global(.sbb-suggestion-button), .scope :global(.sbb-suggestion-button) {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font-size: var(--fs-base);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: inherit;
+  font-weight: 500;
+  min-height: 2.75rem;
+}
+
+.scope:global(.sbb-suggestion-button):hover, .scope :global(.sbb-suggestion-button):hover {
+  background-color: var(--paper-2);
+}
+
+.scope:global(.sbb-suggestion-button):focus, .scope :global(.sbb-suggestion-button):focus {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+
+/* Toggle Button */
+.scope:global(.sbb-toggle), .scope :global(.sbb-toggle) {
+  padding: 0.75rem 1rem;
+  border: var(--border-thin);
+  border-radius: 0.375rem;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: var(--fs-base);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  min-height: 3rem;
+}
+
+.scope:global(.sbb-toggle):hover, .scope :global(.sbb-toggle):hover {
+  background-color: var(--paper-2);
+  border-color: var(--ink-2);
+}
+
+.scope:global(.sbb-toggle.active), .scope :global(.sbb-toggle.active) {
+  background-color: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.scope:global(.sbb-toggle):focus, .scope :global(.sbb-toggle):focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.scope:global(.sbb-search-hint), .scope :global(.sbb-search-hint) {
+  margin-top: 0.75rem;
+  color: var(--ink-4);
+  font-size: var(--fs-sm);
+}
+
+/* Search Button */
+.scope:global(.sbb-search-button), .scope :global(.sbb-search-button) {
+  font-size: var(--fs-lg);
+  padding: 1rem;
+  min-height: 3.5rem;
+}
+
+/* Error Box */
+.scope:global(.sbb-error), .scope :global(.sbb-error) {
+  font-size: var(--fs-sm);
+  color: var(--error);
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.scope:global(.sbb-error-box), .scope :global(.sbb-error-box) {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--error-light, rgba(220, 38, 38, 0.1));
+  border: 2px solid var(--error);
+  border-radius: 0.375rem;
+  color: var(--error);
+  font-size: var(--fs-base);
+  font-weight: 600;
+}
+
+/* Results */
+.scope:global(.sbb-results), .scope :global(.sbb-results) {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 10rem;
+}
+
+.scope:global(.sbb-loading), .scope :global(.sbb-loading) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 3rem 2rem;
+  color: var(--ink-4);
+  font-size: var(--fs-lg);
+}
+
+.scope:global(.sbb-spinner), .scope :global(.sbb-spinner) {
+  animation: spin 1s linear infinite;
+  color: var(--accent);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.scope:global(.sbb-empty), .scope :global(.sbb-empty) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 3rem 2rem;
+  color: var(--ink-4);
+  font-size: var(--fs-lg);
+}
+
+/* Connections List */
+.scope:global(.sbb-connections), .scope :global(.sbb-connections) {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.scope:global(.sbb-connections > div), .scope :global(.sbb-connections > div) {
+  width: 100%;
+}
+
+.scope:global(.sbb-results-title), .scope :global(.sbb-results-title) {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+  padding: 0 0 0.5rem;
+  border-bottom: var(--border-thin);
+}
+
+.scope:global(.sbb-results-nav), .scope :global(.sbb-results-nav) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.scope:global(.sbb-results-nav-button), .scope :global(.sbb-results-nav-button) {
+  min-height: 3.5rem;
+  padding: 0.75rem 1.25rem;
+  border: var(--border-thin);
+  border-radius: 0.375rem;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.scope:global(.sbb-results-nav-button:hover), .scope :global(.sbb-results-nav-button:hover) {
+  background: var(--paper-2);
+  border-color: var(--accent);
+}
+
+.scope:global(.sbb-results-nav-button:disabled), .scope :global(.sbb-results-nav-button:disabled) {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: var(--ink-3);
+}
+
+.scope:global(.sbb-results-nav-after), .scope :global(.sbb-results-nav-after) {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.scope:global(.sbb-results-nav-after:hover), .scope :global(.sbb-results-nav-after:hover) {
+  background: #000;
+  border-color: #000;
+}
+
+/* Connection Card */
+.scope:global(.sbb-connection-card), .scope :global(.sbb-connection-card) {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  background: var(--paper);
+  border: var(--border-thin);
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  text-align: left;
+  font-size: inherit;
+  color: inherit;
+  min-height: 5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.scope:global(.sbb-connection-card):hover, .scope :global(.sbb-connection-card):hover {
+  background-color: var(--paper-2);
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.scope:global(.sbb-connection-card):focus, .scope :global(.sbb-connection-card):focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.scope:global(.sbb-card-left), .scope :global(.sbb-card-left) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.scope:global(.sbb-card-middle), .scope :global(.sbb-card-middle) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+  text-align: center;
+}
+
+.scope:global(.sbb-card-right), .scope :global(.sbb-card-right) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: right;
+}
+
+.scope:global(.sbb-time-from), .scope :global(.sbb-time-from),
+.scope:global(.sbb-time-to), .scope :global(.sbb-time-to) {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.1;
+}
+
+.scope:global(.sbb-station-from), .scope :global(.sbb-station-from),
+.scope:global(.sbb-station-to), .scope :global(.sbb-station-to) {
+  font-size: var(--fs-base);
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.scope:global(.sbb-duration), .scope :global(.sbb-duration) {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.scope:global(.sbb-changes), .scope :global(.sbb-changes) {
+  font-size: var(--fs-sm);
+  color: var(--ink-4);
+  font-weight: 500;
+}
+
+/* Connection Detail Modal */
+.scope:global(.sbb-modal-overlay), .scope :global(.sbb-modal-overlay) {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1rem;
+}
+
+.scope:global(.sbb-modal-content), .scope :global(.sbb-modal-content) {
+  background: var(--paper);
+  border-radius: 0.5rem;
+  width: 100%;
+  max-width: min(60rem, calc(100vw - 2rem));
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.scope:global(.sbb-connection-detail), .scope :global(.sbb-connection-detail) {
+  padding: 2rem 2rem 1.5rem;
+}
+
+.scope:global(.sbb-detail-header), .scope :global(.sbb-detail-header) {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.scope:global(.sbb-detail-header) h3, .scope :global(.sbb-detail-header) h3 {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  margin: 0 0 0.25rem 0;
+  color: var(--ink);
+}
+
+.scope:global(.sbb-detail-date), .scope :global(.sbb-detail-date) {
+  font-size: var(--fs-base);
+  color: var(--ink-4);
+  margin: 0;
+}
+
+.scope:global(.sbb-detail-close), .scope :global(.sbb-detail-close) {
+  background: transparent;
+  border: none;
+  color: var(--ink-4);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  transition: color 0.2s, background 0.2s;
+}
+
+.scope:global(.sbb-detail-close):hover, .scope :global(.sbb-detail-close):hover {
+  background: var(--paper-2);
+  color: var(--ink);
+}
+
+.scope:global(.sbb-detail-close):focus, .scope :global(.sbb-detail-close):focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Timeline visualization */
+.scope:global(.sbb-detail-timeline), .scope :global(.sbb-detail-timeline) {
+  position: relative;
+  height: 3.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.scope:global(.sbb-timeline-bar), .scope :global(.sbb-timeline-bar) {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--ink-3);
+  transform: translateY(-50%);
+}
+
+.scope:global(.sbb-timeline-label), .scope :global(.sbb-timeline-label) {
+  position: absolute;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink);
+  top: -1.25rem;
+}
+
+.scope:global(.sbb-timeline-start), .scope :global(.sbb-timeline-start) {
+  left: 0;
+}
+
+.scope:global(.sbb-timeline-end), .scope :global(.sbb-timeline-end) {
+  right: 0;
+}
+
+.scope:global(.sbb-timeline-marker), .scope :global(.sbb-timeline-marker) {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  pointer-events: none;
+}
+
+.scope:global(.sbb-timeline-dot), .scope :global(.sbb-timeline-dot) {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.08);
+}
+
+/* Detail content */
+.scope:global(.sbb-detail-content), .scope :global(.sbb-detail-content) {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Journey points (start/end locations) */
+.scope:global(.sbb-journey-point), .scope :global(.sbb-journey-point) {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--paper-2);
+  border-radius: 0.5rem;
+  border: var(--border-thin);
+}
+
+.scope:global(.sbb-point-icon), .scope :global(.sbb-point-icon) {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.scope:global(.sbb-point-name), .scope :global(.sbb-point-name) {
+  font-size: var(--fs-base);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* Journey sections */
+.scope:global(.sbb-journey-sections), .scope :global(.sbb-journey-sections) {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.scope:global(.sbb-section), .scope :global(.sbb-section) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--paper-2);
+  border-radius: 0.5rem;
+  border: var(--border-thin);
+}
+
+.scope:global(.sbb-section-header), .scope :global(.sbb-section-header) {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.scope:global(.sbb-section-title), .scope :global(.sbb-section-title) {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.scope:global(.sbb-time),
+.scope :global(.sbb-time),
+.scope:global(.sbb-train-badge),
+.scope :global(.sbb-train-badge),
+.scope:global(.sbb-leg-direction),
+.scope :global(.sbb-leg-direction) {
+  white-space: nowrap;
+}
+
+.scope:global(.sbb-time), .scope :global(.sbb-time) {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  color: var(--ink);
+  min-width: 4rem;
+}
+
+.scope:global(.sbb-train-badge), .scope :global(.sbb-train-badge) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.5rem;
+  background: #db3d3d;
+  color: #ffffff;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
+.scope:global(.sbb-section-meta), .scope :global(.sbb-section-meta) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  font-size: var(--fs-sm);
+  color: var(--ink-4);
+}
+
+.scope:global(.sbb-leg-body), .scope :global(.sbb-leg-body) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-left: 0.5rem;
+}
+
+.scope:global(.sbb-leg-row), .scope :global(.sbb-leg-row) {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: var(--fs-sm);
+  color: var(--ink-4);
+}
+
+.scope:global(.sbb-leg-direction), .scope :global(.sbb-leg-direction) {
+  font-weight: 600;
+}
+
+.scope:global(.sbb-platform), .scope :global(.sbb-platform) {
+  font-size: var(--fs-sm);
+  color: var(--ink-4);
+  font-weight: 700;
+  text-align: right;
+}
+
+/* Transfer indicator */
+.scope:global(.sbb-transfer), .scope :global(.sbb-transfer) {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--paper-2);
+  border-radius: 0.5rem;
+  border: var(--border-thin);
+  font-size: var(--fs-base);
+  color: var(--ink-4);
+}
+
+.scope:global(.sbb-transfer-line), .scope :global(.sbb-transfer-line) {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.scope:global(.sbb-transfer-station), .scope :global(.sbb-transfer-station) {
+  font-size: var(--fs-base);
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.scope:global(.sbb-transfer-label), .scope :global(.sbb-transfer-label) {
+  color: var(--ink-4);
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 32rem) {
+  .scope:global(.sbb-modal-content), .scope :global(.sbb-modal-content) {
+    max-height: 90vh;
+    max-width: 95vw;
+  }
+
+  .scope:global(.sbb-connection-detail), .scope :global(.sbb-connection-detail) {
+    padding: 1.5rem;
+  }
+
+  .scope:global(.sbb-detail-header), .scope :global(.sbb-detail-header) {
+    margin-bottom: 1rem;
+  }
+
+  .scope:global(.sbb-section-header), .scope :global(.sbb-section-header) {
+    gap: 0.75rem;
+  }
+
+  .scope:global(.sbb-train-info), .scope :global(.sbb-train-info) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Responsive */
+@media (max-width: 32rem) {
+  .scope:global(.sbb-form), .scope :global(.sbb-form) {
+    padding: 1.5rem;
+  }
+
+  .scope:global(.sbb-form-row), .scope :global(.sbb-form-row) {
+    grid-template-columns: 1fr;
+  }
+
+  .scope:global(.sbb-results-nav), .scope :global(.sbb-results-nav) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .scope:global(.sbb-results-nav-button), .scope :global(.sbb-results-nav-button) {
+    width: 100%;
+  }
+
+  .scope:global(.sbb-connection-card), .scope :global(.sbb-connection-card) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    min-height: auto;
+  }
+
+  .scope:global(.sbb-card-middle), .scope :global(.sbb-card-middle),
+  .scope:global(.sbb-card-right), .scope :global(.sbb-card-right) {
+    text-align: left;
+  }
+
+  .scope:global(.sbb-modal-content), .scope :global(.sbb-modal-content) {
+    max-height: 90vh;
+    max-width: 95vw;
+  }
+
+  .scope:global(.sbb-connection-detail), .scope :global(.sbb-connection-detail) {
+    padding: 1.5rem;
+  }
+
+  .scope:global(.sbb-section-header), .scope :global(.sbb-section-header) {
+    align-items: flex-start;
+  }
+
+  .scope:global(.sbb-section-title), .scope :global(.sbb-section-title) {
+    flex-wrap: wrap;
+  }
+
+  .scope:global(.sbb-detail-timeline), .scope :global(.sbb-detail-timeline) {
+    height: 4rem;
+  }
+
+  .scope:global(.sbb-transfer), .scope :global(.sbb-transfer) {
+    align-items: flex-start;
+  }
+}
