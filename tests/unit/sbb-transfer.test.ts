@@ -11,6 +11,7 @@ function makeDataset() {
   return {
     stopIdsByStation: new Map([
       ["bern", ["8507000:0:5", "8507000:0:49"]],
+      ["jegenstorf", ["jegenstorf-bahnhof"]],
       ["spiez schiffstation", ["spiez-schiffstation"]],
       ["spiez bahnhof", ["spiez-bahnhof"]],
       ["spiez bahnhofstr 45", ["spiez-bahnhofstr-45"]],
@@ -25,6 +26,7 @@ function makeDataset() {
       ["spiez-schiffstation", { lat: 46.6869, lon: 7.6712 }],
       ["spiez-bahnhof", { lat: 46.7041, lon: 7.6712 }],
       ["spiez-bahnhofstr-45", { lat: 46.7163, lon: 7.6714 }],
+      ["jegenstorf-bahnhof", { lat: 47.0516, lon: 7.5231 }],
     ]),
     transferRules: new Map(),
   };
@@ -320,6 +322,44 @@ test("Spiez Bahnhofstrasse destination walk is based on the real walking distanc
     assert.ok((destination?.walkDistanceMeters || 0) > 1000);
     assert.ok(destination?.requiredMinutes !== null);
     assert.ok((destination?.requiredMinutes || 0) > 2);
+  });
+});
+
+test("destination walk without an explicit walking leg still gets an estimated time", async () => {
+  await withNetworkDisabled(async () => {
+    const dataset = makeDataset();
+    const connection = {
+      from: "Spiez",
+      to: "Jegenstorf, Hofuurenweg 11",
+      departure: "20:47",
+      arrival: "22:03",
+      departureIso: "2026-05-07T18:47:00.000Z",
+      arrivalIso: "2026-05-07T20:03:00.000Z",
+      duration: "1h 16m",
+      changes: 0,
+      platform: "4",
+      destinationTargetCoords: { lat: 47.0512, lon: 7.5229 },
+      legs: [
+        {
+          number: "65",
+          category: "IR",
+          direction: "Jegenstorf",
+          departureTime: "20:47",
+          arrivalTime: "22:03",
+          departureStation: "Spiez",
+          arrivalStation: "Jegenstorf",
+          departurePlatform: "4",
+          arrivalPlatform: undefined,
+        },
+      ],
+    };
+
+    const destination = await calculateDestinationAssessment(connection, dataset);
+    assert.ok(destination, "expected a destination access assessment");
+    assert.ok((destination?.givenMinutes || 0) > 0);
+    assert.ok((destination?.requiredMinutes || 0) > 0);
+    assert.ok(destination?.walkDistanceMeters !== null);
+    assert.ok((destination?.walkDistanceMeters || 0) > 0);
   });
 });
 

@@ -10,10 +10,7 @@ import { Button, SeniorNetPage } from "./ui";
 import styles from "./sbb-screen.module.css";
 
 const EMPTY_ARRAY = [];
-const INITIAL_RESULTS_PAGE = 1;
 const SWISS_TIME_ZONE = "Europe/Zurich";
-const EDGE_FETCH_LIMIT = 16;
-const EDGE_WINDOWS_MINUTES = [20, 40, 60, 90, 180];
 const TRANSFER_STATUS_META = {
   tight: {
     icon: Rabbit,
@@ -405,7 +402,6 @@ function ConnectionDetail({ connection, onClose }) {
   const destinationTitle = destinationAssessment && lastVehicleLeg
     ? t("sbb.access.walk")
     : "";
-
   return (
     <div className="sbb-connection-detail">
       <div className="sbb-detail-header">
@@ -433,6 +429,32 @@ function ConnectionDetail({ connection, onClose }) {
             <span className="sbb-timeline-dot" />
           </div>
         ))}
+        {accessAssessment && (
+          <div
+            className="sbb-timeline-marker sbb-timeline-marker-access sbb-timeline-marker-access-start"
+            style={{ left: "2%" }}
+            title={accessSummary || t("sbb.access.walk")}
+            aria-hidden="true"
+          >
+            <span className="sbb-timeline-dot sbb-timeline-dot-access" />
+            <span className="sbb-timeline-access-icon">
+              <Footprints size={13} />
+            </span>
+          </div>
+        )}
+        {destinationAssessment && (
+          <div
+            className="sbb-timeline-marker sbb-timeline-marker-access sbb-timeline-marker-access-end"
+            style={{ left: "98%" }}
+            title={destinationSummary || t("sbb.access.walk")}
+            aria-hidden="true"
+          >
+            <span className="sbb-timeline-dot sbb-timeline-dot-access" />
+            <span className="sbb-timeline-access-icon">
+              <Footprints size={13} />
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="sbb-detail-content">
@@ -660,25 +682,6 @@ function formatSwissDateTimeParts(isoTime) {
   };
 }
 
-function shiftSwissDateTimeParts(date, time, offsetMinutes) {
-  const base = new Date(Date.UTC(
-    Number.parseInt(date.slice(0, 4), 10),
-    Number.parseInt(date.slice(5, 7), 10) - 1,
-    Number.parseInt(date.slice(8, 10), 10),
-    Number.parseInt(time.slice(0, 2), 10),
-    Number.parseInt(time.slice(3, 5), 10),
-    0
-  ));
-  if (Number.isNaN(base.getTime())) return null;
-
-  base.setUTCMinutes(base.getUTCMinutes() + offsetMinutes);
-  const shifted = base.toISOString();
-  return {
-    date: shifted.slice(0, 10),
-    time: shifted.slice(11, 16),
-  };
-}
-
 export function SbbScreen() {
   const { t } = useAppState();
   const defaultSwissDateTime = React.useMemo(() => getSwissNowDefaults(), []);
@@ -697,12 +700,8 @@ export function SbbScreen() {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
   const [selectedConnection, setSelectedConnection] = React.useState(null);
-  const [minLoadedPage, setMinLoadedPage] = React.useState(INITIAL_RESULTS_PAGE);
-  const [maxLoadedPage, setMaxLoadedPage] = React.useState(INITIAL_RESULTS_PAGE);
 
   const debounceRef = React.useRef(null);
-  const connectionsRef = React.useRef(null);
-  const pendingPrependRef = React.useRef(null);
   const isInitialLoading = loading && connections.length === 0;
 
   function handleFromStationChange(value) {
@@ -741,118 +740,7 @@ export function SbbScreen() {
     }, 300);
   }, [toStation]);
 
-  function mergeConnections(existing, incoming, direction) {
-    const seen = new Set();
-    const merged = direction === "prepend" ? [...incoming, ...existing] : [...existing, ...incoming];
-
-    return merged.filter((connection) => {
-      const key = `${connection.departureIso}|${connection.arrivalIso}|${connection.from}|${connection.to}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }
-
-  function getRelevantIso(connection) {
-    return connection.departureIso;
-  }
-
-  function filterEdgeConnections(batch, direction, cursorIso) {
-    const cursorParts = formatSwissDateTimeParts(cursorIso);
-    if (!cursorParts) return EMPTY_ARRAY;
-    const cursorTime = parseClockMinutes(cursorParts.time);
-    if (cursorTime === null) return EMPTY_ARRAY;
-    const searchTimeMinutes = parseClockMinutes(time);
-
-    const filtered = batch.filter((connection) => {
-      const departureParts = formatSwissDateTimeParts(connection.departureIso);
-      const arrivalParts = formatSwissDateTimeParts(connection.arrivalIso);
-      if (!departureParts || !arrivalParts) return false;
-
-      const departureMinutes = parseClockMinutes(departureParts.time);
-      const arrivalMinutes = parseClockMinutes(arrivalParts.time);
-      if (departureMinutes === null || arrivalMinutes === null) return false;
-
-      if (isArrival) {
-        if (arrivalParts.date !== date || searchTimeMinutes === null || arrivalMinutes > searchTimeMinutes) {
-          return false;
-        }
-      } else {
-        if (departureParts.date !== date || searchTimeMinutes === null || departureMinutes < searchTimeMinutes) {
-          return false;
-        }
-      }
-
-      return direction === "before"
-        ? departureMinutes < cursorTime
-        : departureMinutes > cursorTime;
-    });
-
-    filtered.sort((a, b) => {
-      const aTime = parseClockMinutes(formatSwissDateTimeParts(a.departureIso)?.time || "");
-      const bTime = parseClockMinutes(formatSwissDateTimeParts(b.departureIso)?.time || "");
-      if (aTime === null || bTime === null) return 0;
-      return aTime - bTime;
-    });
-
-    return direction === "before" ? filtered.slice(-6) : filtered.slice(0, 6);
-  }
-
-  async function fetchEdgeConnections(direction) {
-    if (connections.length === 0) return EMPTY_ARRAY;
-
-    const cursorConnection = direction === "before" ? connections[0] : connections[connections.length - 1];
-    const cursorIso = getRelevantIso(cursorConnection);
-    if (!cursorIso) return EMPTY_ARRAY;
-
-    const offsets = direction === "before"
-      ? EDGE_WINDOWS_MINUTES.map((minutes) => -minutes)
-      : [0];
-
-    for (const offsetMinutes of offsets) {
-      const cursorParts = formatSwissDateTimeParts(cursorIso);
-      if (!cursorParts) continue;
-      const swissParts = shiftSwissDateTimeParts(cursorParts.date, cursorParts.time, offsetMinutes);
-      if (!swissParts) continue;
-
-      const result = await searchConnectionsAction(
-        fromStationId || fromStation,
-        toStationId || toStation,
-        swissParts.date,
-        swissParts.time,
-        false,
-        0,
-        false,
-        EDGE_FETCH_LIMIT
-      );
-
-      if (result.error) {
-        setError(result.error);
-        return EMPTY_ARRAY;
-      }
-
-      const nextConnections = filterEdgeConnections(result.connections || EMPTY_ARRAY, direction, cursorIso);
-      if (nextConnections.length > 0) {
-        return nextConnections;
-      }
-    }
-
-    return EMPTY_ARRAY;
-  }
-
-  React.useLayoutEffect(() => {
-    const pendingPrepend = pendingPrependRef.current;
-    if (!pendingPrepend || !connectionsRef.current) return;
-
-    const nextHeight = connectionsRef.current.scrollHeight;
-    const delta = nextHeight - pendingPrepend.previousHeight;
-    if (delta !== 0) {
-      window.scrollTo({ top: pendingPrepend.previousScrollY + delta });
-    }
-    pendingPrependRef.current = null;
-  }, [connections]);
-
-  async function fetchConnections(nextPage, direction = "replace") {
+  async function fetchConnections() {
     setError("");
     setSelectedConnection(null);
 
@@ -861,62 +749,33 @@ export function SbbScreen() {
       return false;
     }
 
-    if (direction === "replace") {
-      setConnections(EMPTY_ARRAY);
-      setMinLoadedPage(nextPage);
-      setMaxLoadedPage(nextPage);
-      pendingPrependRef.current = null;
-    } else if (direction === "prepend" && connectionsRef.current) {
-      pendingPrependRef.current = {
-        previousHeight: connectionsRef.current.scrollHeight,
-        previousScrollY: window.scrollY,
-      };
-    } else {
-      pendingPrependRef.current = null;
-    }
-
     setLoading(true);
-    // Use station ID if available, otherwise use the display name
+
     const fromParam = fromStationId || fromStation;
     const toParam = toStationId || toStation;
-
     const result = await searchConnectionsAction(
       fromParam,
       toParam,
       date,
       time,
       isArrival,
-      nextPage,
-      direction === "replace"
+      1,
+      true
     );
 
     if (result.error) {
       setError(result.error);
-      if (direction === "replace") {
-        setConnections(EMPTY_ARRAY);
-      }
+      setConnections(EMPTY_ARRAY);
       setLoading(false);
       return false;
     }
 
     const nextConnections = result.connections || EMPTY_ARRAY;
-    if (nextConnections.length === 0 && direction === "replace") {
+    if (nextConnections.length === 0) {
       setConnections(EMPTY_ARRAY);
       setError(t("sbb.errors.noConnections"));
-      setLoading(false);
-      return true;
-    }
-
-    if (direction === "replace") {
+    } else {
       setConnections(nextConnections);
-      setMinLoadedPage(nextPage);
-      setMaxLoadedPage(nextPage);
-    } else if (direction === "prepend") {
-      setConnections((existing) => mergeConnections(existing, nextConnections, "prepend"));
-      setMinLoadedPage((current) => Math.min(current, nextPage));
-    } else if (direction === "append") {
-      setConnections((existing) => mergeConnections(existing, nextConnections, "append"));
-      setMaxLoadedPage((current) => Math.max(current, nextPage));
     }
 
     setLoading(false);
@@ -925,43 +784,7 @@ export function SbbScreen() {
 
   async function handleSearch(e) {
     e.preventDefault();
-    await fetchConnections(INITIAL_RESULTS_PAGE);
-  }
-
-  async function handlePageChange(nextPage) {
-    if (nextPage < minLoadedPage) {
-      if (nextPage < 0) {
-        setLoading(true);
-        const nextConnections = await fetchEdgeConnections("before");
-        if (nextConnections.length > 0) {
-          if (connectionsRef.current) {
-            pendingPrependRef.current = {
-              previousHeight: connectionsRef.current.scrollHeight,
-              previousScrollY: window.scrollY,
-            };
-          }
-          setConnections((existing) => mergeConnections(existing, nextConnections, "prepend"));
-        }
-        setLoading(false);
-        return;
-      }
-      await fetchConnections(nextPage, "prepend");
-      return;
-    }
-
-    if (nextPage > maxLoadedPage) {
-      if (nextPage > 3) {
-        setLoading(true);
-        const nextConnections = await fetchEdgeConnections("after");
-        if (nextConnections.length > 0) {
-          setConnections((existing) => mergeConnections(existing, nextConnections, "append"));
-        }
-        setLoading(false);
-        return;
-      }
-      await fetchConnections(nextPage, "append");
-      return;
-    }
+    await fetchConnections();
   }
 
   return (
@@ -1064,18 +887,6 @@ export function SbbScreen() {
 
             {connections.length > 0 && (
               <div className="sbb-connections">
-                <div ref={connectionsRef}>
-                <div className="sbb-results-nav" aria-label={t("sbb.connectionNavigation")}>
-                  <button
-                    type="button"
-                    className="sbb-results-nav-button sbb-results-nav-before"
-                    onClick={() => handlePageChange(minLoadedPage - 1)}
-                    disabled={loading}
-                  >
-                    {t("sbb.previousConnections")}
-                  </button>
-                </div>
-
                 {connections.map((conn) => (
                   <ConnectionCard
                     key={getConnectionKey(conn)}
@@ -1083,18 +894,6 @@ export function SbbScreen() {
                     onSelect={setSelectedConnection}
                   />
                 ))}
-
-                <div className="sbb-results-nav" aria-label={t("sbb.connectionNavigation")}>
-                  <button
-                    type="button"
-                    className="sbb-results-nav-button sbb-results-nav-after"
-                    onClick={() => handlePageChange(maxLoadedPage + 1)}
-                    disabled={loading}
-                  >
-                    {t("sbb.nextConnections")}
-                  </button>
-                </div>
-                </div>
               </div>
             )}
 

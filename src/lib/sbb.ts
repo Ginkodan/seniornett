@@ -1253,7 +1253,12 @@ async function buildEndpointAssessment(
       ? Math.max(DEFAULT_TRANSFER_MINUTES, walkMinutes)
       : DEFAULT_TRANSFER_MINUTES;
 
-  if (givenMinutes === null) {
+  const endpointMinutes = routeEstimate?.minutes ?? walkMinutes;
+  const displayGivenMinutes = givenMinutes === null || givenMinutes === 0
+    ? endpointMinutes ?? givenMinutes
+    : givenMinutes;
+
+  if (displayGivenMinutes === null) {
     return {
       givenMinutes: null,
       requiredMinutes,
@@ -1264,7 +1269,7 @@ async function buildEndpointAssessment(
     };
   }
 
-  const slackMinutes = givenMinutes - requiredMinutes;
+  const slackMinutes = displayGivenMinutes - requiredMinutes;
 
   let tone: TransferAssessment["tone"] = "plenty";
   if (slackMinutes < 0) {
@@ -1276,7 +1281,7 @@ async function buildEndpointAssessment(
   }
 
   return {
-    givenMinutes,
+    givenMinutes: displayGivenMinutes,
     requiredMinutes,
     slackMinutes,
     walkMinutes,

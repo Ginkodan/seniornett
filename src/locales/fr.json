@@ -559,9 +559,6 @@
     "loadingConnections": "Les connexions se chargent ...",
     "connectionSingular": "Connexion",
     "connectionPlural": "Connexions",
-    "previousConnections": "Connexions précédentes",
-    "nextConnections": "Connexions suivantes",
-    "connectionNavigation": "Parcourir les connexions",
     "realtime": {
       "cancelled": "Suppression",
       "delayed": "Retard",
