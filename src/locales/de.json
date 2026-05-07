@@ -555,6 +555,7 @@
     "departure": "Abfahrt",
     "arrival": "Ankunft",
     "search": "Suchen",
+    "formIntro": "Geben Sie Start und Ziel ein. Wir zeigen nur die wichtigsten Angaben.",
     "loadingConnections": "Verbindungen werden geladen ...",
     "connectionSingular": "Verbindung",
     "connectionPlural": "Verbindungen",
@@ -568,6 +569,21 @@
       "updatedDeparture": "neu ab {time}",
       "updatedArrival": "neu an {time}",
       "updatedPlatform": "neu {platform}"
+    },
+    "transfer": {
+      "walk": "zu Fuss",
+      "minutes": "{required} nötig, {given} verfügbar",
+      "status": {
+        "tight": "Knapp",
+        "okay": "Passt",
+        "plenty": "Viel Zeit",
+        "unknown": "Unklar"
+      }
+    },
+    "access": {
+      "walk": "zu Fuss",
+      "summary": "Zu Fuss von {from} zum Zug in {to}",
+      "summaryEnd": "Zu Fuss vom Zug in {from} zum Ziel {to}"
     },
     "enterStations": "Bitte geben Sie Start- und Zielbahnhof ein.",
     "errors": {

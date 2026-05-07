@@ -3,7 +3,7 @@
 "use client";
 
 import React from "react";
-import { MapPin, Train, Bus, Ship, TramFront, AlertCircle, Loader2, X, Navigation, Search } from "lucide-react";
+import { MapPin, Train, Bus, Ship, TramFront, AlertCircle, Loader2, X, Navigation, Clock3, Rabbit, Snail, Footprints } from "lucide-react";
 import { searchStationsAction, searchConnectionsAction } from "@/app/actions/sbb";
 import { useAppState } from "./app-provider";
 import { Button, SeniorNetPage } from "./ui";
@@ -14,6 +14,28 @@ const INITIAL_RESULTS_PAGE = 1;
 const SWISS_TIME_ZONE = "Europe/Zurich";
 const EDGE_FETCH_LIMIT = 16;
 const EDGE_WINDOWS_MINUTES = [20, 40, 60, 90, 180];
+const TRANSFER_STATUS_META = {
+  tight: {
+    icon: Rabbit,
+    labelKey: "sbb.transfer.status.tight",
+    tone: "tight",
+  },
+  okay: {
+    icon: Clock3,
+    labelKey: "sbb.transfer.status.okay",
+    tone: "okay",
+  },
+  plenty: {
+    icon: Snail,
+    labelKey: "sbb.transfer.status.plenty",
+    tone: "plenty",
+  },
+  unknown: {
+    icon: Clock3,
+    labelKey: "sbb.transfer.status.unknown",
+    tone: "unknown",
+  },
+};
 
 function getSwissNowDefaults() {
   const now = new Date();
@@ -165,6 +187,16 @@ function getConnectionRealtimeState(connection, t) {
   return null;
 }
 
+function getTransferStatusMeta(assessment, t) {
+  if (!assessment) return null;
+  const status = TRANSFER_STATUS_META[assessment.tone] || TRANSFER_STATUS_META.unknown;
+  return {
+    icon: status.icon,
+    label: t(status.labelKey),
+    tone: status.tone,
+  };
+}
+
 function parseClockMinutes(value) {
   if (!value || !value.includes(":")) return null;
   const [hours, minutes] = value.split(":").map((part) => Number.parseInt(part, 10));
@@ -272,6 +304,26 @@ function getTransferDetails(connection, displayLegs, idx) {
   };
 }
 
+function formatTransferMinutes(minutes) {
+  if (typeof minutes !== "number" || Number.isNaN(minutes)) {
+    return "–";
+  }
+
+  return `${minutes} min`;
+}
+
+function formatWalkDistanceMeters(meters) {
+  if (typeof meters !== "number" || Number.isNaN(meters) || meters <= 0) {
+    return null;
+  }
+
+  if (meters >= 1000) {
+    return `ca. ${(meters / 1000).toFixed(meters >= 5000 ? 0 : 1)} km`;
+  }
+
+  return `ca. ${Math.round(meters)} m`;
+}
+
 function StationAutocomplete({ label, value, onChange, onSelect, suggestions, error }) {
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const wrapRef = React.useRef(null);
@@ -329,6 +381,30 @@ function ConnectionDetail({ connection, onClose }) {
   const { t } = useAppState();
   const transferMarkers = React.useMemo(() => buildTransferMarkers(connection), [connection]);
   const displayLegs = React.useMemo(() => getDisplayLegs(connection.legs), [connection.legs]);
+  const accessAssessment = connection.accessAssessment;
+  const destinationAssessment = connection.destinationAssessment;
+  const firstVehicleLeg = displayLegs[0];
+  const lastVehicleLeg = displayLegs[displayLegs.length - 1];
+  const accessDistanceLabel = formatWalkDistanceMeters(accessAssessment?.walkDistanceMeters);
+  const destinationDistanceLabel = formatWalkDistanceMeters(destinationAssessment?.walkDistanceMeters);
+  const accessSummary = accessAssessment && firstVehicleLeg
+    ? t("sbb.access.summary", {
+      from: connection.from,
+      to: firstVehicleLeg.departureStation,
+    })
+    : "";
+  const destinationSummary = destinationAssessment && lastVehicleLeg
+    ? t("sbb.access.summaryEnd", {
+      from: lastVehicleLeg.arrivalStation,
+      to: connection.to,
+    })
+    : "";
+  const accessTitle = accessAssessment && firstVehicleLeg
+    ? t("sbb.access.walk")
+    : "";
+  const destinationTitle = destinationAssessment && lastVehicleLeg
+    ? t("sbb.access.walk")
+    : "";
 
   return (
     <div className="sbb-connection-detail">
@@ -363,6 +439,29 @@ function ConnectionDetail({ connection, onClose }) {
         <div className="sbb-journey-point sbb-journey-start">
           <div className="sbb-point-name">{connection.from}</div>
         </div>
+
+        {accessAssessment && firstVehicleLeg && (
+          <div className="sbb-walk-strip">
+            <div className="sbb-walk-box">
+              <div className="sbb-access-title">{accessTitle}</div>
+              <div className="sbb-access-summary-text">{accessSummary}</div>
+              <div className="sbb-access-meta">
+                <span className="sbb-access-pill">
+                  <Footprints size={14} />
+                  <span>{t("sbb.access.walk")}</span>
+                </span>
+                <span className="sbb-transfer-minutes">
+                  {formatTransferMinutes(accessAssessment.givenMinutes)}
+                </span>
+                {accessDistanceLabel && (
+                  <span className="sbb-transfer-distance">
+                    {accessDistanceLabel}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {displayLegs.length > 0 && (
           <div className="sbb-journey-sections">
@@ -408,14 +507,41 @@ function ConnectionDetail({ connection, onClose }) {
                   {idx < displayLegs.length - 1 && (
                     (() => {
                       const transfer = getTransferDetails(connection, displayLegs, idx);
+                      const transferAssessment = connection.transferAssessments?.[idx];
+                      const transferStatus = getTransferStatusMeta(transferAssessment, t);
                       if (!transfer) return null;
+                      const TransferStatusIcon = transferStatus?.icon;
 
                       return (
-                        <div className="sbb-transfer">
+                        <div className={`sbb-transfer ${transferAssessment ? `sbb-transfer-${transferAssessment.tone}` : ""}`}>
                           <div className="sbb-transfer-line">
                             <span className="sbb-transfer-station">{transfer.station}</span>
                             <span className="sbb-transfer-label">{transfer.text}</span>
                           </div>
+                          {transferAssessment && transferStatus && (
+                            <div className="sbb-transfer-meta">
+                              {typeof transferAssessment.walkMinutes === "number" && transferAssessment.walkMinutes > 0 && (
+                                <span className="sbb-transfer-walk" title={t("sbb.transfer.walk")}>
+                                  <Footprints size={14} />
+                                  <span>{t("sbb.transfer.walk")}</span>
+                                </span>
+                              )}
+                              <span
+                                className={`sbb-transfer-badge sbb-transfer-badge-${transferStatus.tone}`}
+                                aria-label={transferStatus.label}
+                                title={transferStatus.label}
+                              >
+                                <TransferStatusIcon size={14} />
+                                <span>{transferStatus.label}</span>
+                              </span>
+                              <span className="sbb-transfer-minutes">
+                                {t("sbb.transfer.minutes", {
+                                  required: formatTransferMinutes(transferAssessment.requiredMinutes),
+                                  given: formatTransferMinutes(transferAssessment.givenMinutes),
+                                })}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       );
                     })()
@@ -423,6 +549,29 @@ function ConnectionDetail({ connection, onClose }) {
                 </React.Fragment>
               );
             })}
+          </div>
+        )}
+
+        {destinationAssessment && lastVehicleLeg && (
+          <div className="sbb-walk-strip">
+            <div className="sbb-walk-box">
+              <div className="sbb-access-title">{destinationTitle}</div>
+              <div className="sbb-access-summary-text">{destinationSummary}</div>
+              <div className="sbb-access-meta">
+                <span className="sbb-access-pill">
+                  <Footprints size={14} />
+                  <span>{t("sbb.access.walk")}</span>
+                </span>
+                <span className="sbb-transfer-minutes">
+                  {formatTransferMinutes(destinationAssessment.givenMinutes)}
+                </span>
+                {destinationDistanceLabel && (
+                  <span className="sbb-transfer-distance">
+                    {destinationDistanceLabel}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
@@ -482,7 +631,16 @@ function getConnectionKey(connection) {
 }
 
 function formatSwissDateTimeParts(isoTime) {
-  const date = new Date(isoTime);
+  const trimmed = `${isoTime || ""}`.trim();
+  const localMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+  if (localMatch && !/(?:Z|[+-]\d{2}:\d{2})$/i.test(trimmed)) {
+    return {
+      date: `${localMatch[1]}-${localMatch[2]}-${localMatch[3]}`,
+      time: `${localMatch[4]}:${localMatch[5]}`,
+    };
+  }
+
+  const date = new Date(trimmed);
   if (Number.isNaN(date.getTime())) return null;
   const parts = new Intl.DateTimeFormat("sv-SE", {
     timeZone: SWISS_TIME_ZONE,
@@ -499,6 +657,25 @@ function formatSwissDateTimeParts(isoTime) {
   return {
     date: `${lookup.year}-${lookup.month}-${lookup.day}`,
     time: `${lookup.hour}:${lookup.minute}`,
+  };
+}
+
+function shiftSwissDateTimeParts(date, time, offsetMinutes) {
+  const base = new Date(Date.UTC(
+    Number.parseInt(date.slice(0, 4), 10),
+    Number.parseInt(date.slice(5, 7), 10) - 1,
+    Number.parseInt(date.slice(8, 10), 10),
+    Number.parseInt(time.slice(0, 2), 10),
+    Number.parseInt(time.slice(3, 5), 10),
+    0
+  ));
+  if (Number.isNaN(base.getTime())) return null;
+
+  base.setUTCMinutes(base.getUTCMinutes() + offsetMinutes);
+  const shifted = base.toISOString();
+  return {
+    date: shifted.slice(0, 10),
+    time: shifted.slice(11, 16),
   };
 }
 
@@ -527,6 +704,16 @@ export function SbbScreen() {
   const connectionsRef = React.useRef(null);
   const pendingPrependRef = React.useRef(null);
   const isInitialLoading = loading && connections.length === 0;
+
+  function handleFromStationChange(value) {
+    setFromStation(value);
+    setFromStationId("");
+  }
+
+  function handleToStationChange(value) {
+    setToStation(value);
+    setToStationId("");
+  }
 
   // Search from station suggestions
   React.useEffect(() => {
@@ -567,36 +754,48 @@ export function SbbScreen() {
   }
 
   function getRelevantIso(connection) {
-    return isArrival ? connection.arrivalIso : connection.departureIso;
+    return connection.departureIso;
   }
 
   function filterEdgeConnections(batch, direction, cursorIso) {
-    const cursorTime = new Date(cursorIso).getTime();
-    if (Number.isNaN(cursorTime)) return EMPTY_ARRAY;
+    const cursorParts = formatSwissDateTimeParts(cursorIso);
+    if (!cursorParts) return EMPTY_ARRAY;
+    const cursorTime = parseClockMinutes(cursorParts.time);
+    if (cursorTime === null) return EMPTY_ARRAY;
+    const searchTimeMinutes = parseClockMinutes(time);
 
     const filtered = batch.filter((connection) => {
-      const relevantIso = getRelevantIso(connection);
-      const relevantTime = new Date(relevantIso).getTime();
-      if (Number.isNaN(relevantTime)) return false;
-      const relevantDate = formatSwissDateTimeParts(relevantIso)?.date;
-      if (relevantDate !== date) return false;
+      const departureParts = formatSwissDateTimeParts(connection.departureIso);
+      const arrivalParts = formatSwissDateTimeParts(connection.arrivalIso);
+      if (!departureParts || !arrivalParts) return false;
 
-      if (direction === "before") {
-        return isArrival ? relevantTime > cursorTime : relevantTime < cursorTime;
+      const departureMinutes = parseClockMinutes(departureParts.time);
+      const arrivalMinutes = parseClockMinutes(arrivalParts.time);
+      if (departureMinutes === null || arrivalMinutes === null) return false;
+
+      if (isArrival) {
+        if (arrivalParts.date !== date || searchTimeMinutes === null || arrivalMinutes > searchTimeMinutes) {
+          return false;
+        }
+      } else {
+        if (departureParts.date !== date || searchTimeMinutes === null || departureMinutes < searchTimeMinutes) {
+          return false;
+        }
       }
-      return isArrival ? relevantTime < cursorTime : relevantTime > cursorTime;
+
+      return direction === "before"
+        ? departureMinutes < cursorTime
+        : departureMinutes > cursorTime;
     });
 
     filtered.sort((a, b) => {
-      const aTime = new Date(getRelevantIso(a)).getTime();
-      const bTime = new Date(getRelevantIso(b)).getTime();
-      return isArrival ? bTime - aTime : aTime - bTime;
+      const aTime = parseClockMinutes(formatSwissDateTimeParts(a.departureIso)?.time || "");
+      const bTime = parseClockMinutes(formatSwissDateTimeParts(b.departureIso)?.time || "");
+      if (aTime === null || bTime === null) return 0;
+      return aTime - bTime;
     });
 
-    if (direction === "before" && !isArrival) {
-      return filtered.slice(-6);
-    }
-    return filtered.slice(0, 6);
+    return direction === "before" ? filtered.slice(-6) : filtered.slice(0, 6);
   }
 
   async function fetchEdgeConnections(direction) {
@@ -607,12 +806,13 @@ export function SbbScreen() {
     if (!cursorIso) return EMPTY_ARRAY;
 
     const offsets = direction === "before"
-      ? (isArrival ? EDGE_WINDOWS_MINUTES : EDGE_WINDOWS_MINUTES.map((minutes) => -minutes))
+      ? EDGE_WINDOWS_MINUTES.map((minutes) => -minutes)
       : [0];
 
     for (const offsetMinutes of offsets) {
-      const anchorDate = new Date(new Date(cursorIso).getTime() + (offsetMinutes * 60_000));
-      const swissParts = formatSwissDateTimeParts(anchorDate.toISOString());
+      const cursorParts = formatSwissDateTimeParts(cursorIso);
+      if (!cursorParts) continue;
+      const swissParts = shiftSwissDateTimeParts(cursorParts.date, cursorParts.time, offsetMinutes);
       if (!swissParts) continue;
 
       const result = await searchConnectionsAction(
@@ -620,7 +820,7 @@ export function SbbScreen() {
         toStationId || toStation,
         swissParts.date,
         swissParts.time,
-        isArrival,
+        false,
         0,
         false,
         EDGE_FETCH_LIMIT
@@ -770,11 +970,13 @@ export function SbbScreen() {
         <div className="sbb-shell">
           {/* Search Form */}
           <form className="sbb-form" onSubmit={handleSearch}>
+            <p className="sbb-form-intro">{t("sbb.formIntro")}</p>
+
             <div className="sbb-form-row">
               <StationAutocomplete
                 label={t("sbb.from")}
                 value={fromStation}
-                onChange={setFromStation}
+                onChange={handleFromStationChange}
                 onSelect={(s) => {
                   setFromStation(s.name);
                   setFromStationId(s.id);
@@ -784,7 +986,7 @@ export function SbbScreen() {
               <StationAutocomplete
                 label={t("sbb.to")}
                 value={toStation}
-                onChange={setToStation}
+                onChange={handleToStationChange}
                 onSelect={(s) => {
                   setToStation(s.name);
                   setToStationId(s.id);
@@ -837,7 +1039,6 @@ export function SbbScreen() {
               onClick={handleSearch}
               disabled={loading || !fromStation.trim() || !toStation.trim()}
               className="sbb-search-button"
-              icon={<Search size={22} />}
               variant="primary"
               size="lg"
             >

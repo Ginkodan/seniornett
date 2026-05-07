@@ -16,7 +16,3 @@ For every change consider the `design-guide.md` before implementing a todo.
 - [ ] Medizinische Hilfe/Überwachung
 - [ ] Hilfsangebote (Einkaufen etc.)
 - [ ] Files/images print
-
-Fahrplan
-- Zug/Bus Icon
-- Ausfälle/Versä"tungen

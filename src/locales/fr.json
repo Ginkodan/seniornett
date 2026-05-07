@@ -555,6 +555,7 @@
     "departure": "Départ",
     "arrival": "Arrivée",
     "search": "Chercher",
+    "formIntro": "Entrez le départ et l'arrivée. Nous montrons seulement les informations essentielles.",
     "loadingConnections": "Les connexions se chargent ...",
     "connectionSingular": "Connexion",
     "connectionPlural": "Connexions",
@@ -568,6 +569,21 @@
       "updatedDeparture": "nouveau départ {time}",
       "updatedArrival": "nouvelle arrivée {time}",
       "updatedPlatform": "nouveau quai {platform}"
+    },
+    "transfer": {
+      "walk": "à pied",
+      "minutes": "{required} nécessaires, {given} disponibles",
+      "status": {
+        "tight": "Juste",
+        "okay": "Correct",
+        "plenty": "Large",
+        "unknown": "Inconnu"
+      }
+    },
+    "access": {
+      "walk": "à pied",
+      "summary": "À pied de {from} jusqu'au train à {to}",
+      "summaryEnd": "À pied du train à {from} jusqu'à la destination {to}"
     },
     "enterStations": "Veuillez entrer les gares de départ et d'arrivée.",
     "errors": {
