@@ -19,6 +19,14 @@ export interface Leg {
   arrivalStation: string;
   departurePlatform?: string;
   arrivalPlatform?: string;
+  departureDelay?: number;
+  arrivalDelay?: number;
+  departurePrognosisTime?: string;
+  arrivalPrognosisTime?: string;
+  departurePrognosisPlatform?: string;
+  arrivalPrognosisPlatform?: string;
+  cancelled?: boolean;
+  hasRealtimeData?: boolean;
 }
 
 export interface Connection {
@@ -74,17 +82,35 @@ interface ApiSection {
   };
   departure?: {
     departure?: string;
+    delay?: number | null;
     station?: {
       name?: string;
     };
     platform?: string;
+    prognosis?: {
+      platform?: string | null;
+      arrival?: string | null;
+      departure?: string | null;
+    };
+    realtimeAvailability?: unknown;
+    cancelled?: boolean | null;
+    canceled?: boolean | null;
   };
   arrival?: {
     arrival?: string;
+    delay?: number | null;
     station?: {
       name?: string;
     };
     platform?: string;
+    prognosis?: {
+      platform?: string | null;
+      arrival?: string | null;
+      departure?: string | null;
+    };
+    realtimeAvailability?: unknown;
+    cancelled?: boolean | null;
+    canceled?: boolean | null;
   };
 }
 
@@ -218,6 +244,32 @@ function getSwissClockMinutes(isoTime: string): number | null {
   return hours * 60 + minutes;
 }
 
+function hasRealtimeCheckpointData(
+  checkpoint?: {
+    delay?: number | null;
+    prognosis?: {
+      platform?: string | null;
+      arrival?: string | null;
+      departure?: string | null;
+    };
+    realtimeAvailability?: unknown;
+    cancelled?: boolean | null;
+    canceled?: boolean | null;
+  }
+): boolean {
+  if (!checkpoint) return false;
+
+  return (
+    typeof checkpoint.delay === "number" ||
+    Boolean(checkpoint.prognosis?.platform) ||
+    Boolean(checkpoint.prognosis?.arrival) ||
+    Boolean(checkpoint.prognosis?.departure) ||
+    checkpoint.realtimeAvailability != null ||
+    checkpoint.cancelled === true ||
+    checkpoint.canceled === true
+  );
+}
+
 /**
  * Search for train connections between two stations
  */
@@ -313,16 +365,28 @@ export async function searchConnections(
         platform: c.from.platform,
         legs: sectionsArray.map((section) => {
           const journey = section.journey || {};
+          const departure = section.departure;
+          const arrival = section.arrival;
+          const departureCancelled = departure?.cancelled === true || departure?.canceled === true;
+          const arrivalCancelled = arrival?.cancelled === true || arrival?.canceled === true;
           return {
             number: normalizeTrainNumber(journey.number || journey.name || "–"),
             category: journey.category || "",
             direction: journey.to || "",
-            departureTime: formatTime(section.departure?.departure || journey.departure),
-            arrivalTime: formatTime(section.arrival?.arrival || journey.arrival),
-            departureStation: section.departure?.station?.name || "–",
-            arrivalStation: section.arrival?.station?.name || "–",
-            departurePlatform: section.departure?.platform || undefined,
-            arrivalPlatform: section.arrival?.platform || undefined,
+            departureTime: formatTime(departure?.departure || journey.departure),
+            arrivalTime: formatTime(arrival?.arrival || journey.arrival),
+            departureStation: departure?.station?.name || "–",
+            arrivalStation: arrival?.station?.name || "–",
+            departurePlatform: departure?.platform || undefined,
+            arrivalPlatform: arrival?.platform || undefined,
+            departureDelay: typeof departure?.delay === "number" ? departure.delay : undefined,
+            arrivalDelay: typeof arrival?.delay === "number" ? arrival.delay : undefined,
+            departurePrognosisTime: departure?.prognosis?.departure ? formatTime(departure.prognosis.departure) : undefined,
+            arrivalPrognosisTime: arrival?.prognosis?.arrival ? formatTime(arrival.prognosis.arrival) : undefined,
+            departurePrognosisPlatform: departure?.prognosis?.platform || undefined,
+            arrivalPrognosisPlatform: arrival?.prognosis?.platform || undefined,
+            cancelled: departureCancelled || arrivalCancelled,
+            hasRealtimeData: hasRealtimeCheckpointData(departure) || hasRealtimeCheckpointData(arrival),
           };
         }),
       };

@@ -561,6 +561,14 @@
     "previousConnections": "Frühere Verbindungen",
     "nextConnections": "Spätere Verbindungen",
     "connectionNavigation": "Verbindungen durchblättern",
+    "realtime": {
+      "cancelled": "Ausfall",
+      "delayed": "Verspätung",
+      "delayedMinutes": "Verspätung +{minutes} Min.",
+      "updatedDeparture": "neu ab {time}",
+      "updatedArrival": "neu an {time}",
+      "updatedPlatform": "neu {platform}"
+    },
     "enterStations": "Bitte geben Sie Start- und Zielbahnhof ein.",
     "errors": {
       "missingStations": "Bitte geben Sie Start- und Zielbahnhof ein.",

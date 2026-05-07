@@ -561,6 +561,14 @@
     "previousConnections": "Connexions précédentes",
     "nextConnections": "Connexions suivantes",
     "connectionNavigation": "Parcourir les connexions",
+    "realtime": {
+      "cancelled": "Suppression",
+      "delayed": "Retard",
+      "delayedMinutes": "Retard +{minutes} min.",
+      "updatedDeparture": "nouveau départ {time}",
+      "updatedArrival": "nouvelle arrivée {time}",
+      "updatedPlatform": "nouveau quai {platform}"
+    },
     "enterStations": "Veuillez entrer les gares de départ et d'arrivée.",
     "errors": {
       "missingStations": "Veuillez entrer les gares de départ et d'arrivée.",

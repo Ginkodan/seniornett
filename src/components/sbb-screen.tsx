@@ -15,6 +15,26 @@ const SWISS_TIME_ZONE = "Europe/Zurich";
 const EDGE_FETCH_LIMIT = 16;
 const EDGE_WINDOWS_MINUTES = [20, 40, 60, 90, 180];
 
+function getSwissNowDefaults() {
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat("sv-SE", {
+    timeZone: SWISS_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(now);
+
+  const lookup = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+
+  return {
+    date: `${lookup.year}-${lookup.month}-${lookup.day}`,
+    time: `${lookup.hour}:${lookup.minute}`,
+  };
+}
+
 function getTransportIcon(category, number) {
   const type = `${category || ""} ${number || ""}`.trim().toLowerCase();
   const primaryToken = type.split(/\s+/)[0] || "";
@@ -50,42 +70,44 @@ function getTransportIcon(category, number) {
   return Train;
 }
 
-function getTransportKind(category, number) {
-  const Icon = getTransportIcon(category, number);
-  if (Icon === Bus || Icon === TramFront) return "kante";
-  if (Icon === Ship) return "steg";
-  return "gleis";
-}
-
 function getPlatformLabel(platform, category, number) {
   if (!platform) return null;
   const normalizedPlatform = String(platform).trim();
   if (!normalizedPlatform) return null;
+  const barePlatform = normalizedPlatform
+    .replace(/^(gleis|platform|kante|quai|stand|steg|pier)\s*/i, "")
+    .trim();
 
-  if (/^[0-9]+[a-z]?$/i.test(normalizedPlatform)) {
-    return `Gleis ${normalizedPlatform}`;
+  if (!barePlatform) return null;
+
+  if (/^[0-9]+[a-z]?$/i.test(barePlatform)) {
+    return `Gleis ${barePlatform}`;
   }
 
-  if (/^[a-z]$/i.test(normalizedPlatform)) {
-    return `Kante ${normalizedPlatform.toUpperCase()}`;
+  if (/^[a-z]$/i.test(barePlatform)) {
+    return `Kante ${barePlatform.toUpperCase()}`;
   }
 
   if (/^(gleis|platform)\b/i.test(normalizedPlatform)) {
-    return normalizedPlatform.replace(/^(platform)\b/i, "Gleis");
+    return `Gleis ${barePlatform}`;
   }
 
   if (/^(kante|quai|stand)\b/i.test(normalizedPlatform)) {
-    return normalizedPlatform.replace(/^(quai|stand)\b/i, "Kante");
+    return `Kante ${barePlatform}`;
   }
 
   if (/^(steg|pier)\b/i.test(normalizedPlatform)) {
-    return normalizedPlatform.replace(/^(pier)\b/i, "Steg");
+    return `Steg ${barePlatform}`;
   }
 
-  const kind = getTransportKind(category, number);
-  if (kind === "kante") return `Kante ${platform}`;
-  if (kind === "steg") return `Steg ${platform}`;
-  return `Gleis ${platform}`;
+  const TransportIcon = getTransportIcon(category, number);
+  if (TransportIcon === Ship) return `Steg ${barePlatform}`;
+  if (TransportIcon === Bus || TransportIcon === TramFront) {
+    if (/^[a-z][a-z0-9-]*$/i.test(barePlatform)) {
+      return `Kante ${barePlatform.toUpperCase()}`;
+    }
+  }
+  return `Gleis ${barePlatform}`;
 }
 
 function isVehicleLeg(leg) {
@@ -97,6 +119,50 @@ function isVehicleLeg(leg) {
 
 function getDisplayLegs(legs) {
   return (legs || []).filter(isVehicleLeg);
+}
+
+function getLegRealtimeStatus(leg, t) {
+  if (!leg) return null;
+
+  if (leg.cancelled) {
+    return {
+      tone: "cancelled",
+      text: t("sbb.realtime.cancelled"),
+    };
+  }
+
+  const departureDelay = typeof leg.departureDelay === "number" ? leg.departureDelay : null;
+  const arrivalDelay = typeof leg.arrivalDelay === "number" ? leg.arrivalDelay : null;
+  const maxDelay = Math.max(departureDelay ?? 0, arrivalDelay ?? 0);
+
+  if (maxDelay > 0) {
+    return {
+      tone: "delayed",
+      text: t("sbb.realtime.delayedMinutes", { minutes: maxDelay }),
+    };
+  }
+
+  return null;
+}
+
+function getConnectionRealtimeState(connection, t) {
+  const displayLegs = getDisplayLegs(connection?.legs);
+
+  if (displayLegs.some((leg) => leg.cancelled)) {
+    return {
+      tone: "cancelled",
+      label: t("sbb.realtime.cancelled"),
+    };
+  }
+
+  if (displayLegs.some((leg) => (leg.departureDelay ?? 0) > 0 || (leg.arrivalDelay ?? 0) > 0)) {
+    return {
+      tone: "delayed",
+      label: t("sbb.realtime.delayed"),
+    };
+  }
+
+  return null;
 }
 
 function parseClockMinutes(value) {
@@ -145,6 +211,65 @@ function buildTransferMarkers(connection) {
       };
     })
     .filter(Boolean);
+}
+
+function getTransferDetails(connection, displayLegs, idx) {
+  const currentLeg = displayLegs[idx];
+  const nextLeg = displayLegs[idx + 1];
+  if (!currentLeg || !nextLeg) return null;
+
+  const allLegs = Array.isArray(connection?.legs) ? connection.legs : EMPTY_ARRAY;
+  const currentIndex = allLegs.indexOf(currentLeg);
+  const nextIndex = allLegs.indexOf(nextLeg);
+  const betweenLegs = currentIndex >= 0 && nextIndex > currentIndex
+    ? allLegs.slice(currentIndex + 1, nextIndex)
+    : EMPTY_ARRAY;
+  const walkLegs = betweenLegs.filter((leg) => !isVehicleLeg(leg));
+
+  const fromStation = walkLegs[0]?.departureStation || currentLeg.arrivalStation;
+  const toStation = walkLegs[walkLegs.length - 1]?.arrivalStation || nextLeg.departureStation;
+  const fromPlatform = getPlatformLabel(currentLeg.arrivalPlatform, currentLeg.category, currentLeg.number);
+  const toPlatform = getPlatformLabel(nextLeg.departurePlatform, nextLeg.category, nextLeg.number);
+
+  if (walkLegs.length > 0 && fromStation && toStation && fromStation !== toStation) {
+    if (toPlatform) {
+      return {
+        station: fromStation,
+        text: `Umsteigen zu Fuss nach ${toStation}, ab ${toPlatform}`,
+      };
+    }
+
+    return {
+      station: fromStation,
+      text: `Umsteigen zu Fuss nach ${toStation}`,
+    };
+  }
+
+  if (fromPlatform && toPlatform) {
+    return {
+      station: currentLeg.arrivalStation,
+      text: `Umsteigen von ${fromPlatform} nach ${toPlatform}`,
+    };
+  }
+
+  if (toPlatform) {
+    return {
+      station: currentLeg.arrivalStation,
+      text: `Umsteigen weiter ab ${toPlatform}`,
+    };
+  }
+
+  if (currentLeg.arrivalStation !== nextLeg.departureStation) {
+    return {
+      station: currentLeg.arrivalStation,
+      text: `Umsteigen nach ${nextLeg.departureStation}`,
+    };
+  }
+
+  return {
+    station: currentLeg.arrivalStation,
+    text: "Umsteigen",
+  };
 }
 
 function StationAutocomplete({ label, value, onChange, onSelect, suggestions, error }) {
@@ -201,6 +326,7 @@ function StationAutocomplete({ label, value, onChange, onSelect, suggestions, er
 }
 
 function ConnectionDetail({ connection, onClose }) {
+  const { t } = useAppState();
   const transferMarkers = React.useMemo(() => buildTransferMarkers(connection), [connection]);
   const displayLegs = React.useMemo(() => getDisplayLegs(connection.legs), [connection.legs]);
 
@@ -243,6 +369,7 @@ function ConnectionDetail({ connection, onClose }) {
             {displayLegs.map((leg, idx) => {
               const TransportIcon = getTransportIcon(leg.category, leg.number);
               const platformLabel = getPlatformLabel(leg.departurePlatform, leg.category, leg.number);
+              const realtimeStatus = getLegRealtimeStatus(leg, t);
               return (
                 <React.Fragment key={idx}>
                   <div className="sbb-section">
@@ -260,6 +387,12 @@ function ConnectionDetail({ connection, onClose }) {
                       <div className="sbb-platform">{platformLabel || "–"}</div>
                     </div>
 
+                    {realtimeStatus && (
+                      <div className={`sbb-leg-status sbb-leg-status-${realtimeStatus.tone}`} role="status">
+                        {realtimeStatus.text}
+                      </div>
+                    )}
+
                     <div className="sbb-leg-body">
                       <div className="sbb-leg-row">
                         <span>{leg.departureStation}</span>
@@ -273,14 +406,19 @@ function ConnectionDetail({ connection, onClose }) {
                   </div>
 
                   {idx < displayLegs.length - 1 && (
-                    <div className="sbb-transfer">
-                      <div className="sbb-transfer-line">
-                        <span className="sbb-transfer-station">{leg.arrivalStation}</span>
-                        <span className="sbb-transfer-label">
-                          Umsteigen von {getPlatformLabel(leg.arrivalPlatform, leg.category, leg.number) || "–"} nach {getPlatformLabel(displayLegs[idx + 1].departurePlatform, displayLegs[idx + 1].category, displayLegs[idx + 1].number) || "–"}
-                        </span>
-                      </div>
-                    </div>
+                    (() => {
+                      const transfer = getTransferDetails(connection, displayLegs, idx);
+                      if (!transfer) return null;
+
+                      return (
+                        <div className="sbb-transfer">
+                          <div className="sbb-transfer-line">
+                            <span className="sbb-transfer-station">{transfer.station}</span>
+                            <span className="sbb-transfer-label">{transfer.text}</span>
+                          </div>
+                        </div>
+                      );
+                    })()
                   )}
                 </React.Fragment>
               );
@@ -297,6 +435,9 @@ function ConnectionDetail({ connection, onClose }) {
 }
 
 function ConnectionCard({ connection, onSelect }) {
+  const { t } = useAppState();
+  const realtimeState = getConnectionRealtimeState(connection, t);
+
   return (
     <button
       type="button"
@@ -310,7 +451,18 @@ function ConnectionCard({ connection, onSelect }) {
       </div>
 
       <div className="sbb-card-middle">
-        <div className="sbb-duration">{connection.duration}</div>
+        <div className="sbb-card-duration-row">
+          <div className="sbb-duration">{connection.duration}</div>
+          {realtimeState && (
+            <span
+              className={`sbb-card-status-icon sbb-card-status-icon-${realtimeState.tone}`}
+              aria-label={realtimeState.label}
+              title={realtimeState.label}
+            >
+              <AlertCircle size={18} />
+            </span>
+          )}
+        </div>
         {connection.changes > 0 && (
           <div className="sbb-changes">{connection.changes} Umstieg{connection.changes > 1 ? "e" : ""}</div>
         )}
@@ -352,16 +504,14 @@ function formatSwissDateTimeParts(isoTime) {
 
 export function SbbScreen() {
   const { t } = useAppState();
+  const defaultSwissDateTime = React.useMemo(() => getSwissNowDefaults(), []);
 
   const [fromStation, setFromStation] = React.useState("");
   const [fromStationId, setFromStationId] = React.useState("");
   const [toStation, setToStation] = React.useState("");
   const [toStationId, setToStationId] = React.useState("");
-  const [date, setDate] = React.useState(() => {
-    const d = new Date();
-    return d.toISOString().split("T")[0];
-  });
-  const [time, setTime] = React.useState("08:00");
+  const [date, setDate] = React.useState(defaultSwissDateTime.date);
+  const [time, setTime] = React.useState(defaultSwissDateTime.time);
   const [isArrival, setIsArrival] = React.useState(false);
 
   const [fromSuggestions, setFromSuggestions] = React.useState(EMPTY_ARRAY);
