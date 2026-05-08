@@ -5,6 +5,7 @@ import { MapPin } from "lucide-react";
 import { useAppState } from "./app-provider";
 import { Button, ModalOverlay, TextField } from "./ui";
 import type { DayForecast, WeatherLocation, WeatherResult } from "@/app/actions/weather";
+import { readJsonFromStorage, writeJsonToStorage } from "@/lib/shared/client-storage";
 import {
   Area,
   Bar,
@@ -18,6 +19,9 @@ import {
   YAxis,
 } from "recharts";
 import styles from "./home-weather-panel.module.css";
+
+const WEATHER_CACHE_PREFIX = "seniornett-weather-cache-v1";
+const WEATHER_CACHE_TTL_MS = 60 * 60 * 1000;
 
 type HomeWeatherPanelProps = {
   initialWeather: WeatherResult | null;
@@ -54,16 +58,49 @@ function WeatherChartSection({ title, note, legend, children }: WeatherChartSect
   );
 }
 
+function weatherCacheKey(localeTag: string) {
+  return `${WEATHER_CACHE_PREFIX}:${localeTag}`;
+}
+
+function readWeatherCache(localeTag: string): { savedAt: number; weather: WeatherResult } | null {
+  const cached = readJsonFromStorage<{ savedAt: number; weather: WeatherResult } | null>(
+    weatherCacheKey(localeTag),
+    null
+  );
+
+  if (!cached?.weather || typeof cached.savedAt !== "number") {
+    return null;
+  }
+
+  if (Date.now() - cached.savedAt > WEATHER_CACHE_TTL_MS) {
+    return null;
+  }
+
+  return cached;
+}
+
+function writeWeatherCache(localeTag: string, weather: WeatherResult): void {
+  if (weather.error) {
+    return;
+  }
+
+  writeJsonToStorage(weatherCacheKey(localeTag), {
+    savedAt: Date.now(),
+    weather,
+  });
+}
+
 export function HomeWeatherPanel({
   initialWeather,
   fetchWeatherAction,
   searchLocationsAction,
 }: HomeWeatherPanelProps) {
-  const { t, locale } = useAppState();
+  const { t, locale, localeTag } = useAppState();
+  const cachedWeather = React.useMemo(() => readWeatherCache(localeTag), [localeTag]);
   const [weather, setWeather] = React.useState<WeatherResult | null>(initialWeather);
-  const [loading, setLoading] = React.useState(!initialWeather);
+  const [loading, setLoading] = React.useState(() => !initialWeather && !cachedWeather);
   const [searchOpen, setSearchOpen] = React.useState(false);
-  const [searchTerm, setSearchTerm] = React.useState(initialWeather?.city || "");
+  const [searchTerm, setSearchTerm] = React.useState(initialWeather?.city || cachedWeather?.weather.city || "");
   const [suggestions, setSuggestions] = React.useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const [activeIndex, setActiveIndex] = React.useState(-1);
@@ -71,6 +108,15 @@ export function HomeWeatherPanel({
 
   const debounceRef = React.useRef<number | null>(null);
   const locationLoadedRef = React.useRef(false);
+  const hourlyPrefetchRef = React.useRef<string | null>(null);
+
+  React.useEffect(() => {
+    if (!initialWeather && cachedWeather?.weather && !weather) {
+      setWeather(cachedWeather.weather);
+      setSearchTerm(cachedWeather.weather.city || "");
+      setLoading(false);
+    }
+  }, [cachedWeather, initialWeather, weather]);
 
   const summary = weather?.days?.[0];
   const isReady = Boolean(summary && !weather?.error);
@@ -147,7 +193,7 @@ export function HomeWeatherPanel({
         () => {
           void loadFallbackWeather();
         },
-        { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 60 * 60 * 1000 }
       );
     }
 
@@ -169,6 +215,53 @@ export function HomeWeatherPanel({
     },
     []
   );
+
+  React.useEffect(() => {
+    if (!weather || weather.error) {
+      return;
+    }
+
+    writeWeatherCache(localeTag, weather);
+  }, [localeTag, weather]);
+
+  React.useEffect(() => {
+    if (!weather?.city || weather.error || weather.days.length === 0 || weather.days[0]?.hourly?.length) {
+      return;
+    }
+
+    const prefetchKey = `${localeTag}:${weather.city}`;
+    if (hourlyPrefetchRef.current === prefetchKey) {
+      return;
+    }
+
+    hourlyPrefetchRef.current = prefetchKey;
+    const timeoutId = window.setTimeout(() => {
+      void fetchWeatherAction(weather.city, locale, undefined, { includeHourly: true })
+        .then((nextWeather) => {
+          if (nextWeather?.days?.length && !nextWeather.error) {
+            setWeather(nextWeather);
+          }
+        })
+        .catch(() => {
+          // Keep the lightweight overview if the background prefetch fails.
+        });
+    }, 1200);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [fetchWeatherAction, locale, localeTag, weather]);
+
+  React.useEffect(() => {
+    if (!selectedDay || !weather?.days?.length) {
+      return;
+    }
+
+    const refreshed = weather.days.find((day) => day.date === selectedDay.date);
+    if (refreshed && refreshed !== selectedDay && refreshed.hourly?.length) {
+      setSelectedDay(refreshed);
+    }
+  }, [selectedDay, weather]);
 
   function queueSuggestions(value: string) {
     if (!searchLocationsAction) return;
@@ -269,7 +362,15 @@ export function HomeWeatherPanel({
 
   const days: DayForecast[] = weather?.days?.slice(0, 5) ?? [];
 
-  const selectedHourlySeries = selectedDay?.hourly ?? [];
+  const selectedDayDetails = React.useMemo(() => {
+    if (!selectedDay) {
+      return null;
+    }
+
+    return weather?.days.find((entry) => entry.date === selectedDay.date) ?? selectedDay;
+  }, [selectedDay, weather]);
+
+  const selectedHourlySeries = selectedDayDetails?.hourly ?? [];
   type WeatherChartPoint = {
     slotIndex: number;
     time: string;
@@ -309,17 +410,18 @@ export function HomeWeatherPanel({
     : t("weather.dayDetailsSnowNone");
 
   async function loadSelectedDayDetails(day: DayForecast) {
-    if (!weather?.city || day.hourly?.length) {
+    const currentDay = weather?.days.find((entry) => entry.date === day.date) ?? day;
+
+    if (!weather?.city || currentDay.hourly?.length) {
+      setSelectedDay(currentDay);
       return;
     }
 
     try {
       const detailedWeather = await fetchWeatherAction(weather.city, locale, undefined, { includeHourly: true });
-      const detailedDay = detailedWeather.days.find((entry) => entry.date === day.date) ?? null;
       setWeather(detailedWeather);
-      if (detailedDay) {
-        setSelectedDay(detailedDay);
-      }
+      const detailedDay = detailedWeather.days.find((entry) => entry.date === day.date) ?? currentDay;
+      setSelectedDay(detailedDay);
     } catch {
       // Keep the summary view if the detailed fetch fails.
     }
@@ -467,8 +569,9 @@ export function HomeWeatherPanel({
                   type="button"
                   className={`home-weather-day-card home-weather-day-button ${index === 0 ? "home-weather-day-card--today" : ""}`}
                   onClick={() => {
-                    setSelectedDay(day);
-                    void loadSelectedDayDetails(day);
+                    const currentDay = weather.days.find((entry) => entry.date === day.date) ?? day;
+                    setSelectedDay(currentDay);
+                    void loadSelectedDayDetails(currentDay);
                   }}
                   aria-label={t("weather.openDayDetails", {
                     day: formatLongDayLabel(day.date),
@@ -561,36 +664,36 @@ export function HomeWeatherPanel({
         <ModalOverlay
           open={Boolean(selectedDay)}
           eyebrow={weather?.city || t("weather.title")}
-          title={selectedDay ? formatLongDayLabel(selectedDay.date) : t("weather.title")}
+          title={selectedDayDetails ? formatLongDayLabel(selectedDayDetails.date) : t("weather.title")}
           closeLabel={t("common.close")}
           onClose={() => setSelectedDay(null)}
           className="home-weather-overlay home-weather-day-overlay"
         >
-              {selectedDay ? (
+              {selectedDayDetails ? (
             <div className="home-weather-day-details">
               <div className="home-weather-day-summary">
                 <div className="home-weather-day-summary-icon" aria-hidden="true">
-                  {selectedDay.emoji}
+                  {selectedDayDetails.emoji}
                 </div>
                 <div className="home-weather-day-summary-copy">
-                  <p className="home-weather-day-summary-label">{selectedDay.label}</p>
+                  <p className="home-weather-day-summary-label">{selectedDayDetails.label}</p>
                   <p className="home-weather-day-summary-note">{t("weather.dayDetailsNote")}</p>
                 </div>
               </div>
 
-              {!selectedDay.hourly?.length ? (
+              {!selectedDayDetails.hourly?.length ? (
                 <p className="home-weather-day-loading">{t("weather.loading")}</p>
               ) : null}
 
               <div className="home-weather-day-metrics" aria-label={t("weather.dayDetailsMetrics")}>
                 <div className="home-weather-day-metric">
                   <span className="home-weather-day-metric-label">{t("weather.dayDetailsTemperature")}</span>
-                  <strong className="home-weather-day-metric-value">{selectedDay.tempMax}° / {selectedDay.tempMin}°</strong>
+                  <strong className="home-weather-day-metric-value">{selectedDayDetails.tempMax}° / {selectedDayDetails.tempMin}°</strong>
                 </div>
                 <div className="home-weather-day-metric">
                   <span className="home-weather-day-metric-label">{t("weather.dayDetailsRain")}</span>
                   <strong className="home-weather-day-metric-value">
-                    {selectedDay.precipMm > 0 ? `${selectedDay.precipMm} mm` : t("weather.dayDetailsDry")}
+                    {selectedDayDetails.precipMm > 0 ? `${selectedDayDetails.precipMm} mm` : t("weather.dayDetailsDry")}
                   </strong>
                 </div>
                 <div className="home-weather-day-metric">

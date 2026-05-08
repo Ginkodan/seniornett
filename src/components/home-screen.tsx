@@ -12,10 +12,10 @@ import uiStyles from "./ui/seniornett.module.css";
 
 const APPS = [
   { id: 'notfall', href: '/notfall', icon: <Siren size={34} strokeWidth={2.25} />, accent: 'coral', urgent: true },
+  { id: 'lotti-live', href: '/lotti-live', icon: <MessagesSquare size={34} strokeWidth={2.25} />, accent: 'blue' },
   { id: 'social-hub', href: '/social-hub', icon: <MessageCircleHeart size={34} strokeWidth={2.25} />, accent: 'teal' },
   { id: 'news', href: '/news', icon: <Newspaper size={34} strokeWidth={2.25} />, accent: 'green' },
   { id: 'audio', href: '/audio', icon: <Radio size={34} strokeWidth={2.25} />, accent: 'blue' },
-  { id: 'lotti-live', href: '/lotti-live', icon: <MessagesSquare size={34} strokeWidth={2.25} />, accent: 'coral' },
   { id: 'sbb', href: '/sbb', icon: <Train size={34} strokeWidth={2.25} />, accent: 'teal' },
   { id: 'lexikon', href: '/lexikon', icon: <BookOpen size={34} strokeWidth={2.25} />, accent: 'violet' },
   { id: 'karte', href: '/karte', icon: <Map size={34} strokeWidth={2.25} />, accent: 'amber' },

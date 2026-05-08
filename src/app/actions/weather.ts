@@ -1,6 +1,9 @@
 "use server";
 
 import { createTranslator, getLocaleTag, normalizeLanguage } from "@/lib/i18n";
+import { createHash } from "crypto";
+import { mkdir, readFile, writeFile } from "fs/promises";
+import path from "path";
 
 // MeteoSwiss OGD Local Forecast data
 // See: https://opendatadocs.meteoswiss.ch/e4-local-forecast-model-data/e4-local-forecast-model-data
@@ -10,6 +13,8 @@ const STAC_ITEMS_URL =
 const META_POINTS_URL =
   "https://data.geo.admin.ch/ch.meteoschweiz.ogd-local-forecasting/ogd-local-forecasting_meta_point.csv";
 const META_POINTS_TTL_MS = 60 * 60 * 1000;
+const WEATHER_TTL_MS = 60 * 60 * 1000;
+const WEATHER_CACHE_DIR = path.join(process.cwd(), ".cache", "seniornett-weather");
 
 // Zürich / Fluntern station point_id available across all required parameters
 const ZURICH_POINT_ID = "71";
@@ -35,6 +40,51 @@ const metaPointsCache: MetaPointCache = {
   promise: null,
   value: null,
 };
+
+type WeatherCacheEntry = {
+  expiresAt: number;
+  promise: Promise<WeatherResult> | null;
+  value: WeatherResult | null;
+};
+
+const weatherCache = new Map<string, WeatherCacheEntry>();
+
+type DiskCacheEnvelope<T> = {
+  savedAt: number;
+  value: T;
+};
+
+async function ensureWeatherCacheDir(): Promise<void> {
+  await mkdir(WEATHER_CACHE_DIR, { recursive: true });
+}
+
+function cacheFilePath(kind: string, key: string): string {
+  const hash = createHash("sha1").update(`${kind}:${key}`).digest("hex");
+  return path.join(WEATHER_CACHE_DIR, `${kind}-${hash}.json`);
+}
+
+async function readDiskCache<T>(kind: string, key: string, ttlMs: number): Promise<T | null> {
+  try {
+    const raw = await readFile(cacheFilePath(kind, key), "utf8");
+    const envelope = JSON.parse(raw) as DiskCacheEnvelope<T>;
+    if (!envelope || typeof envelope.savedAt !== "number" || Date.now() - envelope.savedAt > ttlMs) {
+      return null;
+    }
+    return envelope.value ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function writeDiskCache<T>(kind: string, key: string, value: T): Promise<void> {
+  try {
+    await ensureWeatherCacheDir();
+    const envelope: DiskCacheEnvelope<T> = { savedAt: Date.now(), value };
+    await writeFile(cacheFilePath(kind, key), JSON.stringify(envelope), "utf8");
+  } catch {
+    // Ignore cache write failures.
+  }
+}
 
 function hasCoordinates(point: MetaPoint): boolean {
   return Number.isFinite(point.lat) && Number.isFinite(point.lon);
@@ -397,6 +447,13 @@ async function loadMetaPoints(): Promise<MetaPoint[]> {
     return metaPointsCache.value;
   }
 
+  const cachedDiskPoints = await readDiskCache<MetaPoint[]>("meta-points", "all", META_POINTS_TTL_MS);
+  if (cachedDiskPoints) {
+    metaPointsCache.value = cachedDiskPoints;
+    metaPointsCache.expiresAt = Date.now() + META_POINTS_TTL_MS;
+    return cachedDiskPoints;
+  }
+
   if (metaPointsCache.promise) {
     return metaPointsCache.promise;
   }
@@ -414,6 +471,7 @@ async function loadMetaPoints(): Promise<MetaPoint[]> {
     const points = parseMetaPoints(metaText);
     metaPointsCache.value = points;
     metaPointsCache.expiresAt = Date.now() + META_POINTS_TTL_MS;
+    void writeDiskCache("meta-points", "all", points);
     return points;
   })();
 
@@ -422,6 +480,27 @@ async function loadMetaPoints(): Promise<MetaPoint[]> {
   } finally {
     metaPointsCache.promise = null;
   }
+}
+
+function weatherCacheKey(pointId: string, locale: string, includeHourly: boolean): string {
+  return [pointId, locale, includeHourly ? "hourly" : "daily"].join(":");
+}
+
+function readCachedWeather(key: string): WeatherResult | null {
+  const entry = weatherCache.get(key);
+  if (!entry || entry.expiresAt <= Date.now() || !entry.value) {
+    return null;
+  }
+
+  return entry.value;
+}
+
+function writeCachedWeather(key: string, value: WeatherResult): void {
+  weatherCache.set(key, {
+    expiresAt: Date.now() + WEATHER_TTL_MS,
+    promise: null,
+    value,
+  });
 }
 
 function choosePointByQuery(points: MetaPoint[], query: string): ResolvedPoint | null {
@@ -580,141 +659,175 @@ export async function fetchWeatherAction(
     const resolvedPoint = await resolvePointForQuery(query, location);
     const pointId = resolvedPoint.pointId;
     cityName = resolvedPoint.cityName;
+    const cacheKey = weatherCacheKey(pointId, locale, includeHourly);
+    const cachedWeather = readCachedWeather(cacheKey);
+    if (cachedWeather) {
+      return cachedWeather;
+    }
 
-    // 1. Get the latest forecast item from the STAC API
-    const stacResp = await fetch(STAC_ITEMS_URL, {
-      next: { revalidate: 1800 },
+    const cachedDiskWeather = await readDiskCache<WeatherResult>("weather", cacheKey, WEATHER_TTL_MS);
+    if (cachedDiskWeather) {
+      writeCachedWeather(cacheKey, cachedDiskWeather);
+      return cachedDiskWeather;
+    }
+
+    const cachedEntry = weatherCache.get(cacheKey);
+    if (cachedEntry?.promise) {
+      return cachedEntry.promise;
+    }
+
+    const fetchPromise = (async () => {
+      // 1. Get the latest forecast item from the STAC API
+      const stacResp = await fetch(STAC_ITEMS_URL, {
+        cache: "no-store",
+      });
+      if (!stacResp.ok) throw new Error("STAC API nicht erreichbar");
+      const stacData = await stacResp.json();
+      // Items are returned oldest-first; take the last (most recent) item
+      const features = stacData.features ?? [];
+      if (features.length === 0) {
+        throw new Error("Keine Prognosedaten gefunden");
+      }
+
+      // 2. Find the newest item that has all required weather parameters.
+      const selected = await selectLatestUsableAssets(features);
+      if (!selected) {
+        throw new Error("Wetterparameter nicht verfügbar");
+      }
+
+      // 3. Fetch CSVs in parallel (daily params are ≤1.2 MB each)
+      const fetchPromises: Promise<string>[] = [
+        fetch(selected.minUrl, { cache: "no-store" }).then((r) => r.text()),
+        fetch(selected.maxUrl, { cache: "no-store" }).then((r) => r.text()),
+        fetch(selected.iconUrl, { cache: "no-store" }).then((r) => r.text()),
+      ];
+      if (selected.precipUrl) {
+        fetchPromises.push(fetch(selected.precipUrl, { cache: "no-store" }).then((r) => r.text()));
+      }
+      if (includeHourly) {
+        if (selected.hourlyTempUrl) {
+          fetchPromises.push(fetch(selected.hourlyTempUrl, { cache: "no-store" }).then((r) => r.text()));
+        }
+        if (selected.hourlyPrecipUrl) {
+          fetchPromises.push(fetch(selected.hourlyPrecipUrl, { cache: "no-store" }).then((r) => r.text()));
+        }
+        if (selected.hourlySunshineUrl) {
+          fetchPromises.push(fetch(selected.hourlySunshineUrl, { cache: "no-store" }).then((r) => r.text()));
+        }
+        if (selected.windSpeedUrl) {
+          fetchPromises.push(fetch(selected.windSpeedUrl, { cache: "no-store" }).then((r) => r.text()));
+        }
+        if (selected.windGustUrl) {
+          fetchPromises.push(fetch(selected.windGustUrl, { cache: "no-store" }).then((r) => r.text()));
+        }
+        if (selected.windDirectionUrl) {
+          fetchPromises.push(fetch(selected.windDirectionUrl, { cache: "no-store" }).then((r) => r.text()));
+        }
+        if (selected.hourlyIconUrl) {
+          fetchPromises.push(fetch(selected.hourlyIconUrl, { cache: "no-store" }).then((r) => r.text()));
+        }
+      }
+      const results = await Promise.all(fetchPromises);
+      const [
+        minText,
+        maxText,
+        iconText,
+        precipText,
+        hourlyTempText,
+        hourlyPrecipText,
+        hourlySunshineText,
+        windSpeedText,
+        windGustText,
+        windDirectionText,
+        hourlyIconText,
+      ] = results;
+
+      // 4. Parse CSVs for selected place
+      const minMap = parseCsvMap(minText, pointId);
+      const maxMap = parseCsvMap(maxText, pointId);
+      const iconMap =
+        selected.iconParam === "jp2000d0"
+          ? parseCsvMap(iconText, pointId)
+          : parseHourlyIconCsvToDailyMap(iconText, pointId);
+      const precipMap = precipText
+        ? parseCsvMap(precipText, pointId)
+        : new Map<string, number>();
+      const hourlyTempMap = includeHourly && hourlyTempText
+        ? parseCsvMap(hourlyTempText, pointId)
+        : new Map<string, number>();
+      const hourlyPrecipMap = includeHourly && hourlyPrecipText
+        ? parseCsvMap(hourlyPrecipText, pointId)
+        : new Map<string, number>();
+      const hourlySunshineMap = includeHourly && hourlySunshineText
+        ? parseCsvMap(hourlySunshineText, pointId)
+        : new Map<string, number>();
+      const windSpeedMap = includeHourly && windSpeedText
+        ? parseCsvMap(windSpeedText, pointId)
+        : new Map<string, number>();
+      const windGustMap = includeHourly && windGustText
+        ? parseCsvMap(windGustText, pointId)
+        : new Map<string, number>();
+      const windDirectionMap = includeHourly && windDirectionText
+        ? parseCsvMap(windDirectionText, pointId)
+        : new Map<string, number>();
+      const hourlyIconMap = includeHourly && hourlyIconText
+        ? parseCsvMap(hourlyIconText, pointId)
+        : new Map<string, number>();
+
+      // 5. Build 5-day forecast
+      const dates = [...minMap.keys()].sort().slice(0, 5);
+      if (dates.length === 0) {
+        throw new Error(`Keine Prognosewerte für ${cityName} gefunden`);
+      }
+
+      const days: DayForecast[] = dates.map((dateKey) => {
+        const iconCode = Math.round(iconMap.get(dateKey) ?? 0);
+        const iconInfo = iconForCode(iconCode, t);
+        const hourly = includeHourly
+          ? buildHourlySeries(
+              dateKey.slice(0, 8),
+              localeTag,
+              t,
+              hourlyTempMap,
+              hourlyPrecipMap,
+              hourlySunshineMap,
+              windSpeedMap,
+              windGustMap,
+              windDirectionMap,
+              hourlyIconMap
+            )
+          : undefined;
+        return {
+          date: `${dateKey.slice(0, 4)}-${dateKey.slice(4, 6)}-${dateKey.slice(6, 8)}`,
+          dayLabel: formatDayLabel(dateKey, localeTag),
+          tempMin: Math.round(minMap.get(dateKey) ?? 0),
+          tempMax: Math.round(maxMap.get(dateKey) ?? 0),
+          precipMm:
+            Math.round((precipMap.get(dateKey) ?? 0) * 10) / 10,
+          emoji: iconInfo.emoji,
+          label: iconInfo.label,
+          hourly,
+        };
+      });
+
+      return { city: cityName, days };
+    })();
+
+    weatherCache.set(cacheKey, {
+      expiresAt: Date.now() + WEATHER_TTL_MS,
+      promise: fetchPromise,
+      value: null,
     });
-    if (!stacResp.ok) throw new Error("STAC API nicht erreichbar");
-    const stacData = await stacResp.json();
-    // Items are returned oldest-first; take the last (most recent) item
-    const features = stacData.features ?? [];
-    if (features.length === 0) {
-      throw new Error("Keine Prognosedaten gefunden");
+
+    try {
+      const result = await fetchPromise;
+      writeCachedWeather(cacheKey, result);
+      void writeDiskCache("weather", cacheKey, result);
+      return result;
+    } catch (error) {
+      weatherCache.delete(cacheKey);
+      throw error;
     }
-
-    // 2. Find the newest item that has all required weather parameters.
-    const selected = await selectLatestUsableAssets(features);
-    if (!selected) {
-      throw new Error("Wetterparameter nicht verfügbar");
-    }
-
-    // 3. Fetch CSVs in parallel (daily params are ≤1.2 MB each)
-    const fetchPromises: Promise<string>[] = [
-      fetch(selected.minUrl).then((r) => r.text()),
-      fetch(selected.maxUrl).then((r) => r.text()),
-      fetch(selected.iconUrl).then((r) => r.text()),
-    ];
-    if (selected.precipUrl) {
-      fetchPromises.push(fetch(selected.precipUrl).then((r) => r.text()));
-    }
-    if (includeHourly) {
-      if (selected.hourlyTempUrl) {
-        fetchPromises.push(fetch(selected.hourlyTempUrl).then((r) => r.text()));
-      }
-      if (selected.hourlyPrecipUrl) {
-        fetchPromises.push(fetch(selected.hourlyPrecipUrl).then((r) => r.text()));
-      }
-      if (selected.hourlySunshineUrl) {
-        fetchPromises.push(fetch(selected.hourlySunshineUrl).then((r) => r.text()));
-      }
-      if (selected.windSpeedUrl) {
-        fetchPromises.push(fetch(selected.windSpeedUrl).then((r) => r.text()));
-      }
-      if (selected.windGustUrl) {
-        fetchPromises.push(fetch(selected.windGustUrl).then((r) => r.text()));
-      }
-      if (selected.windDirectionUrl) {
-        fetchPromises.push(fetch(selected.windDirectionUrl).then((r) => r.text()));
-      }
-      if (selected.hourlyIconUrl) {
-        fetchPromises.push(fetch(selected.hourlyIconUrl).then((r) => r.text()));
-      }
-    }
-    const results = await Promise.all(fetchPromises);
-    const [
-      minText,
-      maxText,
-      iconText,
-      precipText,
-      hourlyTempText,
-      hourlyPrecipText,
-      hourlySunshineText,
-      windSpeedText,
-      windGustText,
-      windDirectionText,
-      hourlyIconText,
-    ] = results;
-
-    // 4. Parse CSVs for selected place
-    const minMap = parseCsvMap(minText, pointId);
-    const maxMap = parseCsvMap(maxText, pointId);
-    const iconMap =
-      selected.iconParam === "jp2000d0"
-        ? parseCsvMap(iconText, pointId)
-        : parseHourlyIconCsvToDailyMap(iconText, pointId);
-    const precipMap = precipText
-      ? parseCsvMap(precipText, pointId)
-      : new Map<string, number>();
-    const hourlyTempMap = includeHourly && hourlyTempText
-      ? parseCsvMap(hourlyTempText, pointId)
-      : new Map<string, number>();
-    const hourlyPrecipMap = includeHourly && hourlyPrecipText
-      ? parseCsvMap(hourlyPrecipText, pointId)
-      : new Map<string, number>();
-    const hourlySunshineMap = includeHourly && hourlySunshineText
-      ? parseCsvMap(hourlySunshineText, pointId)
-      : new Map<string, number>();
-    const windSpeedMap = includeHourly && windSpeedText
-      ? parseCsvMap(windSpeedText, pointId)
-      : new Map<string, number>();
-    const windGustMap = includeHourly && windGustText
-      ? parseCsvMap(windGustText, pointId)
-      : new Map<string, number>();
-    const windDirectionMap = includeHourly && windDirectionText
-      ? parseCsvMap(windDirectionText, pointId)
-      : new Map<string, number>();
-    const hourlyIconMap = includeHourly && hourlyIconText
-      ? parseCsvMap(hourlyIconText, pointId)
-      : new Map<string, number>();
-
-    // 5. Build 5-day forecast
-    const dates = [...minMap.keys()].sort().slice(0, 5);
-    if (dates.length === 0) {
-      throw new Error(`Keine Prognosewerte für ${cityName} gefunden`);
-    }
-
-    const days: DayForecast[] = dates.map((dateKey) => {
-      const iconCode = Math.round(iconMap.get(dateKey) ?? 0);
-      const iconInfo = iconForCode(iconCode, t);
-      const hourly = includeHourly
-        ? buildHourlySeries(
-            dateKey.slice(0, 8),
-            localeTag,
-            t,
-            hourlyTempMap,
-            hourlyPrecipMap,
-            hourlySunshineMap,
-            windSpeedMap,
-            windGustMap,
-            windDirectionMap,
-            hourlyIconMap
-          )
-        : undefined;
-      return {
-        date: `${dateKey.slice(0, 4)}-${dateKey.slice(4, 6)}-${dateKey.slice(6, 8)}`,
-        dayLabel: formatDayLabel(dateKey, localeTag),
-        tempMin: Math.round(minMap.get(dateKey) ?? 0),
-        tempMax: Math.round(maxMap.get(dateKey) ?? 0),
-        precipMm:
-          Math.round((precipMap.get(dateKey) ?? 0) * 10) / 10,
-        emoji: iconInfo.emoji,
-        label: iconInfo.label,
-        hourly,
-      };
-    });
-
-    return { city: cityName, days };
   } catch {
     const message = t("weather.error");
     return { city: cityName, days: [], error: message };

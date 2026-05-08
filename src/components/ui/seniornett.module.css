@@ -511,6 +511,7 @@
   background: var(--tile-soft, var(--info-soft));
   color: var(--tile-accent, var(--info));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tile-accent, var(--info)) 24%, white);
+  margin-left: 2rem;
 }
 
 .scope:global(.sn-app-tile-body), .scope :global(.sn-app-tile-body) {
