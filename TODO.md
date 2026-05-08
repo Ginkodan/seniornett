@@ -16,9 +16,10 @@ For every change consider the `design-guide.md` before implementing a todo.
 - [ ] Video Calls mit Kontakten
 - [ ] Externe Pages mit integriertem PW manager (e.g. eBanking)
 - [ ] Netzwerkeinstellungen (WLAN/Roaming etc.)
-- [ ] Lotti agent capabilities
+- [x] Lotti agent capabilities
 - [ ] Medizinische Hilfe/Überwachung
 - [ ] Hilfsangebote (Einkaufen etc.)
 - [ ] Marktplatz
 - [ ] Files & Fotos | Files/images print
 - [ ] Kalender? zu kompliziert?
+- [ ] Rezepte

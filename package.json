@@ -4,9 +4,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "next dev --webpack --hostname 0.0.0.0 --port 5176",
-    "build": "next build --webpack",
-    "start": "next start --hostname 0.0.0.0 --port 5176",
+    "build": "next build",
+    "dev": "next dev",
     "lint": "eslint",
     "ui:review": "node scripts/ui-review.mjs",
     "a11y:install": "playwright install chromium",

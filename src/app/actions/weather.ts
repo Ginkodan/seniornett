@@ -14,6 +14,7 @@ const META_POINTS_URL =
   "https://data.geo.admin.ch/ch.meteoschweiz.ogd-local-forecasting/ogd-local-forecasting_meta_point.csv";
 const META_POINTS_TTL_MS = 60 * 60 * 1000;
 const WEATHER_TTL_MS = 60 * 60 * 1000;
+const REMOTE_FETCH_TIMEOUT_MS = Number(process.env.SENIORNETT_WEATHER_FETCH_TIMEOUT_MS || 8000);
 const WEATHER_CACHE_DIR = path.join(process.cwd(), ".cache", "seniornett-weather");
 
 // Zürich / Fluntern station point_id available across all required parameters
@@ -83,6 +84,68 @@ async function writeDiskCache<T>(kind: string, key: string, value: T): Promise<v
     await writeFile(cacheFilePath(kind, key), JSON.stringify(envelope), "utf8");
   } catch {
     // Ignore cache write failures.
+  }
+}
+
+async function fetchTextWithTimeout(url: string, init: RequestInit = {}, timeoutMs = REMOTE_FETCH_TIMEOUT_MS): Promise<string> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      ...init,
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+    return await response.text();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function fetchJsonWithTimeout<T = unknown>(
+  url: string,
+  init: RequestInit = {},
+  timeoutMs = REMOTE_FETCH_TIMEOUT_MS
+): Promise<T> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      ...init,
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+    return (await response.json()) as T;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function fetchArrayBufferWithTimeout(
+  url: string,
+  init: RequestInit = {},
+  timeoutMs = REMOTE_FETCH_TIMEOUT_MS
+): Promise<ArrayBuffer> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      ...init,
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+    return await response.arrayBuffer();
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -459,14 +522,9 @@ async function loadMetaPoints(): Promise<MetaPoint[]> {
   }
 
   metaPointsCache.promise = (async () => {
-    const metaResp = await fetch(META_POINTS_URL, {
+    const metaBuffer = await fetchArrayBufferWithTimeout(META_POINTS_URL, {
       next: { revalidate: 86400 },
     });
-    if (!metaResp.ok) {
-      throw new Error("Ortsliste konnte nicht geladen werden");
-    }
-
-    const metaBuffer = await metaResp.arrayBuffer();
     const metaText = new TextDecoder("iso-8859-1").decode(metaBuffer);
     const points = parseMetaPoints(metaText);
     metaPointsCache.value = points;
@@ -678,11 +736,9 @@ export async function fetchWeatherAction(
 
     const fetchPromise = (async () => {
       // 1. Get the latest forecast item from the STAC API
-      const stacResp = await fetch(STAC_ITEMS_URL, {
+      const stacData = await fetchJsonWithTimeout<{ features?: Array<{ assets?: Record<string, { href: string }> }> }>(STAC_ITEMS_URL, {
         cache: "no-store",
       });
-      if (!stacResp.ok) throw new Error("STAC API nicht erreichbar");
-      const stacData = await stacResp.json();
       // Items are returned oldest-first; take the last (most recent) item
       const features = stacData.features ?? [];
       if (features.length === 0) {
@@ -697,34 +753,34 @@ export async function fetchWeatherAction(
 
       // 3. Fetch CSVs in parallel (daily params are ≤1.2 MB each)
       const fetchPromises: Promise<string>[] = [
-        fetch(selected.minUrl, { cache: "no-store" }).then((r) => r.text()),
-        fetch(selected.maxUrl, { cache: "no-store" }).then((r) => r.text()),
-        fetch(selected.iconUrl, { cache: "no-store" }).then((r) => r.text()),
+        fetchTextWithTimeout(selected.minUrl, { cache: "no-store" }),
+        fetchTextWithTimeout(selected.maxUrl, { cache: "no-store" }),
+        fetchTextWithTimeout(selected.iconUrl, { cache: "no-store" }),
       ];
       if (selected.precipUrl) {
-        fetchPromises.push(fetch(selected.precipUrl, { cache: "no-store" }).then((r) => r.text()));
+        fetchPromises.push(fetchTextWithTimeout(selected.precipUrl, { cache: "no-store" }));
       }
       if (includeHourly) {
         if (selected.hourlyTempUrl) {
-          fetchPromises.push(fetch(selected.hourlyTempUrl, { cache: "no-store" }).then((r) => r.text()));
+          fetchPromises.push(fetchTextWithTimeout(selected.hourlyTempUrl, { cache: "no-store" }));
         }
         if (selected.hourlyPrecipUrl) {
-          fetchPromises.push(fetch(selected.hourlyPrecipUrl, { cache: "no-store" }).then((r) => r.text()));
+          fetchPromises.push(fetchTextWithTimeout(selected.hourlyPrecipUrl, { cache: "no-store" }));
         }
         if (selected.hourlySunshineUrl) {
-          fetchPromises.push(fetch(selected.hourlySunshineUrl, { cache: "no-store" }).then((r) => r.text()));
+          fetchPromises.push(fetchTextWithTimeout(selected.hourlySunshineUrl, { cache: "no-store" }));
         }
         if (selected.windSpeedUrl) {
-          fetchPromises.push(fetch(selected.windSpeedUrl, { cache: "no-store" }).then((r) => r.text()));
+          fetchPromises.push(fetchTextWithTimeout(selected.windSpeedUrl, { cache: "no-store" }));
         }
         if (selected.windGustUrl) {
-          fetchPromises.push(fetch(selected.windGustUrl, { cache: "no-store" }).then((r) => r.text()));
+          fetchPromises.push(fetchTextWithTimeout(selected.windGustUrl, { cache: "no-store" }));
         }
         if (selected.windDirectionUrl) {
-          fetchPromises.push(fetch(selected.windDirectionUrl, { cache: "no-store" }).then((r) => r.text()));
+          fetchPromises.push(fetchTextWithTimeout(selected.windDirectionUrl, { cache: "no-store" }));
         }
         if (selected.hourlyIconUrl) {
-          fetchPromises.push(fetch(selected.hourlyIconUrl, { cache: "no-store" }).then((r) => r.text()));
+          fetchPromises.push(fetchTextWithTimeout(selected.hourlyIconUrl, { cache: "no-store" }));
         }
       }
       const results = await Promise.all(fetchPromises);
