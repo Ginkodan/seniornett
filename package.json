@@ -8,9 +8,12 @@
     "build": "next build --webpack",
     "start": "next start --hostname 0.0.0.0 --port 5176",
     "lint": "eslint",
+    "ui:review": "node scripts/ui-review.mjs",
+    "a11y:install": "playwright install chromium",
+    "a11y:audit": "node scripts/a11y-audit.mjs",
     "visual:install": "playwright install chromium",
-    "visual:audit": "playwright test tests/visual/visual-audit.spec.ts",
-    "visual:report": "node tests/visual/print-report.mjs"
+    "visual:audit": "npm run ui:review",
+    "visual:report": "npm run a11y:audit"
   },
   "dependencies": {
     "@fontsource/atkinson-hyperlegible": "^5.2.8",

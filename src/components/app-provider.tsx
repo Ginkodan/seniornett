@@ -119,7 +119,6 @@ export function AppProvider({ children, loadNewsAction, initialIdentity }) {
   React.useEffect(() => {
     const scale = [1, 1.2, 1.45][textSize] || 1;
     document.documentElement.style.setProperty('--type-scale', String(scale));
-    document.body.classList.add('hc');
     writeTextSize(textSize);
   }, [textSize]);
 

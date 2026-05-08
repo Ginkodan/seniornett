@@ -170,7 +170,7 @@ export function MessagingScreen({ initialContactId = "" }) {
   }, [draft, selectedConversation, sending, loadBootstrap, t]);
 
   return (
-    <SeniorNetPage title={t("messaging.title")}>
+    <SeniorNetPage title={t("messaging.title")} tone="teal">
       <div className={styles.scope}>
         <div className="messaging-shell">
           <aside className="messaging-sidebar" aria-label={t("messaging.contacts.aria")}>

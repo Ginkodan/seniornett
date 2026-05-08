@@ -32,28 +32,42 @@
       "media": "Photos et papiers",
       "marketplace": "Marché",
       "audio": "Audio et musique",
-      "news": "Journal",
+      "news": "Actualités",
       "lotti-live": "Demander à Lotti",
-      "lexikon": "Expliquer des mots",
+      "lexikon": "Comprendre les mots",
       "wetter": "Météo",
-      "sbb": "Train",
+      "sbb": "Trajets en train",
       "karte": "Carte",
       "video": "Télévision",
       "notfall": "Urgence"
     },
     "appDescriptions": {
-      "social-hub": "Joindre la famille, les amis et l’accompagnement.",
-      "media": "Voir des photos et retrouver des papiers importants.",
-      "marketplace": "Trouver ou donner des objets gratuitement.",
-      "audio": "Écouter la radio, des émissions et des livres audio.",
-      "news": "Lire les nouvelles calmement, sans publicité.",
-      "lotti-live": "Poser une question simple.",
-      "lexikon": "Chercher un mot en langage simple.",
-      "wetter": "Voir le temps d’aujourd’hui et de demain.",
-      "sbb": "Regarder les connexions de train et les horaires.", 
-      "karte": "Regarder les lieux, chemins et environs.",
-      "video": "Voir des émissions et des conférences.",
-      "notfall": "Appeler rapidement de l’aide et montrer les informations."
+      "social-hub": "Joindre la famille et l’aide.",
+      "media": "Trouver photos et documents.",
+      "marketplace": "Trouver ou donner des objets.",
+      "audio": "Écouter la radio et des livres audio.",
+      "news": "Lire les nouvelles.",
+      "lotti-live": "Poser une question.",
+      "lexikon": "Comprendre les mots.",
+      "wetter": "Voir la météo d’aujourd’hui et demain.",
+      "sbb": "Vérifier les trajets.",
+      "karte": "Voir les lieux et les chemins.",
+      "video": "Voir des émissions.",
+      "notfall": "Appeler rapidement de l’aide."
+    },
+    "tileActions": {
+      "social-hub": "Ouvrir les messages",
+      "media": "Voir les images",
+      "marketplace": "Voir les annonces",
+      "audio": "Lancer l’audio",
+      "news": "Lire les nouvelles",
+      "lotti-live": "Poser une question",
+      "lexikon": "Voir le sens",
+      "wetter": "Afficher la météo",
+      "sbb": "Chercher les trajets",
+      "karte": "Afficher la carte",
+      "video": "Voir les émissions",
+      "notfall": "Ouvrir l’urgence"
     }
   },
   "topbar": {
@@ -69,6 +83,7 @@
   },
   "news": {
     "title": "Journal",
+    "subtitle": "Lire les nouvelles calmement et sans publicité.",
     "reload": "Recharger",
     "fallback": {
       "one": {
@@ -81,11 +96,14 @@
       }
     },
     "errors": {
-      "unavailable": "Les sources en direct n'étaient pas joignables pour le moment. Nous affichons la dernière édition enregistrée."
+      "unavailable": "Les sources d’actualité ne sont pas disponibles pour le moment. Nous affichons la dernière édition enregistrée."
     }
   },
   "emergency": {
     "title": "Urgence",
+    "subtitle": "Numéros importants et informations utiles en un coup d’œil.",
+    "quickNote": "À appeler seulement en cas d’urgence",
+    "quickHelp": "Si la situation est urgente, appelez directement le bon numéro. Nous restons clairs sur la suite.",
     "quick": {
       "police": {
         "label": "Police",
@@ -109,7 +127,7 @@
       "summaryLabel": "Informations essentielles",
       "contactLabel": "Contact d'urgence",
       "empty": "Aucune information médicale n'est enregistrée pour cette personne pour le moment.",
-      "loadingError": "Le profil n'a pas pu être chargé."
+      "loadingError": "La carte d’urgence n’a pas pu être chargée pour le moment."
     },
     "fields": {
       "vorname": "Prénom",
@@ -170,6 +188,7 @@
   },
   "audio": {
     "title": "Audio et musique",
+    "subtitle": "Écouter la radio, des émissions et des livres audio tranquillement.",
     "tabs": {
       "radio": "Radio",
       "programs": "Émissions",
@@ -184,7 +203,7 @@
       "buffering": "Connexion en cours ...",
       "missing": "Cette sélection n'est pas disponible pour le moment.",
       "retry": "Veuillez appuyer encore une fois sur Lecture.",
-      "loadError": "Le contenu audio n'a pas pu être chargé.",
+      "loadError": "Le contenu audio n'a pas pu être chargé pour le moment.",
       "noPrograms": "Aucune émission n'est disponible pour le moment.",
       "noBooks": "Aucun livre audio n'est disponible pour le moment.",
       "noBooksForFilter": "Aucun livre audio n'est visible pour ce filtre pour le moment.",
@@ -317,6 +336,7 @@
   },
   "lotti": {
     "title": "Demander à Lotti",
+    "subtitle": "Poser une question simple et obtenir une explication calme.",
     "emptyTitle": "Je suis Lotti.",
     "empty": "Je vous aide avec des questions simples. Écrivez une question ci-dessous ou choisissez un exemple.",
     "examplesLabel": "Exemples de questions",
@@ -326,9 +346,9 @@
       "2": "Que dit cette lettre ?"
     },
     "pending": "Un instant s'il vous plaît ...",
-    "label": "Votre question à Lotti",
+    "label": "Question à Lotti",
     "placeholder": "Saisissez votre question ici",
-    "send": "Envoyer",
+    "send": "Envoyer la question",
     "validation": "Veuillez d'abord écrire une question à Lotti.",
     "fallback": {
       "general": "Avec plaisir. Je suis là pour vous aider étape par étape. Posez-moi simplement votre question et je répondrai calmement et clairement.",
@@ -442,6 +462,7 @@
   },
   "video": {
     "title": "Télévision et conférences",
+    "subtitle": "Regarder des émissions et des conférences au calme.",
     "reload": "Recharger",
     "loading": "Chargement ...",
     "loadingTitle": "Nous cherchons des émissions adaptées.",
@@ -457,6 +478,7 @@
   },
   "map": {
     "title": "Carte",
+    "subtitle": "Regarder les lieux, les trajets et les environs.",
     "layers": "Couches de la carte",
     "controls": "Commandes de la carte",
     "presets": "Vue rapide de la carte",
@@ -548,13 +570,14 @@
   },
   "sbb": {
     "title": "Connexions de train",
+    "subtitle": "Vérifier facilement les trajets et les horaires.",
     "from": "De",
     "to": "À",
     "date": "Date",
     "time": "Heure",
     "departure": "Départ",
     "arrival": "Arrivée",
-    "search": "Chercher",
+    "search": "Chercher les trajets",
     "formIntro": "Entrez le départ et l'arrivée. Nous montrons seulement les informations essentielles.",
     "loadingConnections": "Les connexions se chargent ...",
     "connectionSingular": "Connexion",
@@ -587,5 +610,19 @@
       "missingStations": "Veuillez entrer les gares de départ et d'arrivée.",
       "noConnections": "Aucune connexion trouvée. Veuillez vérifier vos données."
     }
+  },
+  "lexikon": {
+    "title": "Comprendre les mots",
+    "subtitle": "Un terme, une explication simple.",
+    "heading": "Que souhaitez-vous comprendre ?",
+    "body": "Entrez un mot. SeniorNett montre seulement l’explication, sans liens externes.",
+    "searchLabel": "Terme recherché",
+    "placeholder": "Entrez un mot…",
+    "search": "Rechercher",
+    "loading": "Un moment, s’il vous plaît…",
+    "empty": "Rien n’a été trouvé. Essayez un autre terme.",
+    "results": "{count} résultats",
+    "back": "Retour aux résultats",
+    "sectionTitle": "Brève explication"
   }
 }

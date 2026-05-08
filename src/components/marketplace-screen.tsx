@@ -222,6 +222,7 @@ export function MarketplaceScreen() {
       <SeniorNetPage
         title={t("marketplace.title")}
         subtitle={t("marketplace.subtitle")}
+        tone="amber"
         primaryAction={
           <Button variant="primary" size="lg" icon={<PlusCircle size={22} strokeWidth={2.25} />} onClick={openCreate}>
             {t("marketplace.actions.create")}

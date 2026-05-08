@@ -103,7 +103,7 @@ export function WeatherScreen({ fetchWeatherAction, searchLocationsAction }) {
   }
 
   return (
-    <SeniorNetPage title={result?.city || t("weather.title")} subtitle={t("weather.subtitle")}>
+    <SeniorNetPage title={result?.city || t("weather.title")} subtitle={t("weather.subtitle")} tone="blue">
       <div className={`${styles.scope} weather-screen`}>
         <div className="weather-header">
           <p className="weather-source">{t("weather.source")}</p>

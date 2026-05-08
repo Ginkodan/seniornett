@@ -7,27 +7,52 @@
   height: 100%;
   min-height: 100%;
   min-height: 0;
-  background: var(--paper);
+  background: transparent;
 }
 .scope:global(.app-header), .scope :global(.app-header) {
-  padding: 1.75rem clamp(1.5rem, 4vw, 4rem) 1.35rem;
+  --page-accent: var(--info);
+  --page-accent-soft: var(--info-soft);
+  --page-accent-ink: #17536a;
+  padding: 0.8rem clamp(1rem, 2.4vw, 2rem) 0.75rem;
   display: flex;
   align-items: center;
-  min-height: 7.5rem;
-  gap: 1.5rem;
-  border-bottom: var(--border-thin);
-  background: linear-gradient(180deg, var(--paper-2), var(--paper));
+  min-height: 5rem;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid color-mix(in srgb, var(--page-accent) 18%, var(--card-edge));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--page-accent-soft) 46%, #ffffff) 0,
+    color-mix(in srgb, var(--paper) 94%, #fff) 100%
+  );
+  box-shadow: inset 0 0.25rem 0 0 color-mix(in srgb, var(--page-accent) 14%, transparent);
+}
+.scope:global(.app-header)::before, .scope :global(.app-header)::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0.45rem;
+  background: var(--page-accent);
 }
 .scope:global(.app-title), .scope :global(.app-title) {
-  font-size: clamp(var(--fs-lg), 3vw, var(--fs-xl));
+  font-size: clamp(var(--fs-md), 2.4vw, var(--fs-lg));
   font-weight: 800;
   margin: 0;
   line-height: 1.1;
+  color: var(--ink);
 }
+.scope:global(.app-header[data-accent="teal"]), .scope :global(.app-header[data-accent="teal"]) { --page-accent: #1f7a73; --page-accent-soft: #dcedea; --page-accent-ink: #155a55; }
+.scope:global(.app-header[data-accent="blue"]), .scope :global(.app-header[data-accent="blue"]) { --page-accent: #1f6491; --page-accent-soft: #d9e8f4; --page-accent-ink: #144b6d; }
+.scope:global(.app-header[data-accent="green"]), .scope :global(.app-header[data-accent="green"]) { --page-accent: #2f7b4b; --page-accent-soft: #dfeee4; --page-accent-ink: #235d38; }
+.scope:global(.app-header[data-accent="amber"]), .scope :global(.app-header[data-accent="amber"]) { --page-accent: #a36c00; --page-accent-soft: #f5e6bd; --page-accent-ink: #7d5300; }
+.scope:global(.app-header[data-accent="coral"]), .scope :global(.app-header[data-accent="coral"]) { --page-accent: #b6452c; --page-accent-soft: #f3d7cf; --page-accent-ink: #8f321e; }
+.scope:global(.app-header[data-accent="violet"]), .scope :global(.app-header[data-accent="violet"]) { --page-accent: #5a5bb8; --page-accent-soft: #e1e3f7; --page-accent-ink: #43459a; }
 .scope:global(.app-body), .scope :global(.app-body) {
   flex: 1;
   overflow: auto;
   min-height: 0;
+  padding-bottom: 0.5rem;
 }
 
 /* Buttons */
@@ -379,11 +404,114 @@
 }
 
 .scope:global(.sn-page-subtitle), .scope :global(.sn-page-subtitle) {
-  margin: 0.45rem 0 0;
+  margin: 0.2rem 0 0;
   color: var(--ink-3);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-xs);
   font-weight: 700;
-  line-height: 1.45;
+  line-height: 1.35;
+}
+
+.scope:global(.topbar), .scope :global(.topbar) {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  min-height: 4.5rem;
+  padding: 0.45rem clamp(1rem, 2.4vw, 2rem);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--card-edge) 62%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #ffffff 64%, var(--paper)) 0, color-mix(in srgb, var(--paper) 92%, #fff) 100%);
+  box-shadow: 0 1px 0 rgba(32, 29, 25, 0.04);
+}
+
+.scope:global(.topbar-brand), .scope :global(.topbar-brand) {
+  display: flex;
+  align-items: center;
+  min-width: 9rem;
+}
+
+.scope:global(.a11y), .scope :global(.a11y) {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.scope:global(.a11y-group), .scope :global(.a11y-group) {
+  display: inline-flex;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--card-edge) 88%, transparent);
+  border-radius: 999px;
+  background: var(--card);
+}
+
+.scope:global(.a11y-btn), .scope :global(.a11y-btn) {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.55rem 0.8rem;
+  border: 0;
+  border-right: 1px solid color-mix(in srgb, var(--card-edge) 80%, transparent);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+}
+
+.scope:global(.a11y-group .a11y-btn:last-child), .scope :global(.a11y-group .a11y-btn:last-child) {
+  border-right: 0;
+}
+
+.scope:global(.a11y-btn.active), .scope :global(.a11y-btn.active) {
+  background: var(--ink);
+  color: var(--card);
+}
+
+.scope:global(.a11y-btn:hover), .scope :global(.a11y-btn:hover) {
+  background: color-mix(in srgb, var(--paper-2) 72%, white);
+}
+
+.scope:global(.whoami-chip), .scope :global(.whoami-chip) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 7.5rem;
+  min-height: 44px;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--card-edge) 82%, transparent);
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--card), var(--card-2));
+  box-shadow: 0 4px 14px rgba(32, 29, 25, 0.05);
+}
+
+.scope:global(.whoami-main), .scope :global(.whoami-main) {
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.scope:global(.time), .scope :global(.time) {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--ink-3);
+  padding: 0.45rem 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--card-edge) 72%, transparent);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.scope:global(.logo-btn), .scope :global(.logo-btn) {
+  min-height: 44px;
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--card-edge) 78%, transparent);
+  background: linear-gradient(180deg, var(--card), var(--card-2));
+  font-weight: 800;
+  text-decoration: none;
 }
 
 .scope:global(button:focus-visible),
@@ -410,6 +538,8 @@
 .scope :global(.logo-btn:focus-visible),
 .scope:global(.home-primary-news:focus-visible),
 .scope :global(.home-primary-news:focus-visible),
+.scope:global(.sn-app-tile:focus-visible),
+.scope :global(.sn-app-tile:focus-visible),
 .scope:global(.field:focus-visible),
 .scope :global(.field:focus-visible),
 .scope:global(.chip:focus-visible),
@@ -420,6 +550,7 @@
 .scope :global(.social-hub-person-button:focus-visible) {
   outline: var(--focus-ring);
   outline-offset: 3px;
+  box-shadow: var(--focus-ring-soft);
 }
 
 /* Input */
@@ -452,7 +583,7 @@
   position: absolute;
   inset: 0;
   z-index: 35;
-  background: rgba(26, 26, 26, 0.62);
+  background: color-mix(in srgb, #111 52%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -461,12 +592,12 @@
 
 .scope:global(.offline-panel), .scope :global(.offline-panel) {
   width: min(720px, 100%);
-  background: var(--paper);
+  background: linear-gradient(180deg, var(--card) 0%, color-mix(in srgb, var(--card-2) 90%, white) 100%);
   color: var(--ink);
-  border: var(--border);
-  border-radius: 1.125rem;
+  border: 1.5px solid color-mix(in srgb, var(--card-edge) 90%, transparent);
+  border-radius: var(--radius-xl);
   padding: 2rem;
-  box-shadow: 10px 10px 0 0 var(--ink);
+  box-shadow: 0 18px 50px rgba(32, 29, 25, 0.18);
 }
 
 .scope:global(.offline-eyebrow), .scope :global(.offline-eyebrow) {

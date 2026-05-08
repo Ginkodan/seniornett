@@ -349,7 +349,7 @@ export function FotosPapiereScreen() {
   }
 
   return (
-    <SeniorNetPage title={t("media.title")}>
+    <SeniorNetPage title={t("media.title")} tone="violet">
       <div className={styles.scope}>
         <div className="media-shell">
           <section className="media-hero">

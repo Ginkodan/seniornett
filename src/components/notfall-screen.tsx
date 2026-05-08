@@ -6,7 +6,7 @@ import React from "react";
 import { PhoneCall } from "lucide-react";
 import { PROFILE_FIELDS, normalizeProfile } from "@/lib/profile";
 import { useAppState } from "./app-provider";
-import { SeniorNetPage } from "./ui";
+import { SeniorNetPage, StatusPanel } from "./ui";
 import styles from "./notfall-screen.module.css";
 
 const EMERGENCY_NUMBERS = [
@@ -115,11 +115,14 @@ export function NotfallScreen(props) {
   }));
 
   return (
-    <SeniorNetPage title={t("emergency.title")}>
+    <SeniorNetPage title={t("emergency.title")} subtitle={t("emergency.subtitle")} tone="coral">
       <div className={styles.scope}>
         <div className="notfall-shell">
-          <div className="notfall-stack">
-            <section className="notfall-quick-section" aria-labelledby="notfall-sofort">
+        <div className="notfall-stack">
+          <section className="notfall-quick-section" aria-labelledby="notfall-sofort">
+            <StatusPanel title={t("emergency.quickNote")} tone="warning">
+              {t("emergency.quickHelp")}
+            </StatusPanel>
 
               <div className="notfall-quick-grid">
                 {emergencyNumbers.map((entry) => (

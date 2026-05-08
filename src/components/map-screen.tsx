@@ -220,6 +220,8 @@ export function MapScreen() {
   return (
     <SeniorNetPage
       title={t('map.title')}
+      subtitle={t('map.subtitle')}
+      tone="amber"
       secondaryActions={
         <div className="map-title-actions" aria-label={t('map.layers')}>
           <IconButton

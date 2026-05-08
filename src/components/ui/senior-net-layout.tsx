@@ -4,6 +4,7 @@ import React, { type ReactNode } from "react";
 import Link from "next/link";
 import { Volume2 } from "lucide-react";
 import { useAppState } from "../app-provider";
+import type { AppTone } from "./app-tile";
 import styles from "./seniornett.module.css";
 import topBarStyles from "../top-bar.module.css";
 
@@ -46,11 +47,13 @@ export function SeniorNetGlobalShell({ children }: SeniorNetGlobalShellProps) {
   return (
     <div className="tablet-screen">
       <header className={`${topBarStyles.scope} topbar`} aria-label={t("common.home")}>
-        <Link className="logo logo-btn" href="/" aria-label={t("common.home")}>
-          {t("common.home")}
-        </Link>
+        <div className="topbar-brand">
+          <Link className="logo logo-btn" href="/" aria-label={t("common.home")}>
+            {t("common.home")}
+          </Link>
+        </div>
 
-        <div className="a11y">
+        <div className="a11y" aria-label={t("common.textSize")}>
           <div className="a11y-group" role="group" aria-label={t("common.textSize")}>
             {["A", "A+", "A++"].map((label, i) => (
               <button
@@ -59,6 +62,7 @@ export function SeniorNetGlobalShell({ children }: SeniorNetGlobalShellProps) {
                 onClick={() => setTextSize(i)}
                 style={{ fontSize: i === 0 ? 14 : i === 1 ? 17 : 20 }}
                 aria-pressed={textSize === i}
+                aria-label={`${t("common.textSize")}: ${label}`}
               >
                 {label}
               </button>
@@ -93,16 +97,17 @@ type SeniorNetPageProps = {
   subtitle?: string;
   primaryAction?: ReactNode;
   secondaryActions?: ReactNode;
+  tone?: AppTone;
   children: ReactNode;
 };
 
 // SeniorNett page shell: one title rhythm, exactly one primary action slot,
 // optional secondary actions, then content. This keeps focus order predictable:
 // global shell controls, page actions, content.
-export function SeniorNetPage({ title, subtitle, primaryAction, secondaryActions, children }: SeniorNetPageProps) {
+export function SeniorNetPage({ title, subtitle, primaryAction, secondaryActions, tone, children }: SeniorNetPageProps) {
   return (
     <div className={`${styles.scope} sn-app app`}>
-      <PageHeader title={title} subtitle={subtitle} primaryAction={primaryAction} secondaryActions={secondaryActions} />
+      <PageHeader title={title} subtitle={subtitle} primaryAction={primaryAction} secondaryActions={secondaryActions} tone={tone} />
       <div className="sn-app-body app-body">{children}</div>
     </div>
   );
@@ -113,11 +118,12 @@ type PageHeaderProps = {
   subtitle?: string;
   primaryAction?: ReactNode;
   secondaryActions?: ReactNode;
+  tone?: AppTone;
 };
 
-export function PageHeader({ title, subtitle, primaryAction, secondaryActions }: PageHeaderProps) {
+export function PageHeader({ title, subtitle, primaryAction, secondaryActions, tone = "blue" }: PageHeaderProps) {
   return (
-    <div className="sn-page-header app-header">
+    <header className="sn-page-header app-header" data-accent={tone}>
       <div className="sn-page-title-block">
         <h1 className="app-title">{title}</h1>
         {subtitle ? <p className="sn-page-subtitle">{subtitle}</p> : null}
@@ -128,6 +134,6 @@ export function PageHeader({ title, subtitle, primaryAction, secondaryActions }:
           {primaryAction ? <div className="sn-page-primary-action">{primaryAction}</div> : null}
         </div>
       ) : null}
-    </div>
+    </header>
   );
 }

@@ -91,6 +91,8 @@ export function VideoScreen({ loadVideoAction }) {
   return (
     <SeniorNetPage
       title={t("video.title")}
+      subtitle={t("video.subtitle")}
+      tone="coral"
       primaryAction={
         <Button onClick={loadData} disabled={loading}>
           {loading ? t("video.loading") : t("video.reload")}

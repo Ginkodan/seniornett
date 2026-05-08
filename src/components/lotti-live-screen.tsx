@@ -71,7 +71,7 @@ export function LottiLiveScreen({ askLottiAction }) {
   };
 
   return (
-    <SeniorNetPage title={t('lotti.title')}>
+    <SeniorNetPage title={t('lotti.title')} subtitle={t('lotti.subtitle')} tone="coral">
       <div className={styles.scope}>
         <div className="lotti-shell">
           <div className="lotti-card">

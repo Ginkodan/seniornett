@@ -15,6 +15,8 @@ export function NewsScreen() {
   return (
     <SeniorNetPage
       title={t('news.title')}
+      subtitle={t('news.subtitle')}
+      tone="green"
       primaryAction={
         <Button onClick={refreshNews} disabled={!isOnline && !news?.updatedAt}>
           {t('news.reload')}

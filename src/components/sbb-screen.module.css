@@ -148,13 +148,13 @@
 
 .scope:global(.sbb-search-hint), .scope :global(.sbb-search-hint) {
   margin-top: 0.75rem;
-  color: var(--ink-4);
+  color: var(--ink-2);
   font-size: var(--fs-sm);
 }
 
 .scope:global(.sbb-form-intro), .scope :global(.sbb-form-intro) {
   margin: 0;
-  color: var(--ink-4);
+  color: var(--ink-2);
   font-size: var(--fs-base);
   line-height: 1.5;
   max-width: 42rem;

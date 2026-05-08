@@ -3,21 +3,27 @@
 /* SeniorNet — Swiss senior network */
 /* Design tokens */
 :root {
-  /* Warm paper palette */
-  --paper: #fffdf8;
-  --paper-2: #f5f2ea;
-  --paper-3: #ece6db;
-  --ink: #111111;
-  --ink-2: #1f1f1f;
-  --ink-3: #2b2b2b;
-  --ink-4: #585858;
-  --rule: #111111;
-  --accent: #8a0000;
-  --accent-ink: #680000;
-  --good: #154f29;
-  --warn: #6b4f00;
-  --card: #FFFFFF;
-  --card-edge: #111111;
+  --paper: #f7f1e8;
+  --paper-2: #efe5d7;
+  --paper-3: #e5d8c4;
+  --card: #fffdf9;
+  --card-2: #fdf7ee;
+  --card-edge: #d5c6b4;
+  --ink: #201d19;
+  --ink-2: #38322c;
+  --ink-3: #5f564e;
+  --ink-4: #7f7467;
+  --rule: #c8b8a4;
+  --accent: #b6452c;
+  --accent-ink: #8f321e;
+  --accent-soft: #f5d8cf;
+  --good: #2f7b4b;
+  --good-soft: #dff1e6;
+  --warn: #8b6400;
+  --warn-soft: #fbefcf;
+  --info: #1f6f8b;
+  --info-soft: #d9eff8;
+  --focus: #005f7f;
 
   /* Type scale — multiplied by --type-scale */
   --type-scale: 1;
@@ -31,24 +37,39 @@
 
   --radius: 0.5rem;
   --radius-lg: 1rem;
-  --border: 2px solid var(--ink);
-  --border-thin: 1px solid var(--ink);
-  --focus-ring: 4px solid #111111;
+  --radius-xl: 1.25rem;
+  --border: 1.5px solid var(--card-edge);
+  --border-thin: 1px solid var(--card-edge);
+  --focus-ring: 3px solid var(--focus);
+  --focus-ring-soft: 0 0 0 6px color-mix(in srgb, var(--focus) 18%, transparent);
 
   --tap: 4rem;
-  --topbar-height: 5.5rem;
+  --topbar-height: 4.5rem;
 }
 
 /* High contrast */
 .hc {
-  --paper: #FFFFFF;
-  --paper-2: #F2F2F2;
-  --paper-3: #E6E6E6;
-  --ink: #000000;
-  --ink-2: #000000;
-  --ink-3: #1F1F1F;
-  --ink-4: #5A5A5A;
-  --accent: #8A0000;
+  --paper: #fefcf8;
+  --paper-2: #f3ece0;
+  --paper-3: #e6d7c2;
+  --card: #ffffff;
+  --card-2: #fef8ef;
+  --card-edge: #aea08d;
+  --ink: #171410;
+  --ink-2: #29231d;
+  --ink-3: #4e463d;
+  --ink-4: #675c50;
+  --rule: #a79279;
+  --accent: #a63a24;
+  --accent-ink: #812a19;
+  --accent-soft: #f1d1c7;
+  --good: #296d42;
+  --good-soft: #d8eddf;
+  --warn: #7f5a00;
+  --warn-soft: #f6e5b6;
+  --info: #1d6380;
+  --info-soft: #d2e8f2;
+  --focus: #005a78;
 }
 
 * { box-sizing: border-box; }
@@ -59,14 +80,17 @@ body {
   font-size: var(--fs-base);
   line-height: 1.6;
   color: var(--ink);
-  background: var(--paper);
+  background:
+    radial-gradient(circle at 14% 0%, color-mix(in srgb, #ffffff 55%, var(--paper)) 0, transparent 30%),
+    radial-gradient(circle at 86% 2%, color-mix(in srgb, #d5f0ef 35%, var(--paper)) 0, transparent 24%),
+    linear-gradient(180deg, var(--paper) 0%, #f9f5ee 46%, #f4edde 100%);
   -webkit-font-smoothing: antialiased;
   letter-spacing: 0;
 }
 .tablet-screen {
   width: 100vw;
   min-height: 100vh;
-  background: var(--paper);
+  background: transparent;
   border-radius: 0;
   overflow: hidden;
   position: relative;
@@ -83,6 +107,7 @@ body {
   overflow: auto;
   position: relative;
   min-height: 0;
+  background: transparent;
 }
 
 .spin {
@@ -112,3 +137,44 @@ body {
 .content::-webkit-scrollbar, .app-body::-webkit-scrollbar { width: 12px; }
 .content::-webkit-scrollbar-track, .app-body::-webkit-scrollbar-track { background: var(--paper); }
 .content::-webkit-scrollbar-thumb, .app-body::-webkit-scrollbar-thumb { background: var(--ink-4); border-radius: 6px; }
+
+:focus {
+  outline: none;
+}
+
+a {
+  color: inherit;
+}
+
+a[href] {
+  text-decoration-thickness: 0.12em;
+  text-underline-offset: 0.12em;
+}
+
+a[href]:hover {
+  text-decoration-thickness: 0.16em;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button:disabled,
+input:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

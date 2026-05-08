@@ -1,4 +1,5 @@
 export { AppImage } from "./app-image";
+export { AppTile } from "./app-tile";
 export { PageHeader, SeniorNetGlobalShell, SeniorNetPage } from "./senior-net-layout";
 export { Button } from "./button";
 export { Card } from "./card";

@@ -371,7 +371,7 @@ export function AudioScreen({ loadAudioAction }) {
           .join(" · ");
 
   return (
-    <SeniorNetPage title={t("audio.title")}>
+    <SeniorNetPage title={t("audio.title")} subtitle={t("audio.subtitle")} tone="blue">
       <div className={styles.scope}>
         <div className="audio-shell">
           <div className="audio-sticky-stack">

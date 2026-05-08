@@ -29,31 +29,45 @@
     "prompt": "Was möchten Sie jetzt tun?",
     "apps": {
       "social-hub": "Mit Menschen sprechen",
-      "media": "Fotos & Papiere",
+      "media": "Fotos und Papiere",
       "marketplace": "Marktplatz",
-      "audio": "Audio & Musik",
-      "news": "Zeitung",
+      "audio": "Audio und Musik",
+      "news": "Nachrichten",
       "lotti-live": "Lotti fragen",
-      "lexikon": "Wörter erklären",
+      "lexikon": "Wörter verstehen",
       "wetter": "Wetter",
-      "sbb": "Zug",
+      "sbb": "Zugverbindungen",
       "karte": "Karte",
       "video": "Fernsehen",
       "notfall": "Notfall"
     },
     "appDescriptions": {
-      "social-hub": "Familie, Freunde und Betreuung erreichen.",
-      "media": "Fotos ansehen und wichtige Papiere finden.",
-      "marketplace": "Gratis Dinge finden oder weitergeben.",
-      "audio": "Radio, Sendungen und Hörbücher hören.",
-      "news": "Nachrichten ruhig und ohne Werbung lesen.",
-      "lotti-live": "Eine einfache Frage stellen.",
-      "lexikon": "Ein Wort in einfacher Sprache nachschlagen.",
-      "wetter": "Sehen, wie das Wetter heute und morgen wird.",
-      "sbb": "Zugverbindungen und Fahrpläne anschauen.",
-      "karte": "Orte, Wege und Umgebung anschauen.",
-      "video": "Sendungen und Vorträge ansehen.",
-      "notfall": "Schnell Hilfe anrufen und Angaben zeigen."
+      "social-hub": "Familie und Betreuung erreichen.",
+      "media": "Fotos und Dokumente finden.",
+      "marketplace": "Dinge finden oder weitergeben.",
+      "audio": "Radio und Hörbücher hören.",
+      "news": "Nachrichten lesen.",
+      "lotti-live": "Eine Frage stellen.",
+      "lexikon": "Wörter einfach verstehen.",
+      "wetter": "Wetter für heute und morgen.",
+      "sbb": "Verbindungen prüfen.",
+      "karte": "Orte und Wege ansehen.",
+      "video": "Sendungen ansehen.",
+      "notfall": "Schnell Hilfe anrufen."
+    },
+    "tileActions": {
+      "social-hub": "Nachrichten öffnen",
+      "media": "Bilder ansehen",
+      "marketplace": "Inserate anschauen",
+      "audio": "Audio starten",
+      "news": "Nachrichten lesen",
+      "lotti-live": "Frage stellen",
+      "lexikon": "Bedeutung zeigen",
+      "wetter": "Prognose anzeigen",
+      "sbb": "Verbindungen suchen",
+      "karte": "Karte anzeigen",
+      "video": "Sendungen ansehen",
+      "notfall": "Notfall öffnen"
     }
   },
   "topbar": {
@@ -69,6 +83,7 @@
   },
   "news": {
     "title": "Zeitung",
+    "subtitle": "Nachrichten ruhig und ohne Werbung lesen.",
     "reload": "Neu laden",
     "fallback": {
       "one": {
@@ -81,11 +96,14 @@
       }
     },
     "errors": {
-      "unavailable": "Die Live-Quellen waren gerade nicht erreichbar. Wir zeigen die zuletzt gespeicherte Ausgabe."
+      "unavailable": "Die Nachrichtenquellen waren gerade nicht erreichbar. Wir zeigen die zuletzt gespeicherte Ausgabe."
     }
   },
   "emergency": {
     "title": "Notfall",
+    "subtitle": "Wichtige Nummern und Angaben auf einen Blick.",
+    "quickNote": "Nur im Ernstfall anrufen",
+    "quickHelp": "Wenn es dringend ist, wählen Sie direkt die passende Nummer. Wir erklären klar, was Sie erwartet.",
     "quick": {
       "police": {
         "label": "Polizei",
@@ -109,7 +127,7 @@
       "summaryLabel": "Wichtige Eckdaten",
       "contactLabel": "Notfallkontakt",
       "empty": "Für diese Person sind im Moment keine medizinischen Angaben hinterlegt.",
-      "loadingError": "Profil konnte nicht geladen werden."
+      "loadingError": "Die Notfallkarte konnte im Moment nicht geladen werden."
     },
     "fields": {
       "vorname": "Vorname",
@@ -170,6 +188,7 @@
   },
   "audio": {
     "title": "Audio & Musik",
+    "subtitle": "Radio, Sendungen und Hörbücher ruhig hören.",
     "tabs": {
       "radio": "Radio",
       "programs": "Sendungen",
@@ -184,7 +203,7 @@
       "buffering": "Verbindung wird aufgebaut ...",
       "missing": "Diese Auswahl ist gerade nicht verfuegbar.",
       "retry": "Bitte tippen Sie nochmals auf Abspielen.",
-      "loadError": "Audio-Inhalte konnten nicht geladen werden.",
+      "loadError": "Audio-Inhalte konnten im Moment nicht geladen werden.",
       "noPrograms": "Zurzeit sind keine Sendungen verfuegbar.",
       "noBooks": "Zurzeit sind keine Hörbücher verfuegbar.",
       "noBooksForFilter": "Für diesen Filter sind gerade keine Hörbücher sichtbar.",
@@ -317,8 +336,9 @@
   },
   "lotti": {
     "title": "Lotti fragen",
+    "subtitle": "Eine einfache Frage stellen und ruhig erklärt bekommen.",
     "emptyTitle": "Ich bin Lotti.",
-    "empty": "Ich helfe dir bei einfachen Fragen. Tippe unten eine Frage ein oder wähle ein Beispiel.",
+    "empty": "Ich helfe Ihnen bei einfachen Fragen. Tippen Sie unten eine Frage ein oder wählen Sie ein Beispiel.",
     "examplesLabel": "Beispielfragen",
     "examples": {
       "0": "Wie wird das Wetter morgen?",
@@ -326,10 +346,10 @@
       "2": "Was steht in diesem Brief?"
     },
     "pending": "Einen Moment bitte ...",
-    "label": "Ihre Frage an Lotti",
+    "label": "Frage an Lotti",
     "placeholder": "Frage hier eingeben",
-    "send": "Senden",
-    "validation": "Schreib bitte zuerst eine Frage an Lotti.",
+    "send": "Frage senden",
+    "validation": "Schreiben Sie bitte zuerst eine Frage an Lotti.",
     "fallback": {
       "general": "Gerne. Ich bin da und helfe Schritt für Schritt. Stell mir einfach deine Frage, und ich antworte ruhig und verständlich.",
       "call": "Gerne. Auf der Startseite kann ich dir als Nächstes auch eine einfache Kontaktliste zeigen. Für jetzt: Wenn du mir sagst, wen du anrufen möchtest, formuliere ich es Schritt für Schritt.",
@@ -442,6 +462,7 @@
   },
   "video": {
     "title": "Fernsehen & Vorträge",
+    "subtitle": "Sendungen und Vorträge in Ruhe ansehen.",
     "reload": "Neu laden",
     "loading": "Lädt ...",
     "loadingTitle": "Wir holen passende Sendungen.",
@@ -457,6 +478,7 @@
   },
   "map": {
     "title": "Karte",
+    "subtitle": "Orte, Wege und Umgebung anschauen.",
     "layers": "Kartenebenen",
     "controls": "Kartensteuerung",
     "presets": "Schnelle Kartenansicht",
@@ -548,13 +570,14 @@
   },
   "sbb": {
     "title": "Zugverbindungen",
+    "subtitle": "Verbindungen und Fahrpläne einfach prüfen.",
     "from": "Von",
     "to": "Nach",
     "date": "Datum",
     "time": "Zeit",
     "departure": "Abfahrt",
     "arrival": "Ankunft",
-    "search": "Suchen",
+    "search": "Verbindungen suchen",
     "formIntro": "Geben Sie Start und Ziel ein. Wir zeigen nur die wichtigsten Angaben.",
     "loadingConnections": "Verbindungen werden geladen ...",
     "connectionSingular": "Verbindung",
@@ -587,5 +610,19 @@
       "missingStations": "Bitte geben Sie Start- und Zielbahnhof ein.",
       "noConnections": "Es wurden keine Verbindungen gefunden. Bitte überprüfen Sie Ihre Angaben."
     }
+  },
+  "lexikon": {
+    "title": "Wörter verstehen",
+    "subtitle": "Ein Begriff, eine einfache Erklärung.",
+    "heading": "Was möchten Sie verstehen?",
+    "body": "Geben Sie ein Wort ein. SeniorNett zeigt nur die Erklärung, keine Links nach draussen.",
+    "searchLabel": "Suchbegriff",
+    "placeholder": "Begriff eingeben …",
+    "search": "Nachschlagen",
+    "loading": "Einen Moment bitte …",
+    "empty": "Dazu wurde nichts gefunden. Versuchen Sie einen anderen Begriff.",
+    "results": "{count} Treffer",
+    "back": "Zurück zu den Treffern",
+    "sectionTitle": "Kurze Erklärung"
   }
 }

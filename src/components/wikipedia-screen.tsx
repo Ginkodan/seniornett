@@ -4,10 +4,12 @@
 
 import React from 'react';
 import { searchWikipediaAction } from '../app/actions/wikipedia';
+import { useAppState } from './app-provider';
 import { SeniorNetPage } from './ui';
 import styles from "./wikipedia-screen.module.css";
 
 export function WikipediaScreen() {
+  const { t } = useAppState();
   const [query, setQuery] = React.useState('');
   const [results, setResults] = React.useState(null);
   const [selected, setSelected] = React.useState(null);
@@ -36,20 +38,20 @@ export function WikipediaScreen() {
   const noResults = results !== null && results.length === 0;
 
   return (
-    <SeniorNetPage title="Wörter erklären" subtitle="Ein Begriff, eine einfache Erklärung.">
+    <SeniorNetPage title={t('lexikon.title')} subtitle={t('lexikon.subtitle')} tone="violet">
       <div className={styles.scope}>
         <div className="wiki-shell">
 
           <div className="wiki-search-panel">
-            <h2>Was möchten Sie verstehen?</h2>
-            <p>Geben Sie ein Wort ein. SeniorNett zeigt nur die Erklärung, keine Links nach draussen.</p>
+            <h2>{t('lexikon.heading')}</h2>
+            <p>{t('lexikon.body')}</p>
             <div className="wiki-search-row">
-              <label className="wiki-label" htmlFor="wiki-query">Suchbegriff</label>
+              <label className="wiki-label" htmlFor="wiki-query">{t('lexikon.searchLabel')}</label>
               <input
                 id="wiki-query"
                 className="field wiki-field"
                 type="search"
-                placeholder="Begriff eingeben …"
+                placeholder={t('lexikon.placeholder')}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') submit(); }}
@@ -60,22 +62,22 @@ export function WikipediaScreen() {
                 onClick={submit}
                 disabled={pending || !query.trim()}
               >
-                Nachschlagen
+                {t('lexikon.search')}
               </button>
             </div>
           </div>
 
           {pending && (
-            <p className="wiki-status">Einen Moment bitte …</p>
+            <p className="wiki-status">{t('lexikon.loading')}</p>
           )}
 
           {noResults && !pending && (
-            <p className="wiki-status">Dazu wurde nichts gefunden. Versuch einen anderen Begriff.</p>
+            <p className="wiki-status">{t('lexikon.empty')}</p>
           )}
 
           {results && results.length > 0 && !pending && !selected && (
             <div className="wiki-results-section">
-              <p className="wiki-results-label">{results.length === 1 ? '1 Treffer' : `${results.length} Treffer`}</p>
+              <p className="wiki-results-label">{t('lexikon.results', { count: results.length })}</p>
               <ul className="wiki-result-list">
                 {results.map((item) => (
                   <li key={item.title}>
@@ -95,10 +97,10 @@ export function WikipediaScreen() {
             {selected && (
               <>
                 <button type="button" className="btn wiki-back-btn" onClick={() => setSelected(null)}>
-                  Zurück zu den Treffern
+                  {t('lexikon.back')}
                 </button>
                 <h2 className="wiki-article-title">{selected.title}</h2>
-                <h3 className="wiki-section-title">Kurze Erklärung</h3>
+                <h3 className="wiki-section-title">{t('lexikon.sectionTitle')}</h3>
                 <div
                   className="wiki-article-body"
                   dangerouslySetInnerHTML={{ __html: selected.extract }}

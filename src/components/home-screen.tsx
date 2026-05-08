@@ -3,24 +3,25 @@
 "use client";
 
 import React from 'react';
-import Link from 'next/link';
 import { MessageCircleHeart, MessagesSquare, Newspaper, BookOpen, CloudSun, Tv, Siren, Map, Radio, Images, Gift, Train } from 'lucide-react';
 import { useAppState } from './app-provider';
-import styles from "./home-screen.module.css";
+import { AppTile } from './ui';
+import homeStyles from "./home-screen.module.css";
+import uiStyles from "./ui/seniornett.module.css";
 
 const APPS = [
-  { id: 'social-hub', href: '/social-hub', icon: <MessageCircleHeart size={36} strokeWidth={2.25} /> },
-  { id: 'media', href: '/fotos-papiere', icon: <Images size={36} strokeWidth={2.25} /> },
-  { id: 'marketplace', href: '/marktplatz', icon: <Gift size={36} strokeWidth={2.25} /> },
-  { id: 'lotti-live', href: '/lotti-live', icon: <MessagesSquare size={36} strokeWidth={2.25} /> },
-  { id: 'audio', href: '/audio', icon: <Radio size={36} strokeWidth={2.25} /> },
-  { id: 'news', href: '/news', icon: <Newspaper size={36} strokeWidth={2.25} /> },
-  { id: 'wetter', href: '/wetter', icon: <CloudSun size={36} strokeWidth={2.25} /> },
-  { id: 'sbb', href: '/sbb', icon: <Train size={36} strokeWidth={2.25} /> },
-  { id: 'lexikon', href: '/lexikon', icon: <BookOpen size={36} strokeWidth={2.25} /> },
-  { id: 'karte', href: '/karte', icon: <Map size={36} strokeWidth={2.25} /> },
-  { id: 'video', href: '/video', icon: <Tv size={36} strokeWidth={2.25} /> },
-  { id: 'notfall', href: '/notfall', icon: <Siren size={36} strokeWidth={2.25} />, urgent: true },
+  { id: 'social-hub', href: '/social-hub', icon: <MessageCircleHeart size={34} strokeWidth={2.25} />, accent: 'teal' },
+  { id: 'media', href: '/fotos-papiere', icon: <Images size={34} strokeWidth={2.25} />, accent: 'violet' },
+  { id: 'marketplace', href: '/marktplatz', icon: <Gift size={34} strokeWidth={2.25} />, accent: 'amber' },
+  { id: 'lotti-live', href: '/lotti-live', icon: <MessagesSquare size={34} strokeWidth={2.25} />, accent: 'coral' },
+  { id: 'audio', href: '/audio', icon: <Radio size={34} strokeWidth={2.25} />, accent: 'blue' },
+  { id: 'news', href: '/news', icon: <Newspaper size={34} strokeWidth={2.25} />, accent: 'green' },
+  { id: 'wetter', href: '/wetter', icon: <CloudSun size={34} strokeWidth={2.25} />, accent: 'blue' },
+  { id: 'sbb', href: '/sbb', icon: <Train size={34} strokeWidth={2.25} />, accent: 'teal' },
+  { id: 'lexikon', href: '/lexikon', icon: <BookOpen size={34} strokeWidth={2.25} />, accent: 'violet' },
+  { id: 'karte', href: '/karte', icon: <Map size={34} strokeWidth={2.25} />, accent: 'amber' },
+  { id: 'video', href: '/video', icon: <Tv size={34} strokeWidth={2.25} />, accent: 'coral' },
+  { id: 'notfall', href: '/notfall', icon: <Siren size={34} strokeWidth={2.25} />, accent: 'coral', urgent: true },
 ];
 
 export function HomeScreen() {
@@ -29,13 +30,13 @@ export function HomeScreen() {
   const apps = APPS.map((app) => ({
     ...app,
     label: t(`home.apps.${app.id}`),
-    description: t(`home.appDescriptions.${app.id}`),
+    actionLabel: t(`home.tileActions.${app.id}`),
   }));
 
   return (
-    <div className={`${styles.scope} home`}>
-      <div className="home-greeting simple">
-        <div>
+    <div className={`${homeStyles.scope} ${uiStyles.scope} home`}>
+      <div className="home-hero">
+        <div className="home-hero-copy">
           <h1>{t('home.greeting', { name: identity?.loading ? '...' : firstName })}</h1>
           <p>{t('home.prompt')}</p>
         </div>
@@ -43,13 +44,15 @@ export function HomeScreen() {
 
       <div className="home-grid">
         {apps.map((app) => (
-          <Link key={app.id} className={`home-primary-news ${app.urgent ? 'urgent' : ''}`} href={app.href}>
-            <div className="icon">{app.icon}</div>
-            <div className="tile-stack">
-              <div className="tile-label">{app.label}</div>
-              <div className="tile-sub">{app.description}</div>
-            </div>
-          </Link>
+          <AppTile
+            key={app.id}
+            href={app.href}
+            title={app.label}
+            actionLabel={app.actionLabel}
+            icon={app.icon}
+            accent={app.accent}
+            urgent={app.urgent}
+          />
         ))}
       </div>
     </div>
