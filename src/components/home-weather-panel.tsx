@@ -5,6 +5,18 @@ import { MapPin } from "lucide-react";
 import { useAppState } from "./app-provider";
 import { Button, ModalOverlay, TextField } from "./ui";
 import type { DayForecast, WeatherLocation, WeatherResult } from "@/app/actions/weather";
+import {
+  Area,
+  Bar,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ResponsiveContainer,
+  Scatter,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import styles from "./home-weather-panel.module.css";
 
 type HomeWeatherPanelProps = {
@@ -12,6 +24,30 @@ type HomeWeatherPanelProps = {
   fetchWeatherAction: (query?: string, language?: string, location?: WeatherLocation) => Promise<WeatherResult>;
   searchLocationsAction?: (query: string, language?: string) => Promise<string[]>;
 };
+
+type WeatherChartSectionProps = {
+  title: string;
+  note: string;
+  legend: React.ReactNode;
+  children: React.ReactNode;
+};
+
+function WeatherChartSection({ title, note, legend, children }: WeatherChartSectionProps) {
+  return (
+    <section className="home-weather-chart-section">
+      <div className="home-weather-hourly-head">
+        <h3 className="home-weather-hourly-title">{title}</h3>
+        <p className="home-weather-hourly-note">{note}</p>
+      </div>
+      <div className="home-weather-chart-legend" aria-label={title}>
+        {legend}
+      </div>
+      <div className="home-weather-chart-frame" aria-label={title}>
+        {children}
+      </div>
+    </section>
+  );
+}
 
 export function HomeWeatherPanel({
   initialWeather,
@@ -26,6 +62,7 @@ export function HomeWeatherPanel({
   const [suggestions, setSuggestions] = React.useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const [activeIndex, setActiveIndex] = React.useState(-1);
+  const [selectedDay, setSelectedDay] = React.useState<DayForecast | null>(null);
 
   const debounceRef = React.useRef<number | null>(null);
 
@@ -186,7 +223,56 @@ export function HomeWeatherPanel({
     }).format(value);
   }
 
+  function formatLongDayLabel(date: string) {
+    const value = new Date(`${date}T00:00:00Z`);
+    return new Intl.DateTimeFormat(locale, {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      timeZone: "UTC",
+    }).format(value);
+  }
+
   const days: DayForecast[] = weather?.days?.slice(0, 5) ?? [];
+
+  const selectedHourlySeries = selectedDay?.hourly ?? [];
+  type WeatherChartPoint = {
+    slotIndex: number;
+    time: string;
+    temp: number | null;
+    sunshine: number | null;
+    rain: number;
+    snow: number;
+    wind: number | null;
+    gust: number | null;
+    direction: number | null;
+  };
+  const weatherChartPoints: WeatherChartPoint[] = selectedHourlySeries.map((slot, index) => ({
+    slotIndex: index,
+    time: slot.time,
+    temp: slot.temp ?? null,
+    sunshine: slot.sunshinePct ?? null,
+    rain: slot.precipMm ?? 0,
+    snow: slot.snow ? slot.precipMm ?? 0 : 0,
+    wind: slot.windSpeed ?? null,
+    gust: slot.windGust ?? null,
+    direction: slot.windDirection ?? null,
+  }));
+  const weatherTickCount = Math.min(6, Math.max(2, weatherChartPoints.length));
+  function formatChartTimeTick(value: number) {
+    return weatherChartPoints[Math.round(value)]?.time ?? "";
+  }
+  const maxHourlyWind =
+    selectedHourlySeries.length > 0
+      ? Math.max(0, ...selectedHourlySeries.map((slot) => slot.windGust ?? slot.windSpeed ?? 0))
+      : 0;
+  const maxHourlyPrecip = Math.max(
+    1,
+    ...selectedHourlySeries.flatMap((slot) => [slot.precipMm ?? 0, slot.snow ? slot.precipMm ?? 0 : 0])
+  );
+  const snowText = selectedHourlySeries.some((slot) => slot.snow)
+    ? t("weather.dayDetailsSnowPossible")
+    : t("weather.dayDetailsSnowNone");
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (!showSuggestions || suggestions.length === 0) return;
@@ -211,6 +297,92 @@ export function HomeWeatherPanel({
     setSearchTerm(value);
     setActiveIndex(-1);
     queueSuggestions(value);
+  }
+
+  function renderWeatherChartTooltip(section: "sunshine" | "precip" | "wind") {
+    return function chartTooltip(props: unknown) {
+      const { active, payload } = props as {
+        active?: boolean;
+        payload?: Array<{ payload?: WeatherChartPoint }>;
+      };
+
+      if (!active || !payload?.length) {
+        return null;
+      }
+
+      const point = payload[0]?.payload as WeatherChartPoint | undefined;
+      if (!point) {
+        return null;
+      }
+
+      return (
+        <div className="home-weather-chart-tooltip">
+          <strong className="home-weather-chart-tooltip-time">{point.time}</strong>
+          {section === "sunshine" ? (
+            <>
+              <span className="home-weather-chart-tooltip-row">
+                {t("weather.chartLegendTemperature")}: {point.temp ?? "—"}°
+              </span>
+              <span className="home-weather-chart-tooltip-row">
+                {t("weather.chartLegendSunshine")}: {point.sunshine ?? "—"}%
+              </span>
+            </>
+          ) : null}
+          {section === "precip" ? (
+            <>
+              <span className="home-weather-chart-tooltip-row">
+                {t("weather.chartLegendRain")}: {point.rain > 0 ? `${point.rain} mm` : t("weather.dayDetailsDry")}
+              </span>
+              <span className="home-weather-chart-tooltip-row">
+                {t("weather.chartLegendSnow")}: {point.snow > 0 ? `${point.snow} mm` : t("weather.dayDetailsDry")}
+              </span>
+            </>
+          ) : null}
+          {section === "wind" ? (
+            <>
+              <span className="home-weather-chart-tooltip-row">
+                {t("weather.chartLegendWindSpeed")}: {point.wind ?? "—"} km/h
+              </span>
+              <span className="home-weather-chart-tooltip-row">
+                {t("weather.chartLegendWindGust")}: {point.gust ?? "—"} km/h
+              </span>
+              <span className="home-weather-chart-tooltip-row">
+                {t("weather.chartLegendWindDirection")}: {point.direction ?? "—"}°
+              </span>
+            </>
+          ) : null}
+        </div>
+      );
+    };
+  }
+
+  function renderWindDirectionShape(props: unknown) {
+    const { cx, cy, payload } = props as {
+      cx?: number;
+      cy?: number;
+      payload?: WeatherChartPoint;
+    };
+
+    if (cx == null || cy == null || payload?.direction == null) {
+      return null;
+    }
+
+    const rotation = (payload.direction + 180) % 360;
+
+    return (
+      <g transform={`translate(${cx}, ${cy}) rotate(${rotation})`}>
+        <circle cx={0} cy={0} r={4.5} fill="color-mix(in srgb, var(--paper) 88%, white)" opacity={0.88} />
+        <path
+          d="M -8 0 L 3 0 M 3 0 L -1 -4 M 3 0 L -1 4"
+          stroke="var(--ink)"
+          strokeWidth={2.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+          opacity={0.95}
+        />
+      </g>
+    );
   }
 
   return (
@@ -239,7 +411,17 @@ export function HomeWeatherPanel({
           ) : isReady ? (
             <div className="home-weather-days" aria-label={t("weather.subtitle")}>
               {days.map((day, index) => (
-                <article key={day.date} className={`home-weather-day-card ${index === 0 ? "home-weather-day-card--today" : ""}`}>
+                <button
+                  key={day.date}
+                  type="button"
+                  className={`home-weather-day-card home-weather-day-button ${index === 0 ? "home-weather-day-card--today" : ""}`}
+                  onClick={() => setSelectedDay(day)}
+                  aria-label={t("weather.openDayDetails", {
+                    day: formatLongDayLabel(day.date),
+                    high: `${day.tempMax}°`,
+                    low: `${day.tempMin}°`,
+                  })}
+                >
                   <p className="home-weather-day-label">{formatShortDayLabel(day.date)}</p>
                   <div className="home-weather-day-emoji" aria-hidden="true">
                     {day.emoji}
@@ -249,7 +431,7 @@ export function HomeWeatherPanel({
                     <span className="home-weather-day-temps-sep"> / </span>
                     <span>{day.tempMin}°</span>
                   </p>
-                </article>
+                </button>
               ))}
             </div>
           ) : (
@@ -318,6 +500,307 @@ export function HomeWeatherPanel({
               </Button>
             </div>
           </form>
+        </ModalOverlay>
+      </div>
+
+      <div className={styles.scope}>
+        <ModalOverlay
+          open={Boolean(selectedDay)}
+          eyebrow={weather?.city || t("weather.title")}
+          title={selectedDay ? formatLongDayLabel(selectedDay.date) : t("weather.title")}
+          closeLabel={t("common.close")}
+          onClose={() => setSelectedDay(null)}
+          className="home-weather-overlay home-weather-day-overlay"
+        >
+              {selectedDay ? (
+            <div className="home-weather-day-details">
+              <div className="home-weather-day-summary">
+                <div className="home-weather-day-summary-icon" aria-hidden="true">
+                  {selectedDay.emoji}
+                </div>
+                <div className="home-weather-day-summary-copy">
+                  <p className="home-weather-day-summary-label">{selectedDay.label}</p>
+                  <p className="home-weather-day-summary-note">{t("weather.dayDetailsNote")}</p>
+                </div>
+              </div>
+
+              <div className="home-weather-day-metrics" aria-label={t("weather.dayDetailsMetrics")}>
+                <div className="home-weather-day-metric">
+                  <span className="home-weather-day-metric-label">{t("weather.dayDetailsTemperature")}</span>
+                  <strong className="home-weather-day-metric-value">{selectedDay.tempMax}° / {selectedDay.tempMin}°</strong>
+                </div>
+                <div className="home-weather-day-metric">
+                  <span className="home-weather-day-metric-label">{t("weather.dayDetailsRain")}</span>
+                  <strong className="home-weather-day-metric-value">
+                    {selectedDay.precipMm > 0 ? `${selectedDay.precipMm} mm` : t("weather.dayDetailsDry")}
+                  </strong>
+                </div>
+                <div className="home-weather-day-metric">
+                  <span className="home-weather-day-metric-label">{t("weather.dayDetailsWind")}</span>
+                  <strong className="home-weather-day-metric-value">
+                    {selectedHourlySeries.length > 0 ? `${maxHourlyWind} km/h` : "—"}
+                  </strong>
+                </div>
+                <div className="home-weather-day-metric">
+                  <span className="home-weather-day-metric-label">{t("weather.dayDetailsSnow")}</span>
+                  <strong className="home-weather-day-metric-value">{snowText}</strong>
+                </div>
+              </div>
+
+              {weatherChartPoints.length > 0 ? (
+                <div className="home-weather-charts">
+                  <WeatherChartSection
+                    title={t("weather.chartSunshineTitle")}
+                    note={t("weather.chartSunshineNote")}
+                    legend={
+                      <>
+                        <span className="home-weather-chart-legend-item">
+                          <span
+                            className="home-weather-chart-legend-swatch home-weather-chart-legend-swatch--line"
+                            style={{ backgroundColor: "var(--ink)", borderColor: "var(--ink)" }}
+                            aria-hidden="true"
+                          />
+                          <span>{t("weather.chartLegendTemperature")} °C</span>
+                        </span>
+                        <span className="home-weather-chart-legend-item">
+                          <span
+                            className="home-weather-chart-legend-swatch home-weather-chart-legend-swatch--area"
+                            style={{
+                              backgroundColor: "color-mix(in srgb, var(--page-accent, var(--info)) 18%, white)",
+                              borderColor: "color-mix(in srgb, var(--page-accent, var(--info)) 40%, white)",
+                            }}
+                            aria-hidden="true"
+                          />
+                          <span>{t("weather.chartLegendSunshine")}</span>
+                        </span>
+                      </>
+                    }
+                  >
+                    <ResponsiveContainer width="100%" height={250}>
+                      <ComposedChart data={weatherChartPoints} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                        <CartesianGrid vertical={false} stroke="rgba(32,29,25,0.10)" />
+                        <XAxis
+                          dataKey="slotIndex"
+                          type="number"
+                          tickLine={false}
+                          axisLine={false}
+                          domain={["dataMin", "dataMax"]}
+                          tickCount={weatherTickCount}
+                          tickFormatter={formatChartTimeTick}
+                          tick={{ fill: "var(--ink-3)", fontSize: 12, fontWeight: 700 }}
+                        />
+                        <YAxis
+                          yAxisId="temp"
+                          tickLine={false}
+                          axisLine={false}
+                          tick={{ fill: "var(--ink-3)", fontSize: 12, fontWeight: 700 }}
+                          width={42}
+                          domain={["dataMin - 1", "dataMax + 1"]}
+                        />
+                        <YAxis
+                          yAxisId="sunshine"
+                          orientation="right"
+                          tickLine={false}
+                          axisLine={false}
+                          tick={{ fill: "var(--ink-3)", fontSize: 12, fontWeight: 700 }}
+                          width={40}
+                          domain={[0, 100]}
+                          tickFormatter={(value) => `${value}%`}
+                        />
+                        <Tooltip content={renderWeatherChartTooltip("sunshine")} />
+                        <Area
+                          yAxisId="sunshine"
+                          type="monotone"
+                          dataKey="sunshine"
+                          stroke="color-mix(in srgb, var(--page-accent, var(--info)) 82%, white)"
+                          fill="color-mix(in srgb, var(--page-accent, var(--info)) 18%, white)"
+                          fillOpacity={1}
+                          strokeWidth={2.5}
+                          dot={false}
+                          activeDot={{ r: 4 }}
+                          connectNulls
+                        />
+                        <Line
+                          yAxisId="temp"
+                          type="monotone"
+                          dataKey="temp"
+                          stroke="var(--ink)"
+                          strokeWidth={2.8}
+                          dot={false}
+                          activeDot={{ r: 4 }}
+                          connectNulls
+                        />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </WeatherChartSection>
+
+                  <WeatherChartSection
+                    title={t("weather.chartRainTitle")}
+                    note={t("weather.chartRainNote")}
+                    legend={
+                      <>
+                        <span className="home-weather-chart-legend-item">
+                          <span
+                            className="home-weather-chart-legend-swatch home-weather-chart-legend-swatch--bar"
+                            style={{
+                              backgroundColor: "color-mix(in srgb, var(--page-accent, var(--info)) 52%, white)",
+                              borderColor: "color-mix(in srgb, var(--page-accent, var(--info)) 52%, white)",
+                            }}
+                            aria-hidden="true"
+                          />
+                          <span>{t("weather.chartLegendRain")}</span>
+                        </span>
+                        <span className="home-weather-chart-legend-item">
+                          <span
+                            className="home-weather-chart-legend-swatch home-weather-chart-legend-swatch--bar"
+                            style={{
+                              backgroundColor: "color-mix(in srgb, var(--ink-3) 22%, white)",
+                              borderColor: "color-mix(in srgb, var(--ink-3) 22%, white)",
+                            }}
+                            aria-hidden="true"
+                          />
+                          <span>{t("weather.chartLegendSnow")}</span>
+                        </span>
+                      </>
+                    }
+                  >
+                    <ResponsiveContainer width="100%" height={210}>
+                      <ComposedChart data={weatherChartPoints} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                        <CartesianGrid vertical={false} stroke="rgba(32,29,25,0.10)" />
+                        <XAxis
+                          dataKey="slotIndex"
+                          type="number"
+                          tickLine={false}
+                          axisLine={false}
+                          domain={["dataMin", "dataMax"]}
+                          tickCount={weatherTickCount}
+                          tickFormatter={formatChartTimeTick}
+                          tick={{ fill: "var(--ink-3)", fontSize: 12, fontWeight: 700 }}
+                        />
+                        <YAxis
+                          yAxisId="precip"
+                          tickLine={false}
+                          axisLine={false}
+                          tick={{ fill: "var(--ink-3)", fontSize: 12, fontWeight: 700 }}
+                          width={42}
+                          domain={[0, maxHourlyPrecip + 1]}
+                          tickFormatter={(value) => `${value} mm`}
+                        />
+                        <YAxis
+                          yAxisId="snow"
+                          orientation="right"
+                          tickLine={false}
+                          axisLine={false}
+                          tick={{ fill: "var(--ink-3)", fontSize: 12, fontWeight: 700 }}
+                          width={42}
+                          domain={[0, maxHourlyPrecip + 1]}
+                          tickFormatter={(value) => `${value} mm`}
+                        />
+                        <Tooltip content={renderWeatherChartTooltip("precip")} />
+                        <Bar
+                          yAxisId="precip"
+                          dataKey="rain"
+                          fill="color-mix(in srgb, var(--page-accent, var(--info)) 52%, white)"
+                          radius={[6, 6, 0, 0]}
+                          maxBarSize={14}
+                          barSize={8}
+                        />
+                        <Bar
+                          yAxisId="snow"
+                          dataKey="snow"
+                          fill="color-mix(in srgb, var(--ink-3) 22%, white)"
+                          radius={[6, 6, 0, 0]}
+                          maxBarSize={14}
+                          barSize={8}
+                        />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </WeatherChartSection>
+
+                  <WeatherChartSection
+                    title={t("weather.chartWindTitle")}
+                    note={t("weather.chartWindNote")}
+                    legend={
+                      <>
+                        <span className="home-weather-chart-legend-item">
+                          <span
+                            className="home-weather-chart-legend-swatch home-weather-chart-legend-swatch--line"
+                            style={{ backgroundColor: "var(--ink)", borderColor: "var(--ink)" }}
+                            aria-hidden="true"
+                          />
+                          <span>{t("weather.chartLegendWindSpeed")}</span>
+                        </span>
+                        <span className="home-weather-chart-legend-item">
+                          <span
+                            className="home-weather-chart-legend-swatch home-weather-chart-legend-swatch--dash"
+                            style={{
+                              backgroundColor: "transparent",
+                              borderColor: "color-mix(in srgb, var(--page-accent, var(--info)) 75%, white)",
+                            }}
+                            aria-hidden="true"
+                          />
+                          <span>{t("weather.chartLegendWindGust")}</span>
+                        </span>
+                        <span className="home-weather-chart-legend-item">
+                          <span className="home-weather-chart-legend-arrow" aria-hidden="true">
+                            →
+                          </span>
+                          <span>{t("weather.chartLegendWindDirection")}</span>
+                        </span>
+                      </>
+                    }
+                  >
+                    <ResponsiveContainer width="100%" height={230}>
+                      <ComposedChart data={weatherChartPoints} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                        <CartesianGrid vertical={false} stroke="rgba(32,29,25,0.10)" />
+                        <XAxis
+                          dataKey="slotIndex"
+                          type="number"
+                          tickLine={false}
+                          axisLine={false}
+                          domain={["dataMin", "dataMax"]}
+                          tickCount={weatherTickCount}
+                          tickFormatter={formatChartTimeTick}
+                          tick={{ fill: "var(--ink-3)", fontSize: 12, fontWeight: 700 }}
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          tick={{ fill: "var(--ink-3)", fontSize: 12, fontWeight: 700 }}
+                          width={42}
+                          domain={[0, Math.max(1, maxHourlyWind + 5)]}
+                          tickFormatter={(value) => `${value} km/h`}
+                        />
+                        <Tooltip content={renderWeatherChartTooltip("wind")} />
+                        <Line
+                          type="monotone"
+                          dataKey="wind"
+                          stroke="var(--ink)"
+                          strokeWidth={2.8}
+                          dot={false}
+                          connectNulls
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="gust"
+                          stroke="color-mix(in srgb, var(--page-accent, var(--info)) 78%, white)"
+                          strokeWidth={2.2}
+                          strokeDasharray="5 5"
+                          dot={false}
+                          connectNulls
+                        />
+                        <Scatter
+                          data={weatherChartPoints}
+                          dataKey="wind"
+                          shape={renderWindDirectionShape}
+                        />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </WeatherChartSection>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </ModalOverlay>
       </div>
     </>

@@ -7,6 +7,7 @@ For every change consider the `design-guide.md` before implementing a todo.
 Zeitung fotos farbig
 Lotti fragen -> Foto machen
 
+- [ ] Kontakte intern/extern (QR code oder ähnlich gegen Phishing/Spam)
 - [ ] Share files/images
 - [ ] Routen planen
 - [ ] WLAN Notfall trigger
@@ -22,3 +23,4 @@ Lotti fragen -> Foto machen
 - [ ] Hilfsangebote (Einkaufen etc.)
 - [ ] Marktplatz
 - [ ] Files & Fotos | Files/images print
+- [ ] Kalender? zu kompliziert?

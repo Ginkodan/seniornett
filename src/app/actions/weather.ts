@@ -96,6 +96,65 @@ function formatDayLabel(dateKey: string, localeTag: string): string {
   });
 }
 
+function formatHourLabel(dateKey: string, localeTag: string): string {
+  const year = parseInt(dateKey.slice(0, 4));
+  const month = parseInt(dateKey.slice(4, 6)) - 1;
+  const day = parseInt(dateKey.slice(6, 8));
+  const hour = parseInt(dateKey.slice(8, 10));
+  const minute = parseInt(dateKey.slice(10, 12));
+  const d = new Date(Date.UTC(year, month, day, hour, minute));
+  return new Intl.DateTimeFormat(localeTag, {
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZone: "Europe/Zurich",
+  }).format(d);
+}
+
+function buildHourlySeries(
+  datePrefix: string,
+  localeTag: string,
+  t: ReturnType<typeof createTranslator>,
+  tempMap: Map<string, number>,
+  precipMap: Map<string, number>,
+  sunshineMap: Map<string, number>,
+  windSpeedMap: Map<string, number>,
+  windGustMap: Map<string, number>,
+  windDirectionMap: Map<string, number>,
+  iconMap: Map<string, number>
+): DayHourlyForecast[] {
+  const keys = new Set<string>([
+    ...tempMap.keys(),
+    ...precipMap.keys(),
+    ...sunshineMap.keys(),
+    ...windSpeedMap.keys(),
+    ...windGustMap.keys(),
+    ...windDirectionMap.keys(),
+    ...iconMap.keys(),
+  ]);
+
+  return [...keys]
+    .filter((key) => key.startsWith(datePrefix))
+    .sort()
+    .map((key) => {
+      const iconInfo = iconForCode(Math.round(iconMap.get(key) ?? 0), t);
+      return {
+        time: formatHourLabel(key, localeTag),
+        label: iconInfo.label,
+        emoji: iconInfo.emoji,
+        temp: tempMap.has(key) ? Math.round(tempMap.get(key) ?? 0) : undefined,
+        precipMm: precipMap.has(key) ? Math.round((precipMap.get(key) ?? 0) * 10) / 10 : undefined,
+        sunshinePct: sunshineMap.has(key)
+          ? Math.max(0, Math.min(100, Math.round(((sunshineMap.get(key) ?? 0) / 60) * 100)))
+          : undefined,
+        windSpeed: windSpeedMap.has(key) ? Math.round(windSpeedMap.get(key) ?? 0) : undefined,
+        windGust: windGustMap.has(key) ? Math.round(windGustMap.get(key) ?? 0) : undefined,
+        windDirection: windDirectionMap.has(key) ? Math.round(windDirectionMap.get(key) ?? 0) : undefined,
+        snow: iconInfo.emoji === "❄️" || iconInfo.emoji === "🌨️",
+      };
+    });
+}
+
 export interface DayForecast {
   date: string;
   dayLabel: string;
@@ -104,12 +163,26 @@ export interface DayForecast {
   precipMm: number;
   emoji: string;
   label: string;
+  hourly?: DayHourlyForecast[];
 }
 
 export interface WeatherResult {
   city: string;
   days: DayForecast[];
   error?: string;
+}
+
+export interface DayHourlyForecast {
+  time: string;
+  label: string;
+  emoji: string;
+  temp?: number;
+  precipMm?: number;
+  sunshinePct?: number;
+  windSpeed?: number;
+  windGust?: number;
+  windDirection?: number;
+  snow?: boolean;
 }
 
 interface ResolvedPoint {
@@ -127,6 +200,13 @@ interface SelectedAssets {
   maxUrl: string;
   precipUrl: string | null;
   iconUrl: string;
+  hourlyTempUrl: string | null;
+  hourlyPrecipUrl: string | null;
+  hourlySunshineUrl: string | null;
+  windSpeedUrl: string | null;
+  windGustUrl: string | null;
+  windDirectionUrl: string | null;
+  hourlyIconUrl: string | null;
   iconParam: "jp2000d0" | "jww003i0";
 }
 
@@ -148,11 +228,17 @@ async function selectLatestUsableAssets(
   for (let i = features.length - 1; i >= 0; i--) {
     const assets: Record<string, { href: string }> = features[i]?.assets ?? {};
 
-    const [minUrl, maxUrl, precipUrl, dailyIconUrl, hourlyIconUrl] = await Promise.all([
+    const [minUrl, maxUrl, precipUrl, dailyIconUrl, hourlyTempUrl, hourlyPrecipUrl, hourlySunshineUrl, windSpeedUrl, windGustUrl, windDirectionUrl, hourlyIconUrl] = await Promise.all([
       findAssetUrl(assets, "tre200dn"),
       findAssetUrl(assets, "tre200dx"),
       findAssetUrl(assets, "rka150d0"),
       findAssetUrl(assets, "jp2000d0"),
+      findAssetUrl(assets, "tre200h0"),
+      findAssetUrl(assets, "rre150h0"),
+      findAssetUrl(assets, "sre000h0"),
+      findAssetUrl(assets, "fu3010h0"),
+      findAssetUrl(assets, "fu3010h1"),
+      findAssetUrl(assets, "dkl010h0"),
       findAssetUrl(assets, "jww003i0"),
     ]);
 
@@ -166,6 +252,13 @@ async function selectLatestUsableAssets(
         maxUrl,
         precipUrl,
         iconUrl: dailyIconUrl,
+        hourlyTempUrl,
+        hourlyPrecipUrl,
+        hourlySunshineUrl,
+        windSpeedUrl,
+        windGustUrl,
+        windDirectionUrl,
+        hourlyIconUrl,
         iconParam: "jp2000d0",
       };
     }
@@ -176,6 +269,13 @@ async function selectLatestUsableAssets(
         maxUrl,
         precipUrl,
         iconUrl: hourlyIconUrl,
+        hourlyTempUrl,
+        hourlyPrecipUrl,
+        hourlySunshineUrl,
+        windSpeedUrl,
+        windGustUrl,
+        windDirectionUrl,
+        hourlyIconUrl,
         iconParam: "jww003i0",
       };
     }
@@ -466,8 +566,29 @@ export async function fetchWeatherAction(
     if (selected.precipUrl) {
       fetchPromises.push(fetch(selected.precipUrl).then((r) => r.text()));
     }
+    if (selected.hourlyTempUrl) {
+      fetchPromises.push(fetch(selected.hourlyTempUrl).then((r) => r.text()));
+    }
+    if (selected.hourlyPrecipUrl) {
+      fetchPromises.push(fetch(selected.hourlyPrecipUrl).then((r) => r.text()));
+    }
+    if (selected.hourlySunshineUrl) {
+      fetchPromises.push(fetch(selected.hourlySunshineUrl).then((r) => r.text()));
+    }
+    if (selected.windSpeedUrl) {
+      fetchPromises.push(fetch(selected.windSpeedUrl).then((r) => r.text()));
+    }
+    if (selected.windGustUrl) {
+      fetchPromises.push(fetch(selected.windGustUrl).then((r) => r.text()));
+    }
+    if (selected.windDirectionUrl) {
+      fetchPromises.push(fetch(selected.windDirectionUrl).then((r) => r.text()));
+    }
+    if (selected.hourlyIconUrl) {
+      fetchPromises.push(fetch(selected.hourlyIconUrl).then((r) => r.text()));
+    }
     const results = await Promise.all(fetchPromises);
-    const [minText, maxText, iconText, precipText] = results;
+    const [minText, maxText, iconText, precipText, hourlyTempText, hourlyPrecipText, hourlySunshineText, windSpeedText, windGustText, windDirectionText, hourlyIconText] = results;
 
     // 4. Parse CSVs for selected place
     const minMap = parseCsvMap(minText, pointId);
@@ -479,6 +600,27 @@ export async function fetchWeatherAction(
     const precipMap = precipText
       ? parseCsvMap(precipText, pointId)
       : new Map<string, number>();
+    const hourlyTempMap = hourlyTempText
+      ? parseCsvMap(hourlyTempText, pointId)
+      : new Map<string, number>();
+    const hourlyPrecipMap = hourlyPrecipText
+      ? parseCsvMap(hourlyPrecipText, pointId)
+      : new Map<string, number>();
+    const hourlySunshineMap = hourlySunshineText
+      ? parseCsvMap(hourlySunshineText, pointId)
+      : new Map<string, number>();
+    const windSpeedMap = windSpeedText
+      ? parseCsvMap(windSpeedText, pointId)
+      : new Map<string, number>();
+    const windGustMap = windGustText
+      ? parseCsvMap(windGustText, pointId)
+      : new Map<string, number>();
+    const windDirectionMap = windDirectionText
+      ? parseCsvMap(windDirectionText, pointId)
+      : new Map<string, number>();
+    const hourlyIconMap = hourlyIconText
+      ? parseCsvMap(hourlyIconText, pointId)
+      : new Map<string, number>();
 
     // 5. Build 5-day forecast
     const dates = [...minMap.keys()].sort().slice(0, 5);
@@ -489,6 +631,18 @@ export async function fetchWeatherAction(
     const days: DayForecast[] = dates.map((dateKey) => {
       const iconCode = Math.round(iconMap.get(dateKey) ?? 0);
       const iconInfo = iconForCode(iconCode, t);
+      const hourly = buildHourlySeries(
+        dateKey.slice(0, 8),
+        localeTag,
+        t,
+        hourlyTempMap,
+        hourlyPrecipMap,
+        hourlySunshineMap,
+        windSpeedMap,
+        windGustMap,
+        windDirectionMap,
+        hourlyIconMap
+      );
       return {
         date: `${dateKey.slice(0, 4)}-${dateKey.slice(4, 6)}-${dateKey.slice(6, 8)}`,
         dayLabel: formatDayLabel(dateKey, localeTag),
@@ -498,6 +652,7 @@ export async function fetchWeatherAction(
           Math.round((precipMap.get(dateKey) ?? 0) * 10) / 10,
         emoji: iconInfo.emoji,
         label: iconInfo.label,
+        hourly,
       };
     });
 
