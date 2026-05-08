@@ -21,7 +21,12 @@ import styles from "./home-weather-panel.module.css";
 
 type HomeWeatherPanelProps = {
   initialWeather: WeatherResult | null;
-  fetchWeatherAction: (query?: string, language?: string, location?: WeatherLocation) => Promise<WeatherResult>;
+  fetchWeatherAction: (
+    query?: string,
+    language?: string,
+    location?: WeatherLocation,
+    options?: { includeHourly?: boolean }
+  ) => Promise<WeatherResult>;
   searchLocationsAction?: (query: string, language?: string) => Promise<string[]>;
 };
 
@@ -65,6 +70,7 @@ export function HomeWeatherPanel({
   const [selectedDay, setSelectedDay] = React.useState<DayForecast | null>(null);
 
   const debounceRef = React.useRef<number | null>(null);
+  const locationLoadedRef = React.useRef(false);
 
   const summary = weather?.days?.[0];
   const isReady = Boolean(summary && !weather?.error);
@@ -75,15 +81,41 @@ export function HomeWeatherPanel({
     }
 
     let cancelled = false;
+    let fallbackTimer: number | null = null;
+    locationLoadedRef.current = false;
+
+    async function loadFallbackWeather() {
+      if (cancelled || locationLoadedRef.current) {
+        return;
+      }
+
+      try {
+        const nextWeather = await fetchWeatherAction(undefined, locale, undefined, { includeHourly: false });
+        if (cancelled || locationLoadedRef.current) {
+          return;
+        }
+        setWeather(nextWeather);
+        setSearchTerm(nextWeather.city || "");
+      } catch {
+        if (!cancelled && !locationLoadedRef.current) {
+          setWeather({ city: "", days: [], error: t("weather.locationError") });
+        }
+      } finally {
+        if (!cancelled && !locationLoadedRef.current) {
+          setLoading(false);
+        }
+      }
+    }
 
     async function loadInitialWeather() {
       if (!navigator.geolocation) {
-        if (!cancelled) {
-          setWeather({ city: "", days: [], error: t("weather.locationError") });
-          setLoading(false);
-        }
+        void loadFallbackWeather();
         return;
       }
+
+      fallbackTimer = window.setTimeout(() => {
+        void loadFallbackWeather();
+      }, 6000);
 
       navigator.geolocation.getCurrentPosition(
         async (position) => {
@@ -95,14 +127,16 @@ export function HomeWeatherPanel({
               {
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude,
-              }
+              },
+              { includeHourly: false }
             );
             if (cancelled) return;
+            locationLoadedRef.current = true;
             setWeather(nextWeather);
             setSearchTerm(nextWeather.city || "");
           } catch {
-            if (!cancelled) {
-              setWeather({ city: "", days: [], error: t("weather.locationError") });
+            if (!cancelled && !locationLoadedRef.current) {
+              void loadFallbackWeather();
             }
           } finally {
             if (!cancelled) {
@@ -111,10 +145,7 @@ export function HomeWeatherPanel({
           }
         },
         () => {
-          if (!cancelled) {
-            setWeather({ city: "", days: [], error: t("weather.locationError") });
-            setLoading(false);
-          }
+          void loadFallbackWeather();
         },
         { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
       );
@@ -124,6 +155,9 @@ export function HomeWeatherPanel({
 
     return () => {
       cancelled = true;
+      if (fallbackTimer) {
+        window.clearTimeout(fallbackTimer);
+      }
     };
   }, [fetchWeatherAction, initialWeather, locale, t]);
 
@@ -177,7 +211,7 @@ export function HomeWeatherPanel({
     }
     setLoading(true);
     try {
-      const nextWeather = await fetchWeatherAction(place, locale);
+      const nextWeather = await fetchWeatherAction(place, locale, undefined, { includeHourly: false });
       setWeather(nextWeather);
       if (nextWeather?.city) {
         setSearchTerm(nextWeather.city);
@@ -200,7 +234,7 @@ export function HomeWeatherPanel({
     setShowSuggestions(false);
     setActiveIndex(-1);
     setLoading(true);
-    void fetchWeatherAction(label, locale)
+    void fetchWeatherAction(label, locale, undefined, { includeHourly: false })
       .then((nextWeather) => {
         setWeather(nextWeather);
         if (nextWeather?.city) {
@@ -273,6 +307,23 @@ export function HomeWeatherPanel({
   const snowText = selectedHourlySeries.some((slot) => slot.snow)
     ? t("weather.dayDetailsSnowPossible")
     : t("weather.dayDetailsSnowNone");
+
+  async function loadSelectedDayDetails(day: DayForecast) {
+    if (!weather?.city || day.hourly?.length) {
+      return;
+    }
+
+    try {
+      const detailedWeather = await fetchWeatherAction(weather.city, locale, undefined, { includeHourly: true });
+      const detailedDay = detailedWeather.days.find((entry) => entry.date === day.date) ?? null;
+      setWeather(detailedWeather);
+      if (detailedDay) {
+        setSelectedDay(detailedDay);
+      }
+    } catch {
+      // Keep the summary view if the detailed fetch fails.
+    }
+  }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (!showSuggestions || suggestions.length === 0) return;
@@ -415,7 +466,10 @@ export function HomeWeatherPanel({
                   key={day.date}
                   type="button"
                   className={`home-weather-day-card home-weather-day-button ${index === 0 ? "home-weather-day-card--today" : ""}`}
-                  onClick={() => setSelectedDay(day)}
+                  onClick={() => {
+                    setSelectedDay(day);
+                    void loadSelectedDayDetails(day);
+                  }}
                   aria-label={t("weather.openDayDetails", {
                     day: formatLongDayLabel(day.date),
                     high: `${day.tempMax}°`,
@@ -523,6 +577,10 @@ export function HomeWeatherPanel({
                   <p className="home-weather-day-summary-note">{t("weather.dayDetailsNote")}</p>
                 </div>
               </div>
+
+              {!selectedDay.hourly?.length ? (
+                <p className="home-weather-day-loading">{t("weather.loading")}</p>
+              ) : null}
 
               <div className="home-weather-day-metrics" aria-label={t("weather.dayDetailsMetrics")}>
                 <div className="home-weather-day-metric">

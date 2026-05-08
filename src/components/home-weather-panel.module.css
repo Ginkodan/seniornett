@@ -230,6 +230,14 @@
   line-height: 1.45;
 }
 
+.scope:global(.home-weather-day-loading),
+.scope :global(.home-weather-day-loading) {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
 .scope:global(.home-weather-day-metrics),
 .scope :global(.home-weather-day-metrics) {
   display: grid;

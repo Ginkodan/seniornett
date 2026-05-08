@@ -9,6 +9,7 @@ const STAC_ITEMS_URL =
   "https://data.geo.admin.ch/api/stac/v1/collections/ch.meteoschweiz.ogd-local-forecasting/items?limit=10";
 const META_POINTS_URL =
   "https://data.geo.admin.ch/ch.meteoschweiz.ogd-local-forecasting/ogd-local-forecasting_meta_point.csv";
+const META_POINTS_TTL_MS = 60 * 60 * 1000;
 
 // Zürich / Fluntern station point_id available across all required parameters
 const ZURICH_POINT_ID = "71";
@@ -21,6 +22,22 @@ interface MetaPoint {
   pointName: string;
   lat: number;
   lon: number;
+}
+
+type MetaPointCache = {
+  expiresAt: number;
+  promise: Promise<MetaPoint[]> | null;
+  value: MetaPoint[] | null;
+};
+
+const metaPointsCache: MetaPointCache = {
+  expiresAt: 0,
+  promise: null,
+  value: null,
+};
+
+function hasCoordinates(point: MetaPoint): boolean {
+  return Number.isFinite(point.lat) && Number.isFinite(point.lon);
 }
 
 function iconForCode(code: number, t: ReturnType<typeof createTranslator>): { emoji: string; label: string } {
@@ -210,6 +227,10 @@ interface SelectedAssets {
   iconParam: "jp2000d0" | "jww003i0";
 }
 
+export type WeatherFetchOptions = {
+  includeHourly?: boolean;
+};
+
 async function findAssetUrl(
   assets: Record<string, { href: string }>,
   paramCode: string
@@ -370,18 +391,52 @@ function parseMetaPoints(text: string): MetaPoint[] {
   return points;
 }
 
+async function loadMetaPoints(): Promise<MetaPoint[]> {
+  const now = Date.now();
+  if (metaPointsCache.value && metaPointsCache.expiresAt > now) {
+    return metaPointsCache.value;
+  }
+
+  if (metaPointsCache.promise) {
+    return metaPointsCache.promise;
+  }
+
+  metaPointsCache.promise = (async () => {
+    const metaResp = await fetch(META_POINTS_URL, {
+      next: { revalidate: 86400 },
+    });
+    if (!metaResp.ok) {
+      throw new Error("Ortsliste konnte nicht geladen werden");
+    }
+
+    const metaBuffer = await metaResp.arrayBuffer();
+    const metaText = new TextDecoder("iso-8859-1").decode(metaBuffer);
+    const points = parseMetaPoints(metaText);
+    metaPointsCache.value = points;
+    metaPointsCache.expiresAt = Date.now() + META_POINTS_TTL_MS;
+    return points;
+  })();
+
+  try {
+    return await metaPointsCache.promise;
+  } finally {
+    metaPointsCache.promise = null;
+  }
+}
+
 function choosePointByQuery(points: MetaPoint[], query: string): ResolvedPoint | null {
   const normalizedQuery = normalizeSearchText(query);
   if (!normalizedQuery) {
     return { pointId: ZURICH_POINT_ID, cityName: ZURICH_NAME };
   }
 
-  const stationPoints = points.filter((point) => point.pointTypeId === "1");
-  if (stationPoints.length === 0) {
+  const stationPoints = points.filter((point) => point.pointTypeId === "1" && hasCoordinates(point));
+  const candidatePoints = stationPoints.length > 0 ? stationPoints : points.filter(hasCoordinates);
+  if (candidatePoints.length === 0) {
     return null;
   }
 
-  const scored = stationPoints
+  const scored = candidatePoints
     .map((point) => {
       const pointNameNorm = normalizeSearchText(point.pointName);
       const postal = (point.postalCode || "").trim();
@@ -435,8 +490,7 @@ function choosePointByQuery(points: MetaPoint[], query: string): ResolvedPoint |
     // Find nearest station by Euclidean distance on WGS84 degrees (good enough for CH)
     let nearest: MetaPoint | null = null;
     let minDist = Infinity;
-    for (const station of stationPoints) {
-      if (!station.lat && !station.lon) continue;
+    for (const station of candidatePoints) {
       const d = Math.hypot(station.lat - refLat, station.lon - refLon);
       if (d < minDist) {
         minDist = d;
@@ -457,16 +511,16 @@ function choosePointByQuery(points: MetaPoint[], query: string): ResolvedPoint |
 }
 
 function chooseNearestStationByCoordinates(points: MetaPoint[], location: WeatherLocation): ResolvedPoint | null {
-  const stationPoints = points.filter((point) => point.pointTypeId === "1");
-  if (stationPoints.length === 0) {
+  const stationPoints = points.filter((point) => point.pointTypeId === "1" && hasCoordinates(point));
+  const candidatePoints = stationPoints.length > 0 ? stationPoints : points.filter(hasCoordinates);
+  if (candidatePoints.length === 0) {
     return null;
   }
 
   let nearest: MetaPoint | null = null;
   let minDist = Infinity;
 
-  for (const station of stationPoints) {
-    if (!station.lat && !station.lon) continue;
+  for (const station of candidatePoints) {
     const d = Math.hypot(station.lat - location.latitude, station.lon - location.longitude);
     if (d < minDist) {
       minDist = d;
@@ -485,38 +539,24 @@ function chooseNearestStationByCoordinates(points: MetaPoint[], location: Weathe
 async function resolvePointForQuery(query?: string, location?: WeatherLocation): Promise<ResolvedPoint> {
   const searchQuery = (query ?? "").trim();
   if (location) {
-    const metaResp = await fetch(META_POINTS_URL, {
-      next: { revalidate: 86400 },
-    });
-    if (!metaResp.ok) {
-      throw new Error("Ortsliste konnte nicht geladen werden");
-    }
+    try {
+      const points = await loadMetaPoints();
+      const resolved = chooseNearestStationByCoordinates(points, location);
+      if (!resolved) {
+        return { pointId: ZURICH_POINT_ID, cityName: ZURICH_NAME };
+      }
 
-    const metaBuffer = await metaResp.arrayBuffer();
-    const metaText = new TextDecoder("iso-8859-1").decode(metaBuffer);
-    const points = parseMetaPoints(metaText);
-    const resolved = chooseNearestStationByCoordinates(points, location);
-    if (!resolved) {
-      throw new Error("Kein Ort zur aktuellen Position gefunden");
+      return resolved;
+    } catch {
+      return { pointId: ZURICH_POINT_ID, cityName: ZURICH_NAME };
     }
-
-    return resolved;
   }
 
   if (!searchQuery) {
     return { pointId: ZURICH_POINT_ID, cityName: ZURICH_NAME };
   }
 
-  const metaResp = await fetch(META_POINTS_URL, {
-    next: { revalidate: 86400 },
-  });
-  if (!metaResp.ok) {
-    throw new Error("Ortsliste konnte nicht geladen werden");
-  }
-
-  const metaBuffer = await metaResp.arrayBuffer();
-  const metaText = new TextDecoder("iso-8859-1").decode(metaBuffer);
-  const points = parseMetaPoints(metaText);
+  const points = await loadMetaPoints();
   const resolved = choosePointByQuery(points, searchQuery);
   if (!resolved) {
     throw new Error(`Kein Ort zu "${searchQuery}" gefunden`);
@@ -528,11 +568,13 @@ async function resolvePointForQuery(query?: string, location?: WeatherLocation):
 export async function fetchWeatherAction(
   query?: string,
   language?: string,
-  location?: WeatherLocation
+  location?: WeatherLocation,
+  options: WeatherFetchOptions = {}
 ): Promise<WeatherResult> {
   const locale = normalizeLanguage(language);
   const t = createTranslator(locale);
   const localeTag = getLocaleTag(locale);
+  const includeHourly = options.includeHourly ?? true;
   let cityName = ZURICH_NAME;
   try {
     const resolvedPoint = await resolvePointForQuery(query, location);
@@ -566,29 +608,43 @@ export async function fetchWeatherAction(
     if (selected.precipUrl) {
       fetchPromises.push(fetch(selected.precipUrl).then((r) => r.text()));
     }
-    if (selected.hourlyTempUrl) {
-      fetchPromises.push(fetch(selected.hourlyTempUrl).then((r) => r.text()));
-    }
-    if (selected.hourlyPrecipUrl) {
-      fetchPromises.push(fetch(selected.hourlyPrecipUrl).then((r) => r.text()));
-    }
-    if (selected.hourlySunshineUrl) {
-      fetchPromises.push(fetch(selected.hourlySunshineUrl).then((r) => r.text()));
-    }
-    if (selected.windSpeedUrl) {
-      fetchPromises.push(fetch(selected.windSpeedUrl).then((r) => r.text()));
-    }
-    if (selected.windGustUrl) {
-      fetchPromises.push(fetch(selected.windGustUrl).then((r) => r.text()));
-    }
-    if (selected.windDirectionUrl) {
-      fetchPromises.push(fetch(selected.windDirectionUrl).then((r) => r.text()));
-    }
-    if (selected.hourlyIconUrl) {
-      fetchPromises.push(fetch(selected.hourlyIconUrl).then((r) => r.text()));
+    if (includeHourly) {
+      if (selected.hourlyTempUrl) {
+        fetchPromises.push(fetch(selected.hourlyTempUrl).then((r) => r.text()));
+      }
+      if (selected.hourlyPrecipUrl) {
+        fetchPromises.push(fetch(selected.hourlyPrecipUrl).then((r) => r.text()));
+      }
+      if (selected.hourlySunshineUrl) {
+        fetchPromises.push(fetch(selected.hourlySunshineUrl).then((r) => r.text()));
+      }
+      if (selected.windSpeedUrl) {
+        fetchPromises.push(fetch(selected.windSpeedUrl).then((r) => r.text()));
+      }
+      if (selected.windGustUrl) {
+        fetchPromises.push(fetch(selected.windGustUrl).then((r) => r.text()));
+      }
+      if (selected.windDirectionUrl) {
+        fetchPromises.push(fetch(selected.windDirectionUrl).then((r) => r.text()));
+      }
+      if (selected.hourlyIconUrl) {
+        fetchPromises.push(fetch(selected.hourlyIconUrl).then((r) => r.text()));
+      }
     }
     const results = await Promise.all(fetchPromises);
-    const [minText, maxText, iconText, precipText, hourlyTempText, hourlyPrecipText, hourlySunshineText, windSpeedText, windGustText, windDirectionText, hourlyIconText] = results;
+    const [
+      minText,
+      maxText,
+      iconText,
+      precipText,
+      hourlyTempText,
+      hourlyPrecipText,
+      hourlySunshineText,
+      windSpeedText,
+      windGustText,
+      windDirectionText,
+      hourlyIconText,
+    ] = results;
 
     // 4. Parse CSVs for selected place
     const minMap = parseCsvMap(minText, pointId);
@@ -600,25 +656,25 @@ export async function fetchWeatherAction(
     const precipMap = precipText
       ? parseCsvMap(precipText, pointId)
       : new Map<string, number>();
-    const hourlyTempMap = hourlyTempText
+    const hourlyTempMap = includeHourly && hourlyTempText
       ? parseCsvMap(hourlyTempText, pointId)
       : new Map<string, number>();
-    const hourlyPrecipMap = hourlyPrecipText
+    const hourlyPrecipMap = includeHourly && hourlyPrecipText
       ? parseCsvMap(hourlyPrecipText, pointId)
       : new Map<string, number>();
-    const hourlySunshineMap = hourlySunshineText
+    const hourlySunshineMap = includeHourly && hourlySunshineText
       ? parseCsvMap(hourlySunshineText, pointId)
       : new Map<string, number>();
-    const windSpeedMap = windSpeedText
+    const windSpeedMap = includeHourly && windSpeedText
       ? parseCsvMap(windSpeedText, pointId)
       : new Map<string, number>();
-    const windGustMap = windGustText
+    const windGustMap = includeHourly && windGustText
       ? parseCsvMap(windGustText, pointId)
       : new Map<string, number>();
-    const windDirectionMap = windDirectionText
+    const windDirectionMap = includeHourly && windDirectionText
       ? parseCsvMap(windDirectionText, pointId)
       : new Map<string, number>();
-    const hourlyIconMap = hourlyIconText
+    const hourlyIconMap = includeHourly && hourlyIconText
       ? parseCsvMap(hourlyIconText, pointId)
       : new Map<string, number>();
 
@@ -631,18 +687,20 @@ export async function fetchWeatherAction(
     const days: DayForecast[] = dates.map((dateKey) => {
       const iconCode = Math.round(iconMap.get(dateKey) ?? 0);
       const iconInfo = iconForCode(iconCode, t);
-      const hourly = buildHourlySeries(
-        dateKey.slice(0, 8),
-        localeTag,
-        t,
-        hourlyTempMap,
-        hourlyPrecipMap,
-        hourlySunshineMap,
-        windSpeedMap,
-        windGustMap,
-        windDirectionMap,
-        hourlyIconMap
-      );
+      const hourly = includeHourly
+        ? buildHourlySeries(
+            dateKey.slice(0, 8),
+            localeTag,
+            t,
+            hourlyTempMap,
+            hourlyPrecipMap,
+            hourlySunshineMap,
+            windSpeedMap,
+            windGustMap,
+            windDirectionMap,
+            hourlyIconMap
+          )
+        : undefined;
       return {
         date: `${dateKey.slice(0, 4)}-${dateKey.slice(4, 6)}-${dateKey.slice(6, 8)}`,
         dayLabel: formatDayLabel(dateKey, localeTag),
@@ -668,12 +726,12 @@ export async function searchLocationsAction(query: string, language?: string): P
   const q = query.trim();
   if (q.length < 2) return [];
 
-  const metaResp = await fetch(META_POINTS_URL, { next: { revalidate: 86400 } });
-  if (!metaResp.ok) return [];
-
-  const metaBuffer = await metaResp.arrayBuffer();
-  const metaText = new TextDecoder("iso-8859-1").decode(metaBuffer);
-  const points = parseMetaPoints(metaText);
+  let points: MetaPoint[];
+  try {
+    points = await loadMetaPoints();
+  } catch {
+    return [];
+  }
 
   const normalizedQuery = normalizeSearchText(q);
   const isNumeric = /^\d{3,6}$/.test(normalizedQuery);
