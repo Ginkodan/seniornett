@@ -117,6 +117,11 @@ interface ResolvedPoint {
   cityName: string;
 }
 
+export interface WeatherLocation {
+  latitude: number;
+  longitude: number;
+}
+
 interface SelectedAssets {
   minUrl: string;
   maxUrl: string;
@@ -351,8 +356,53 @@ function choosePointByQuery(points: MetaPoint[], query: string): ResolvedPoint |
   return { pointId: winner.pointId, cityName };
 }
 
-async function resolvePointForQuery(query?: string): Promise<ResolvedPoint> {
+function chooseNearestStationByCoordinates(points: MetaPoint[], location: WeatherLocation): ResolvedPoint | null {
+  const stationPoints = points.filter((point) => point.pointTypeId === "1");
+  if (stationPoints.length === 0) {
+    return null;
+  }
+
+  let nearest: MetaPoint | null = null;
+  let minDist = Infinity;
+
+  for (const station of stationPoints) {
+    if (!station.lat && !station.lon) continue;
+    const d = Math.hypot(station.lat - location.latitude, station.lon - location.longitude);
+    if (d < minDist) {
+      minDist = d;
+      nearest = station;
+    }
+  }
+
+  if (!nearest) {
+    return null;
+  }
+
+  const cityName = nearest.pointName.split("/")[0].trim() || nearest.pointName;
+  return { pointId: nearest.pointId, cityName };
+}
+
+async function resolvePointForQuery(query?: string, location?: WeatherLocation): Promise<ResolvedPoint> {
   const searchQuery = (query ?? "").trim();
+  if (location) {
+    const metaResp = await fetch(META_POINTS_URL, {
+      next: { revalidate: 86400 },
+    });
+    if (!metaResp.ok) {
+      throw new Error("Ortsliste konnte nicht geladen werden");
+    }
+
+    const metaBuffer = await metaResp.arrayBuffer();
+    const metaText = new TextDecoder("iso-8859-1").decode(metaBuffer);
+    const points = parseMetaPoints(metaText);
+    const resolved = chooseNearestStationByCoordinates(points, location);
+    if (!resolved) {
+      throw new Error("Kein Ort zur aktuellen Position gefunden");
+    }
+
+    return resolved;
+  }
+
   if (!searchQuery) {
     return { pointId: ZURICH_POINT_ID, cityName: ZURICH_NAME };
   }
@@ -375,13 +425,17 @@ async function resolvePointForQuery(query?: string): Promise<ResolvedPoint> {
   return resolved;
 }
 
-export async function fetchWeatherAction(query?: string, language?: string): Promise<WeatherResult> {
+export async function fetchWeatherAction(
+  query?: string,
+  language?: string,
+  location?: WeatherLocation
+): Promise<WeatherResult> {
   const locale = normalizeLanguage(language);
   const t = createTranslator(locale);
   const localeTag = getLocaleTag(locale);
   let cityName = ZURICH_NAME;
   try {
-    const resolvedPoint = await resolvePointForQuery(query);
+    const resolvedPoint = await resolvePointForQuery(query, location);
     const pointId = resolvedPoint.pointId;
     cityName = resolvedPoint.cityName;
 

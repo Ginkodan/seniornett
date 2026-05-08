@@ -11,13 +11,18 @@
 }
 
 .scope:global(.home-hero), .scope :global(.home-hero) {
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(21rem, 0.85fr);
+  gap: 1rem;
+  align-items: start;
 }
 
 .scope:global(.home-hero-copy), .scope :global(.home-hero-copy) {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 0.35rem;
+  min-width: 0;
 }
 
 .scope:global(.home-hero h1), .scope :global(.home-hero h1) {
@@ -43,6 +48,10 @@
 }
 
 @media (max-width: 900px) {
+  .scope:global(.home-hero), .scope :global(.home-hero) {
+    grid-template-columns: 1fr;
+  }
+
   .scope:global(.home-grid), .scope :global(.home-grid) {
     grid-template-columns: 1fr;
   }

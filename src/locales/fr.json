@@ -32,7 +32,6 @@
       "news": "Actualités",
       "lotti-live": "Demander à Lotti",
       "lexikon": "Comprendre les mots",
-      "wetter": "Météo",
       "sbb": "Trajets en train",
       "karte": "Carte",
       "video": "Télévision"
@@ -44,7 +43,6 @@
       "news": "Lire les nouvelles.",
       "lotti-live": "Poser une question.",
       "lexikon": "Comprendre les mots.",
-      "wetter": "Voir la météo d’aujourd’hui et demain.",
       "sbb": "Vérifier les trajets.",
       "karte": "Voir les lieux et les chemins.",
       "video": "Voir des émissions."
@@ -56,7 +54,6 @@
       "news": "Lire les nouvelles",
       "lotti-live": "Poser une question",
       "lexikon": "Voir le sens",
-      "wetter": "Afficher la météo",
       "sbb": "Chercher les trajets",
       "karte": "Afficher la carte",
       "video": "Voir les émissions"
@@ -139,7 +136,11 @@
     "subtitle": "Prévisions météo sur 5 jours",
     "source": "Source : MétéoSuisse",
     "searchLabel": "Rechercher un lieu",
+    "changeLocation": "Changer le lieu",
+    "searchHelp": "Saisissez un lieu ou un code postal.",
     "searchPlaceholder": "p. ex. Berne, Bâle ou Lucerne",
+    "locationLoading": "Votre position est déterminée ...",
+    "locationError": "Votre position n’a pas pu être déterminée. Vous pouvez chercher un lieu.",
     "loadingButton": "Chargement ...",
     "searchButton": "Rechercher",
     "loadingTitle": "Nous cherchons la météo.",

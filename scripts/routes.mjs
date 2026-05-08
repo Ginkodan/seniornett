@@ -4,7 +4,6 @@ export const REVIEW_ROUTES = [
   { name: "news", path: "/news" },
   { name: "lotti-live", path: "/lotti-live" },
   { name: "audio", path: "/audio" },
-  { name: "wetter", path: "/wetter" },
   { name: "sbb", path: "/sbb" },
   { name: "lexikon", path: "/lexikon" },
   { name: "karte", path: "/karte" },

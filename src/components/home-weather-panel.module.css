@@ -1,0 +1,244 @@
+.scope {
+  display: contents;
+}
+
+.scope:global(.home-weather-panel),
+.scope :global(.home-weather-panel) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.42rem;
+  min-width: 0;
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0.18rem 0 0.18rem;
+  margin-left: auto;
+  justify-self: end;
+}
+
+.scope:global(.home-weather-panel-head),
+.scope :global(.home-weather-panel-head) {
+  display: flex;
+  justify-content: flex-start;
+  align-items: start;
+  gap: 0;
+  margin-bottom: 0.26rem;
+}
+
+.scope:global(.home-weather-city),
+.scope :global(.home-weather-city) {
+  margin: 0;
+  font-size: clamp(1.3rem, 2.4vw, 2rem);
+  line-height: 1.05;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.scope:global(.home-weather-location),
+.scope :global(.home-weather-location) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.14rem;
+  min-width: 0;
+  justify-self: start;
+  margin-left: 0;
+}
+
+.scope:global(.home-weather-location-icon),
+.scope :global(.home-weather-location-icon) {
+  color: var(--ink-3);
+  flex-shrink: 0;
+}
+
+.scope:global(.home-weather-search-trigger),
+.scope :global(.home-weather-search-trigger) {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper) 70%, white);
+  color: var(--ink-3);
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+.scope:global(.home-weather-search-trigger:hover),
+.scope :global(.home-weather-search-trigger:hover) {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.scope:global(.home-weather-search-trigger-inline),
+.scope :global(.home-weather-search-trigger-inline) {
+  min-width: 2rem;
+  min-height: 2rem;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  margin-left: 0;
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+.scope:global(.home-weather-status),
+.scope :global(.home-weather-status) {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink-3);
+}
+
+.scope:global(.home-weather-days),
+.scope :global(.home-weather-days) {
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.04rem;
+  min-width: 0;
+}
+
+.scope:global(.home-weather-day-card),
+.scope :global(.home-weather-day-card) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.12rem;
+  min-width: 0;
+  flex: 0 0 auto;
+  width: 3.9rem;
+  min-height: 5.15rem;
+  padding: 0.1rem 0 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+}
+
+.scope:global(.home-weather-day-card--today),
+.scope :global(.home-weather-day-card--today) {
+  background: transparent;
+}
+
+.scope:global(.home-weather-day-label),
+.scope :global(.home-weather-day-label) {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+.scope:global(.home-weather-day-emoji),
+.scope :global(.home-weather-day-emoji) {
+  font-size: 2.15rem;
+  line-height: 1;
+}
+
+.scope:global(.home-weather-day-temps),
+.scope :global(.home-weather-day-temps) {
+  margin: 0;
+  font-size: 0.96rem;
+  font-weight: 800;
+  line-height: 1.05;
+  color: var(--ink);
+}
+
+.scope:global(.home-weather-day-temps-sep),
+.scope :global(.home-weather-day-temps-sep) {
+  color: var(--ink-4);
+  font-weight: 400;
+}
+
+.scope:global(.home-weather-overlay),
+.scope :global(.home-weather-overlay) {
+  width: min(40rem, 100%);
+}
+
+.scope:global(.home-weather-search),
+.scope :global(.home-weather-search) {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.scope:global(.home-weather-suggestions),
+.scope :global(.home-weather-suggestions) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 16rem;
+  overflow: auto;
+  padding-right: 0.15rem;
+}
+
+.scope:global(.home-weather-suggestion),
+.scope :global(.home-weather-suggestion) {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 3.25rem;
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--paper) 88%, white);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--ink) 6%, transparent);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.scope:global(.home-weather-suggestion:hover),
+.scope :global(.home-weather-suggestion:hover),
+.scope:global(.home-weather-suggestion--active),
+.scope :global(.home-weather-suggestion--active) {
+  background: var(--paper-2);
+  color: var(--ink);
+}
+
+.scope:global(.home-weather-search-actions),
+.scope :global(.home-weather-search-actions) {
+  display: flex;
+  justify-content: flex-start;
+}
+
+@media (max-width: 900px) {
+  .scope:global(.home-weather-panel),
+  .scope :global(.home-weather-panel) {
+    width: 100%;
+    justify-self: stretch;
+    margin-left: 0;
+  }
+
+  .scope:global(.home-weather-days),
+  .scope :global(.home-weather-days) {
+    flex-wrap: wrap;
+    gap: 0.12rem;
+  }
+
+  .scope:global(.home-weather-day-card),
+  .scope :global(.home-weather-day-card) {
+    width: calc((100% - 0.1rem) / 2);
+  }
+}
+
+@media (max-width: 560px) {
+  .scope:global(.home-weather-days),
+  .scope :global(.home-weather-days) {
+    flex-direction: column;
+    gap: 0.05rem;
+  }
+
+  .scope:global(.home-weather-day-card),
+  .scope :global(.home-weather-day-card) {
+    width: 100%;
+  }
+}

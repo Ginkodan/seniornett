@@ -3,9 +3,10 @@
 "use client";
 
 import React from 'react';
-import { MessageCircleHeart, MessagesSquare, Newspaper, BookOpen, CloudSun, Tv, Siren, Map, Radio, Train } from 'lucide-react';
+import { MessageCircleHeart, MessagesSquare, Newspaper, BookOpen, Tv, Siren, Map, Radio, Train } from 'lucide-react';
 import { useAppState } from './app-provider';
 import { AppTile } from './ui';
+import { HomeWeatherPanel } from "./home-weather-panel";
 import homeStyles from "./home-screen.module.css";
 import uiStyles from "./ui/seniornett.module.css";
 
@@ -15,14 +16,13 @@ const APPS = [
   { id: 'news', href: '/news', icon: <Newspaper size={34} strokeWidth={2.25} />, accent: 'green' },
   { id: 'audio', href: '/audio', icon: <Radio size={34} strokeWidth={2.25} />, accent: 'blue' },
   { id: 'lotti-live', href: '/lotti-live', icon: <MessagesSquare size={34} strokeWidth={2.25} />, accent: 'coral' },
-  { id: 'wetter', href: '/wetter', icon: <CloudSun size={34} strokeWidth={2.25} />, accent: 'blue' },
   { id: 'sbb', href: '/sbb', icon: <Train size={34} strokeWidth={2.25} />, accent: 'teal' },
   { id: 'lexikon', href: '/lexikon', icon: <BookOpen size={34} strokeWidth={2.25} />, accent: 'violet' },
   { id: 'karte', href: '/karte', icon: <Map size={34} strokeWidth={2.25} />, accent: 'amber' },
   { id: 'video', href: '/video', icon: <Tv size={34} strokeWidth={2.25} />, accent: 'coral' },
 ];
 
-export function HomeScreen() {
+export function HomeScreen({ initialWeather, fetchWeatherAction, searchLocationsAction }) {
   const { identity, t } = useAppState();
   const firstName = (identity?.userName || t('topbar.userUnknown')).split(' ')[0];
   const apps = APPS.map((app) => ({
@@ -38,6 +38,11 @@ export function HomeScreen() {
           <h1>{t('home.greeting', { name: identity?.loading ? '...' : firstName })}</h1>
           <p>{t('home.prompt')}</p>
         </div>
+        <HomeWeatherPanel
+          initialWeather={initialWeather}
+          fetchWeatherAction={fetchWeatherAction}
+          searchLocationsAction={searchLocationsAction}
+        />
       </div>
 
       <div className="home-grid">

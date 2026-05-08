@@ -32,7 +32,6 @@
       "news": "Nachrichten",
       "lotti-live": "Lotti fragen",
       "lexikon": "Wörter verstehen",
-      "wetter": "Wetter",
       "sbb": "Zugverbindungen",
       "karte": "Karte",
       "video": "Fernsehen"
@@ -44,7 +43,6 @@
       "news": "Nachrichten lesen.",
       "lotti-live": "Eine Frage stellen.",
       "lexikon": "Wörter einfach verstehen.",
-      "wetter": "Wetter für heute und morgen.",
       "sbb": "Verbindungen prüfen.",
       "karte": "Orte und Wege ansehen.",
       "video": "Sendungen ansehen."
@@ -56,7 +54,6 @@
       "news": "Nachrichten lesen",
       "lotti-live": "Frage stellen",
       "lexikon": "Bedeutung zeigen",
-      "wetter": "Prognose anzeigen",
       "sbb": "Verbindungen suchen",
       "karte": "Karte anzeigen",
       "video": "Sendungen ansehen"
@@ -139,7 +136,11 @@
     "subtitle": "Wetterprognose für 5 Tage",
     "source": "Quelle: MeteoSchweiz",
     "searchLabel": "Ort suchen",
+    "changeLocation": "Ort ändern",
+    "searchHelp": "Geben Sie einen Ort oder eine Postleitzahl ein.",
     "searchPlaceholder": "z. B. Bern, Basel oder Luzern",
+    "locationLoading": "Ihr Standort wird bestimmt ...",
+    "locationError": "Ihr Standort konnte nicht bestimmt werden. Sie können einen Ort suchen.",
     "loadingButton": "Lädt ...",
     "searchButton": "Suchen",
     "loadingTitle": "Wir holen das Wetter.",
