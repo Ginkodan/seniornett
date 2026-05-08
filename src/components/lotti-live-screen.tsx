@@ -1,20 +1,38 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 "use client";
 
 import React from 'react';
 import Image from 'next/image';
 import { useAppState } from './app-provider';
 import { SeniorNetPage } from './ui';
+import { ChatMarkdown } from './chat-markdown';
 import lottiAvatar from "../../assets/lotti.png";
 import styles from "./lotti-live-screen.module.css";
 
-export function LottiLiveScreen({ askLottiAction }) {
+type ChatRole = "user" | "assistant";
+
+type ChatMessage = {
+  id: string;
+  role: ChatRole;
+  text: string;
+  source?: string;
+};
+
+type AskLottiAction = (
+  message: string,
+  history: Array<{ role: ChatRole; text: string }>,
+  language?: string
+) => Promise<{ ok: boolean; text: string; source: string }>;
+
+type LottiLiveScreenProps = {
+  askLottiAction: AskLottiAction;
+};
+
+export function LottiLiveScreen({ askLottiAction }: LottiLiveScreenProps) {
   const { t, locale } = useAppState();
-  const [messages, setMessages] = React.useState([]);
-  const [draft, setDraft] = React.useState('');
+  const [messages, setMessages] = React.useState<ChatMessage[]>([]);
+  const [draft, setDraft] = React.useState("");
   const [pending, setPending] = React.useState(false);
-  const listRef = React.useRef(null);
+  const listRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     if (!listRef.current) {
@@ -30,14 +48,14 @@ export function LottiLiveScreen({ askLottiAction }) {
       return;
     }
 
-    const userMessage = {
+    const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
-      role: 'user',
+      role: "user",
       text,
     };
 
     setMessages((current) => [...current, userMessage]);
-    setDraft('');
+    setDraft("");
     setPending(true);
 
     try {
@@ -47,9 +65,9 @@ export function LottiLiveScreen({ askLottiAction }) {
         ...current,
         {
           id: `assistant-${Date.now()}`,
-          role: 'assistant',
+          role: "assistant",
           text: result?.text || t('lotti.fallback.general'),
-          source: result?.source || 'fallback',
+          source: result?.source || "fallback",
         },
       ]);
     } catch {
@@ -57,9 +75,9 @@ export function LottiLiveScreen({ askLottiAction }) {
         ...current,
         {
           id: `assistant-${Date.now()}`,
-          role: 'assistant',
+          role: "assistant",
           text: t('lotti.fallback.general'),
-          source: 'fallback',
+          source: "fallback",
         },
       ]);
     } finally {
@@ -98,7 +116,9 @@ export function LottiLiveScreen({ askLottiAction }) {
                       className="lotti-message-avatar"
                     />
                   ) : null}
-                  <div className="lotti-message-text">{message.text}</div>
+                  <div className="lotti-message-text">
+                    <ChatMarkdown text={message.text} />
+                  </div>
                 </div>
               ))}
 
@@ -110,7 +130,9 @@ export function LottiLiveScreen({ askLottiAction }) {
                     aria-hidden="true"
                     className="lotti-message-avatar"
                   />
-                  <div className="lotti-message-text">{t('lotti.pending')}</div>
+                  <div className="lotti-message-text">
+                    <ChatMarkdown text={t('lotti.pending')} />
+                  </div>
                 </div>
               )}
             </div>
@@ -127,7 +149,7 @@ export function LottiLiveScreen({ askLottiAction }) {
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
                   onKeyDown={(event) => {
-                    if (event.key === 'Enter' && !event.shiftKey) {
+                    if (event.key === "Enter" && !event.shiftKey) {
                       event.preventDefault();
                       submitQuestion();
                     }

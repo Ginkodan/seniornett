@@ -70,6 +70,87 @@
   color: var(--ink);
 }
 
+.scope:global(.lotti-markdown), .scope :global(.lotti-markdown) {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.scope:global(.lotti-markdown p), .scope :global(.lotti-markdown p) {
+  margin: 0;
+}
+
+.scope:global(.lotti-markdown h1),
+.scope:global(.lotti-markdown h2),
+.scope:global(.lotti-markdown h3),
+.scope:global(.lotti-markdown h4),
+.scope:global(.lotti-markdown h5),
+.scope:global(.lotti-markdown h6),
+.scope :global(.lotti-markdown h1),
+.scope :global(.lotti-markdown h2),
+.scope :global(.lotti-markdown h3),
+.scope :global(.lotti-markdown h4),
+.scope :global(.lotti-markdown h5),
+.scope :global(.lotti-markdown h6) {
+  margin: 0;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.scope:global(.lotti-markdown h1), .scope :global(.lotti-markdown h1) {
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.scope:global(.lotti-markdown h2), .scope :global(.lotti-markdown h2) {
+  font-size: 1.12rem;
+  font-weight: 800;
+}
+
+.scope:global(.lotti-markdown h3), .scope :global(.lotti-markdown h3) {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.scope:global(.lotti-markdown-list), .scope :global(.lotti-markdown-list) {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.scope:global(.lotti-markdown-list li), .scope :global(.lotti-markdown-list li) {
+  margin: 0;
+}
+
+.scope:global(.lotti-markdown-codeblock), .scope :global(.lotti-markdown-codeblock) {
+  margin: 0;
+  padding: 0.8rem 0.95rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--paper) 88%, var(--card));
+  border: var(--border-thin);
+  overflow: auto;
+  white-space: pre;
+  font-family: "SFMono-Regular", ui-monospace, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", Menlo, Monaco, Consolas, monospace;
+  font-size: 0.95em;
+}
+
+.scope:global(.lotti-markdown code), .scope :global(.lotti-markdown code) {
+  padding: 0.08rem 0.35rem;
+  border-radius: 0.35rem;
+  background: color-mix(in srgb, var(--paper) 86%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--card-edge) 55%, transparent);
+  font-family: "SFMono-Regular", ui-monospace, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", Menlo, Monaco, Consolas, monospace;
+  font-size: 0.95em;
+}
+
+.scope:global(.lotti-markdown strong), .scope :global(.lotti-markdown strong) {
+  font-weight: 800;
+}
+
+.scope:global(.lotti-markdown em), .scope :global(.lotti-markdown em) {
+  font-style: italic;
+}
+
 .scope:global(.lotti-empty-state), .scope :global(.lotti-empty-state) {
   border: var(--border);
   border-radius: 1rem;

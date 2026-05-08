@@ -3,6 +3,7 @@
 
 import JSZip from "jszip";
 import { mkdir, readFile, rename, stat, unlink, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 export interface StopPoint {
@@ -201,7 +202,7 @@ const DEFAULT_TRANSFER_MINUTES = 2;
 const GTFS_CACHE_REVALIDATE_SECONDS = 7 * 24 * 60 * 60;
 const WALKING_ROUTE_REVALIDATE_SECONDS = 7 * 24 * 60 * 60;
 const WALKING_ROUTE_BASE_URL = "https://router.project-osrm.org/route/v1/foot";
-const GTFS_LOCAL_CACHE_DIR = join(process.cwd(), ".cache", "swiss-gtfs");
+const GTFS_LOCAL_CACHE_DIR = join(tmpdir(), "seniornett", "swiss-gtfs");
 const GTFS_LOCAL_CACHE_PATH = join(GTFS_LOCAL_CACHE_DIR, "gtfs_fp2026_latest.zip");
 const WALKING_METERS_PER_MINUTE = 70;
 const WALKING_BUFFER_MINUTES = 2;
@@ -306,6 +307,63 @@ function isStationLikeStopName(name: string | undefined): boolean {
   return /\b(bahnhof|station|gare|staziun|hbf|central)\b/i.test(normalized);
 }
 
+function scoreStationCandidate(candidate: Station, query: string): number {
+  const normalizedCandidate = normalizeStationKey(candidate.name);
+  const normalizedQuery = normalizeStationKey(query);
+
+  if (!normalizedCandidate || !normalizedQuery) {
+    return Number.NEGATIVE_INFINITY;
+  }
+
+  let score = 0;
+
+  if (normalizedCandidate === normalizedQuery) {
+    score += 100;
+  } else if (
+    normalizedCandidate.startsWith(`${normalizedQuery} `) ||
+    normalizedCandidate.startsWith(`${normalizedQuery},`) ||
+    normalizedCandidate.startsWith(`${normalizedQuery}-`)
+  ) {
+    score += 90;
+  } else if (
+    normalizedCandidate.endsWith(` ${normalizedQuery}`) ||
+    normalizedCandidate.includes(` ${normalizedQuery} `)
+  ) {
+    score += 75;
+  } else if (normalizedCandidate.includes(normalizedQuery)) {
+    score += 55;
+  }
+
+  if (/\b(hbf|bahnhof|station|gare|staziun|central)\b/i.test(candidate.name)) {
+    score += 12;
+  }
+
+  if (/,/.test(candidate.name)) {
+    score -= 12;
+  }
+
+  if (/\d/.test(candidate.name)) {
+    score -= 5;
+  }
+
+  return score;
+}
+
+function pickBestStation(stations: Station[], query: string): Station | undefined {
+  let bestStation: Station | undefined;
+  let bestScore = Number.NEGATIVE_INFINITY;
+
+  for (const station of stations) {
+    const score = scoreStationCandidate(station, query);
+    if (score > bestScore) {
+      bestScore = score;
+      bestStation = station;
+    }
+  }
+
+  return bestStation;
+}
+
 async function resolveLocationTarget(
   query: string,
   dataset: SwissGtfsTransferDataset | null
@@ -332,7 +390,7 @@ async function resolveLocationTarget(
         if (!normalizedCandidate) continue;
 
         const stationResult = await searchStations(normalizedCandidate);
-        const station = stationResult.stations[0];
+        const station = pickBestStation(stationResult.stations, normalizedCandidate);
         if (station) {
           return {
             displayLabel,
@@ -347,7 +405,7 @@ async function resolveLocationTarget(
 
     if (!looksLikeAddress) {
       const stationResult = await searchStations(normalizedQuery);
-      const station = stationResult.stations[0];
+      const station = pickBestStation(stationResult.stations, normalizedQuery);
       if (station) {
         return {
           displayLabel: station.name,
@@ -382,7 +440,7 @@ async function resolveLocationTarget(
     }
 
     const stationResult = await searchStations(normalizedQuery);
-    const station = stationResult.stations[0];
+    const station = pickBestStation(stationResult.stations, normalizedQuery);
     if (station) {
       return {
         displayLabel: station.name,
@@ -394,7 +452,7 @@ async function resolveLocationTarget(
     const stripped = stripLocationQuery(normalizedQuery);
     if (stripped && stripped.toLowerCase() !== cacheKey) {
       const strippedStations = await searchStations(stripped);
-      const strippedStation = strippedStations.stations[0];
+      const strippedStation = pickBestStation(strippedStations.stations, stripped);
       if (strippedStation) {
         return {
           displayLabel: normalizedQuery,

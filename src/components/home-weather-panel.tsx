@@ -569,7 +569,7 @@ export function HomeWeatherPanel({
                   type="button"
                   className={`home-weather-day-card home-weather-day-button ${index === 0 ? "home-weather-day-card--today" : ""}`}
                   onClick={() => {
-                    const currentDay = weather.days.find((entry) => entry.date === day.date) ?? day;
+                    const currentDay = weather?.days.find((entry) => entry.date === day.date) ?? day;
                     setSelectedDay(currentDay);
                     void loadSelectedDayDetails(currentDay);
                   }}
