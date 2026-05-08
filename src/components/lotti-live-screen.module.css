@@ -31,6 +31,9 @@
 }
 
 .scope:global(.lotti-message), .scope :global(.lotti-message) {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.9rem;
   max-width: 46rem;
   padding: 1rem 1.25rem;
   border: var(--border-thin);
@@ -52,6 +55,15 @@
   opacity: 0.8;
 }
 
+.scope:global(.lotti-message-avatar), .scope :global(.lotti-message-avatar) {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  border-radius: 0.9rem;
+  object-fit: cover;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--card-edge) 72%, transparent);
+}
+
 .scope:global(.lotti-message-text), .scope :global(.lotti-message-text) {
   font-size: var(--fs-base);
   line-height: 1.7;
@@ -61,18 +73,12 @@
 .scope:global(.lotti-empty-state), .scope :global(.lotti-empty-state) {
   border: var(--border);
   border-radius: 1rem;
-  padding: 1.5rem;
+  padding: 1.25rem 1.4rem;
   background: var(--paper-2);
   color: var(--ink);
-  max-width: 42rem;
+  max-width: 34rem;
   display: grid;
-  gap: 1.25rem;
-}
-
-.scope:global(.lotti-empty-intro h2), .scope :global(.lotti-empty-intro h2) {
-  margin: 0 0 0.5rem;
-  font-size: var(--fs-lg);
-  line-height: 1.15;
+  gap: 0.75rem;
 }
 
 .scope:global(.lotti-empty-intro p), .scope :global(.lotti-empty-intro p) {
@@ -82,23 +88,18 @@
   font-weight: 600;
 }
 
-.scope:global(.lotti-example-list), .scope :global(.lotti-example-list) {
-  display: grid;
-  gap: 0.75rem;
+.scope:global(.lotti-empty-intro), .scope :global(.lotti-empty-intro) {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
 }
 
-.scope:global(.lotti-example-button), .scope :global(.lotti-example-button) {
-  min-height: 4rem;
-  padding: 0.85rem 1rem;
-  border: var(--border-thin);
-  border-radius: var(--radius);
-  background: var(--card);
-  color: var(--ink);
-  font: inherit;
-  font-size: var(--fs-base);
-  font-weight: 800;
-  text-align: left;
-  cursor: pointer;
+.scope:global(.lotti-empty-avatar), .scope :global(.lotti-empty-avatar) {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1rem;
+  object-fit: cover;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--card-edge) 72%, transparent);
 }
 
 .scope:global(.lotti-compose), .scope :global(.lotti-compose) {

@@ -3,8 +3,10 @@
 "use client";
 
 import React from 'react';
+import Image from 'next/image';
 import { useAppState } from './app-provider';
 import { SeniorNetPage } from './ui';
+import lottiAvatar from "../../assets/lotti.png";
 import styles from "./lotti-live-screen.module.css";
 
 export function LottiLiveScreen({ askLottiAction }) {
@@ -65,11 +67,6 @@ export function LottiLiveScreen({ askLottiAction }) {
     }
   };
 
-  const fillExample = (text) => {
-    if (pending) return;
-    setDraft(text);
-  };
-
   return (
     <SeniorNetPage title={t('lotti.title')} subtitle={t('lotti.subtitle')} tone="coral">
       <div className={styles.scope}>
@@ -79,30 +76,40 @@ export function LottiLiveScreen({ askLottiAction }) {
               {!messages.length && !pending && (
                 <div className="lotti-empty-state">
                   <div className="lotti-empty-intro">
-                    <h2>{t('lotti.emptyTitle')}</h2>
+                    <Image
+                      src={lottiAvatar}
+                      alt=""
+                      aria-hidden="true"
+                      className="lotti-empty-avatar"
+                      priority
+                    />
                     <p>{t('lotti.empty')}</p>
-                  </div>
-                  <div className="lotti-example-list" aria-label={t('lotti.examplesLabel')}>
-                    {[0, 1, 2].map((index) => {
-                      const text = t(`lotti.examples.${index}`);
-                      return (
-                        <button key={text} type="button" className="lotti-example-button" onClick={() => fillExample(text)}>
-                          {text}
-                        </button>
-                      );
-                    })}
                   </div>
                 </div>
               )}
 
               {messages.map((message) => (
                 <div key={message.id} className={`lotti-message ${message.role}`}>
+                  {message.role === 'assistant' ? (
+                    <Image
+                      src={lottiAvatar}
+                      alt=""
+                      aria-hidden="true"
+                      className="lotti-message-avatar"
+                    />
+                  ) : null}
                   <div className="lotti-message-text">{message.text}</div>
                 </div>
               ))}
 
               {pending && (
                 <div className="lotti-message assistant pending">
+                  <Image
+                    src={lottiAvatar}
+                    alt=""
+                    aria-hidden="true"
+                    className="lotti-message-avatar"
+                  />
                   <div className="lotti-message-text">{t('lotti.pending')}</div>
                 </div>
               )}

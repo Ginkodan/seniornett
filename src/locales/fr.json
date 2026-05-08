@@ -330,15 +330,8 @@
   },
   "lotti": {
     "title": "Demander à Lotti",
-    "subtitle": "Poser une question simple et obtenir une explication calme.",
-    "emptyTitle": "Je suis Lotti.",
-    "empty": "Je vous aide avec des questions simples. Écrivez une question ci-dessous ou choisissez un exemple.",
-    "examplesLabel": "Exemples de questions",
-    "examples": {
-      "0": "Quel temps fera-t-il demain ?",
-      "1": "Où puis-je trouver mes photos ?",
-      "2": "Que dit cette lettre ?"
-    },
+    "subtitle": "Question simple, réponse courte.",
+    "empty": "Je suis Lotti. Écrivez simplement votre question.",
     "pending": "Un instant s'il vous plaît ...",
     "label": "Question à Lotti",
     "placeholder": "Saisissez votre question ici",

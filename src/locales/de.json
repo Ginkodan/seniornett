@@ -330,15 +330,8 @@
   },
   "lotti": {
     "title": "Lotti fragen",
-    "subtitle": "Eine einfache Frage stellen und ruhig erklärt bekommen.",
-    "emptyTitle": "Ich bin Lotti.",
-    "empty": "Ich helfe Ihnen bei einfachen Fragen. Tippen Sie unten eine Frage ein oder wählen Sie ein Beispiel.",
-    "examplesLabel": "Beispielfragen",
-    "examples": {
-      "0": "Wie wird das Wetter morgen?",
-      "1": "Wo finde ich meine Fotos?",
-      "2": "Was steht in diesem Brief?"
-    },
+    "subtitle": "Einfach fragen. Kurz erklärt.",
+    "empty": "Ich bin Lotti. Schreiben Sie einfach Ihre Frage.",
     "pending": "Einen Moment bitte ...",
     "label": "Frage an Lotti",
     "placeholder": "Frage hier eingeben",
