@@ -122,3 +122,52 @@
   letter-spacing: 0.08em;
   font-weight: 600;
 }
+
+.scope:global(.dev-footer), .scope :global(.dev-footer) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0 1rem;
+  border-top: 1px solid color-mix(in srgb, var(--card-edge) 58%, transparent);
+  border-radius: 0;
+  background: color-mix(in srgb, var(--paper) 92%, white);
+  color: var(--ink-2);
+  font-size: 0.62rem;
+  line-height: 1;
+  letter-spacing: 0.005em;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0.35rem;
+  z-index: 42;
+  box-shadow: 0 -1px 0 color-mix(in srgb, var(--card-edge) 28%, transparent);
+  width: 100%;
+  min-height: 1.75rem;
+  white-space: nowrap;
+}
+.scope:global(.dev-footer-hash), .scope :global(.dev-footer-hash) {
+  display: inline-flex;
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.scope:global(.dev-footer-reload), .scope :global(.dev-footer-reload) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.scope:global(.dev-footer-reload:hover), .scope :global(.dev-footer-reload:hover) {
+  color: var(--ink);
+}

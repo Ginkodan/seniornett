@@ -21,9 +21,13 @@ RUN npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
+ARG GIT_SHA=dev
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
+ENV SENIORNETT_BUILD_SHA=${GIT_SHA}
+
+LABEL org.opencontainers.image.revision=${GIT_SHA}
 
 RUN addgroup -S nodejs && adduser -S nextjs -G nodejs
 RUN mkdir -p /app/.next

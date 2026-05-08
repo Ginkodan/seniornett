@@ -2,8 +2,6 @@ export const REVIEW_ROUTES = [
   { name: "home", path: "/" },
   { name: "social-hub", path: "/social-hub" },
   { name: "news", path: "/news" },
-  { name: "marktplatz", path: "/marktplatz" },
-  { name: "fotos-papiere", path: "/fotos-papiere" },
   { name: "lotti-live", path: "/lotti-live" },
   { name: "audio", path: "/audio" },
   { name: "wetter", path: "/wetter" },

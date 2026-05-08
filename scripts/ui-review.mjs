@@ -121,7 +121,7 @@ async function runSecondaryViewportCheck(browser) {
 
   for (const route of REVIEW_ROUTES) {
     await page.goto(`${baseUrl}${route.path}`, { waitUntil: "domcontentloaded" });
-    await page.locator("h1").first().waitFor({ state: "attached", timeout: 15_000 });
+    await page.locator("h1").first().waitFor({ state: "attached", timeout: 20_000 });
     await page.waitForTimeout(400);
 
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);

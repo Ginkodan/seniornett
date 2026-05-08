@@ -2,7 +2,8 @@
 
 import React, { type ReactNode } from "react";
 import Link from "next/link";
-import { Volume2 } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { RotateCcw } from "lucide-react";
 import { useAppState } from "../app-provider";
 import type { AppTone } from "./app-tile";
 import styles from "./seniornett.module.css";
@@ -10,6 +11,7 @@ import topBarStyles from "../top-bar.module.css";
 
 type SeniorNetGlobalShellProps = {
   children: ReactNode;
+  buildHash?: string;
 };
 
 function formatDateTime(value: string | null, localeTag: string, separator: string) {
@@ -30,10 +32,13 @@ function formatDateTime(value: string | null, localeTag: string, separator: stri
 }
 
 // SeniorNett global shell: this is the only place that owns the persistent
-// Home, text-size, read-aloud, identity, and date/time controls.
-export function SeniorNetGlobalShell({ children }: SeniorNetGlobalShellProps) {
-  const { textSize, setTextSize, readAloud, identity, t, localeTag } = useAppState();
+// Home, text-size, identity, and date/time controls.
+export function SeniorNetGlobalShell({ children, buildHash = "dev" }: SeniorNetGlobalShellProps) {
+  const { textSize, setTextSize, identity, t, localeTag } = useAppState();
+  const pathname = usePathname();
   const [now, setNow] = React.useState<string | null>(null);
+  const shortHash = buildHash && buildHash !== "dev" ? buildHash.slice(0, 7) : "dev";
+  const showDevFooter = pathname === "/";
 
   React.useEffect(() => {
     const updateNow = () => setNow(new Date().toISOString());
@@ -45,7 +50,7 @@ export function SeniorNetGlobalShell({ children }: SeniorNetGlobalShellProps) {
   }, []);
 
   return (
-    <div className="tablet-screen">
+    <div className={`tablet-screen ${showDevFooter ? "tablet-screen--with-dev-footer" : ""}`}>
       <header className={`${topBarStyles.scope} topbar`} aria-label={t("common.home")}>
         <div className="topbar-brand">
           <Link className="logo logo-btn" href="/" aria-label={t("common.home")}>
@@ -68,10 +73,6 @@ export function SeniorNetGlobalShell({ children }: SeniorNetGlobalShellProps) {
               </button>
             ))}
           </div>
-          <button className="a11y-btn" onClick={readAloud} title={t("common.readAloud")}>
-            <Volume2 size={18} strokeWidth={2.25} aria-hidden="true" />
-            {t("common.readAloud")}
-          </button>
         </div>
 
         <div className="spacer" />
@@ -88,6 +89,22 @@ export function SeniorNetGlobalShell({ children }: SeniorNetGlobalShellProps) {
       </header>
 
       <main className="content">{children}</main>
+
+      {showDevFooter ? (
+        <footer className={`${topBarStyles.scope} dev-footer`} aria-label="Entwicklerinformationen">
+          <span className="dev-footer-hash" title={buildHash}>
+            Build {shortHash}
+          </span>
+          <button
+            type="button"
+            className="dev-footer-reload"
+            onClick={() => window.location.reload()}
+            title="Hard reload"
+          >
+            <RotateCcw aria-hidden="true" focusable="false" size={11} />
+          </button>
+        </footer>
+      ) : null}
     </div>
   );
 }

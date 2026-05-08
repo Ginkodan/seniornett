@@ -99,6 +99,11 @@ body {
   border: none;
   box-shadow: none;
   padding-top: var(--topbar-height);
+  padding-bottom: 0;
+}
+
+.tablet-screen--with-dev-footer {
+  padding-bottom: 2rem;
 }
 
 /* Content area */

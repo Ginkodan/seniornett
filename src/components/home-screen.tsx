@@ -3,25 +3,23 @@
 "use client";
 
 import React from 'react';
-import { MessageCircleHeart, MessagesSquare, Newspaper, BookOpen, CloudSun, Tv, Siren, Map, Radio, Images, Gift, Train } from 'lucide-react';
+import { MessageCircleHeart, MessagesSquare, Newspaper, BookOpen, CloudSun, Tv, Siren, Map, Radio, Train } from 'lucide-react';
 import { useAppState } from './app-provider';
 import { AppTile } from './ui';
 import homeStyles from "./home-screen.module.css";
 import uiStyles from "./ui/seniornett.module.css";
 
 const APPS = [
+  { id: 'notfall', href: '/notfall', icon: <Siren size={34} strokeWidth={2.25} />, accent: 'coral', urgent: true },
   { id: 'social-hub', href: '/social-hub', icon: <MessageCircleHeart size={34} strokeWidth={2.25} />, accent: 'teal' },
-  { id: 'media', href: '/fotos-papiere', icon: <Images size={34} strokeWidth={2.25} />, accent: 'violet' },
-  { id: 'marketplace', href: '/marktplatz', icon: <Gift size={34} strokeWidth={2.25} />, accent: 'amber' },
-  { id: 'lotti-live', href: '/lotti-live', icon: <MessagesSquare size={34} strokeWidth={2.25} />, accent: 'coral' },
-  { id: 'audio', href: '/audio', icon: <Radio size={34} strokeWidth={2.25} />, accent: 'blue' },
   { id: 'news', href: '/news', icon: <Newspaper size={34} strokeWidth={2.25} />, accent: 'green' },
+  { id: 'audio', href: '/audio', icon: <Radio size={34} strokeWidth={2.25} />, accent: 'blue' },
+  { id: 'lotti-live', href: '/lotti-live', icon: <MessagesSquare size={34} strokeWidth={2.25} />, accent: 'coral' },
   { id: 'wetter', href: '/wetter', icon: <CloudSun size={34} strokeWidth={2.25} />, accent: 'blue' },
   { id: 'sbb', href: '/sbb', icon: <Train size={34} strokeWidth={2.25} />, accent: 'teal' },
   { id: 'lexikon', href: '/lexikon', icon: <BookOpen size={34} strokeWidth={2.25} />, accent: 'violet' },
   { id: 'karte', href: '/karte', icon: <Map size={34} strokeWidth={2.25} />, accent: 'amber' },
   { id: 'video', href: '/video', icon: <Tv size={34} strokeWidth={2.25} />, accent: 'coral' },
-  { id: 'notfall', href: '/notfall', icon: <Siren size={34} strokeWidth={2.25} />, accent: 'coral', urgent: true },
 ];
 
 export function HomeScreen() {

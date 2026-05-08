@@ -7,8 +7,6 @@
     "loading": "Chargement ...",
     "home": "Retour à l'accueil",
     "textSize": "Taille du texte",
-    "readAloud": "Lire à voix haute",
-    "readAloudCue": "Lecture à voix haute ...",
     "refresh": "Recharger",
     "search": "Rechercher",
     "close": "Fermer",
@@ -28,9 +26,8 @@
     "greeting": "Bonjour, {name}.",
     "prompt": "Que souhaitez-vous faire maintenant ?",
     "apps": {
+      "notfall": "Urgence",
       "social-hub": "Parler avec quelqu’un",
-      "media": "Photos et papiers",
-      "marketplace": "Marché",
       "audio": "Audio et musique",
       "news": "Actualités",
       "lotti-live": "Demander à Lotti",
@@ -38,13 +35,11 @@
       "wetter": "Météo",
       "sbb": "Trajets en train",
       "karte": "Carte",
-      "video": "Télévision",
-      "notfall": "Urgence"
+      "video": "Télévision"
     },
     "appDescriptions": {
+      "notfall": "Appeler rapidement de l’aide.",
       "social-hub": "Joindre la famille et l’aide.",
-      "media": "Trouver photos et documents.",
-      "marketplace": "Trouver ou donner des objets.",
       "audio": "Écouter la radio et des livres audio.",
       "news": "Lire les nouvelles.",
       "lotti-live": "Poser une question.",
@@ -52,13 +47,11 @@
       "wetter": "Voir la météo d’aujourd’hui et demain.",
       "sbb": "Vérifier les trajets.",
       "karte": "Voir les lieux et les chemins.",
-      "video": "Voir des émissions.",
-      "notfall": "Appeler rapidement de l’aide."
+      "video": "Voir des émissions."
     },
     "tileActions": {
+      "notfall": "Ouvrir l’urgence",
       "social-hub": "Ouvrir les messages",
-      "media": "Voir les images",
-      "marketplace": "Voir les annonces",
       "audio": "Lancer l’audio",
       "news": "Lire les nouvelles",
       "lotti-live": "Poser une question",
@@ -66,8 +59,7 @@
       "wetter": "Afficher la météo",
       "sbb": "Chercher les trajets",
       "karte": "Afficher la carte",
-      "video": "Voir les émissions",
-      "notfall": "Ouvrir l’urgence"
+      "video": "Voir les émissions"
     }
   },
   "topbar": {

@@ -31,12 +31,18 @@ export default async function RootLayout({
     language,
     source: "server",
   };
+  const buildHash =
+    process.env.SENIORNETT_BUILD_SHA ||
+    process.env.GIT_SHA ||
+    process.env.VERCEL_GIT_COMMIT_SHA ||
+    process.env.NEXT_PUBLIC_GIT_SHA ||
+    "dev";
 
   return (
     <html lang={getLocaleTag(language)} suppressHydrationWarning>
       <body>
         <AppProvider loadNewsAction={loadNewsAction} initialIdentity={initialIdentity}>
-          <SeniorNetGlobalShell>{children}</SeniorNetGlobalShell>
+          <SeniorNetGlobalShell buildHash={buildHash}>{children}</SeniorNetGlobalShell>
         </AppProvider>
       </body>
     </html>

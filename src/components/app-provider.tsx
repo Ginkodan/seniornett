@@ -49,7 +49,6 @@ type AppStateValue = {
     error: string | null;
   };
   refreshNews: () => Promise<void>;
-  readAloud: () => void;
 };
 
 const AppStateContext = React.createContext<AppStateValue | null>(null);
@@ -269,14 +268,6 @@ export function AppProvider({ children, loadNewsAction, initialIdentity }) {
     refreshNews();
   }, [isOnline, refreshNews]);
 
-  const readAloud = React.useCallback(() => {
-    const cue = document.createElement('div');
-    cue.textContent = `🔊 ${t('common.readAloudCue')}`;
-    cue.style.cssText = 'position:fixed;bottom:200px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:14px 22px;border-radius:999px;font-family:Atkinson Hyperlegible, Arial, sans-serif;font-weight:600;z-index:9999;font-size:18px;';
-    document.body.appendChild(cue);
-    window.setTimeout(() => cue.remove(), 1800);
-  }, [t]);
-
   const value = React.useMemo(() => ({
     CAREGIVER_CONTACT,
     textSize,
@@ -288,8 +279,7 @@ export function AppProvider({ children, loadNewsAction, initialIdentity }) {
     t,
     news,
     refreshNews,
-    readAloud,
-  }), [textSize, isOnline, identity, locale, localeTag, t, news, refreshNews, readAloud]);
+  }), [textSize, isOnline, identity, locale, localeTag, t, news, refreshNews]);
 
   return (
     <AppStateContext.Provider value={value}>

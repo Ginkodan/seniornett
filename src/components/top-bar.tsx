@@ -4,7 +4,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Volume2 } from 'lucide-react';
 import { useAppState } from './app-provider';
 import styles from "./top-bar.module.css";
 
@@ -28,7 +27,7 @@ function formatDateTime(value, localeTag, separator) {
 }
 
 export function TopBar() {
-  const { textSize, setTextSize, readAloud, identity, t, localeTag } = useAppState();
+  const { textSize, setTextSize, identity, t, localeTag } = useAppState();
   const [now, setNow] = React.useState(null);
 
   React.useEffect(() => {
@@ -46,8 +45,8 @@ export function TopBar() {
         {t('common.home')}
       </Link>
 
-      <div className="a11y">
-        <div className="a11y-group" role="group" aria-label={t('common.textSize')}>
+        <div className="a11y">
+          <div className="a11y-group" role="group" aria-label={t('common.textSize')}>
           {['A', 'A+', 'A++'].map((label, i) => (
             <button
               key={label}
@@ -59,10 +58,6 @@ export function TopBar() {
             </button>
           ))}
         </div>
-        <button className="a11y-btn" onClick={readAloud} title={t('common.readAloud')}>
-          <Volume2 size={18} strokeWidth={2.25} />
-          {t('common.readAloud')}
-        </button>
       </div>
 
       <div className="spacer" />
