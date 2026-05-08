@@ -4,9 +4,7 @@ For every change consider the `design-guide.md` before implementing a todo.
 
 ## Apps & Features
 
-Zeitung fotos farbig
-Lotti fragen -> Foto machen
-
+- [ ] Lotti fragen -> Foto machen (test mit Tablet nötig)
 - [ ] Kontakte intern/extern (QR code oder ähnlich gegen Phishing/Spam)
 - [ ] Share files/images
 - [ ] Routen planen

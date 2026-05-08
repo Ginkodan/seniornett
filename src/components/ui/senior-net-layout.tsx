@@ -138,12 +138,11 @@ type PageHeaderProps = {
   tone?: AppTone;
 };
 
-export function PageHeader({ title, subtitle, primaryAction, secondaryActions, tone = "blue" }: PageHeaderProps) {
+export function PageHeader({ title, primaryAction, secondaryActions, tone = "blue" }: PageHeaderProps) {
   return (
     <header className="sn-page-header app-header" data-accent={tone}>
       <div className="sn-page-title-block">
         <h1 className="app-title">{title}</h1>
-        {subtitle ? <p className="sn-page-subtitle">{subtitle}</p> : null}
       </div>
       {primaryAction || secondaryActions ? (
         <div className="sn-page-actions">

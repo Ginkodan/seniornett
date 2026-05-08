@@ -27,36 +27,14 @@
     "prompt": "Que souhaitez-vous faire maintenant ?",
     "apps": {
       "notfall": "Urgence",
-      "social-hub": "Parler avec quelqu’un",
-      "audio": "Audio et musique",
-      "news": "Actualités",
+      "social-hub": "Messages",
+      "audio": "Radio et podcasts",
+      "news": "Journal",
       "lotti-live": "Demander à Lotti",
-      "lexikon": "Comprendre les mots",
-      "sbb": "Trajets en train",
+      "lexikon": "Lexique",
+      "sbb": "Horaires",
       "karte": "Carte",
       "video": "Télévision"
-    },
-    "appDescriptions": {
-      "notfall": "Appeler rapidement de l’aide.",
-      "social-hub": "Joindre la famille et l’aide.",
-      "audio": "Écouter la radio et des livres audio.",
-      "news": "Lire les nouvelles.",
-      "lotti-live": "Poser une question.",
-      "lexikon": "Comprendre les mots.",
-      "sbb": "Vérifier les trajets.",
-      "karte": "Voir les lieux et les chemins.",
-      "video": "Voir des émissions."
-    },
-    "tileActions": {
-      "notfall": "Ouvrir l’urgence",
-      "social-hub": "Ouvrir les messages",
-      "audio": "Lancer l’audio",
-      "news": "Lire les nouvelles",
-      "lotti-live": "Poser une question",
-      "lexikon": "Voir le sens",
-      "sbb": "Chercher les trajets",
-      "karte": "Afficher la carte",
-      "video": "Voir les émissions"
     }
   },
   "topbar": {
@@ -203,7 +181,7 @@
     }
   },
   "audio": {
-    "title": "Audio et musique",
+    "title": "Radio et podcasts",
     "subtitle": "Écouter la radio, des émissions et des livres audio tranquillement.",
     "tabs": {
       "radio": "Radio",
@@ -585,7 +563,7 @@
     }
   },
   "sbb": {
-    "title": "Connexions de train",
+    "title": "Horaires",
     "subtitle": "Vérifier facilement les trajets et les horaires.",
     "from": "De",
     "to": "À",
@@ -628,7 +606,7 @@
     }
   },
   "lexikon": {
-    "title": "Comprendre les mots",
+    "title": "Lexique",
     "subtitle": "Un terme, une explication simple.",
     "heading": "Que souhaitez-vous comprendre ?",
     "body": "Entrez un mot. SeniorNett montre seulement l’explication, sans liens externes.",

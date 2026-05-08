@@ -6,8 +6,6 @@ import type { ReactNode } from "react";
 type AppTileProps = {
   href: string;
   title: string;
-  subtitle?: string;
-  actionLabel: string;
   icon: ReactNode;
   accent?: AppTone;
   urgent?: boolean;
@@ -16,8 +14,6 @@ type AppTileProps = {
 export function AppTile({
   href,
   title,
-  subtitle,
-  actionLabel,
   icon,
   accent = "blue",
   urgent = false,
@@ -27,19 +23,15 @@ export function AppTile({
       className="sn-app-tile"
       href={href}
       data-accent={accent}
-      aria-label={`${title}. ${actionLabel}`}
+      aria-label={title}
     >
       <div className="sn-app-tile-icon" aria-hidden="true">
         {icon}
       </div>
       <div className="sn-app-tile-body">
         <h2 className="sn-app-tile-title">{title}</h2>
-        {subtitle ? <p className="sn-app-tile-subtitle">{subtitle}</p> : null}
       </div>
-      <div className="sn-app-tile-action">
-        {actionLabel}
-        <span aria-hidden="true">{urgent ? "!" : "›"}</span>
-      </div>
+      <span className="sn-app-tile-corner" aria-hidden="true">{urgent ? "!" : "›"}</span>
     </Link>
   );
 }

@@ -28,7 +28,6 @@ export function HomeScreen({ initialWeather, fetchWeatherAction, searchLocations
   const apps = APPS.map((app) => ({
     ...app,
     label: t(`home.apps.${app.id}`),
-    actionLabel: t(`home.tileActions.${app.id}`),
   }));
 
   return (
@@ -51,7 +50,6 @@ export function HomeScreen({ initialWeather, fetchWeatherAction, searchLocations
             key={app.id}
             href={app.href}
             title={app.label}
-            actionLabel={app.actionLabel}
             icon={app.icon}
             accent={app.accent}
             urgent={app.urgent}

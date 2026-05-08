@@ -27,36 +27,14 @@
     "prompt": "Was möchten Sie jetzt tun?",
     "apps": {
       "notfall": "Notfall",
-      "social-hub": "Mit Menschen sprechen",
-      "audio": "Audio und Musik",
-      "news": "Nachrichten",
+      "social-hub": "Nachrichten",
+      "audio": "Radio und Podcasts",
+      "news": "Zeitung",
       "lotti-live": "Lotti fragen",
-      "lexikon": "Wörter verstehen",
-      "sbb": "Zugverbindungen",
+      "lexikon": "Lexikon",
+      "sbb": "Fahrplan",
       "karte": "Karte",
       "video": "Fernsehen"
-    },
-    "appDescriptions": {
-      "notfall": "Schnell Hilfe anrufen.",
-      "social-hub": "Familie und Betreuung erreichen.",
-      "audio": "Radio und Hörbücher hören.",
-      "news": "Nachrichten lesen.",
-      "lotti-live": "Eine Frage stellen.",
-      "lexikon": "Wörter einfach verstehen.",
-      "sbb": "Verbindungen prüfen.",
-      "karte": "Orte und Wege ansehen.",
-      "video": "Sendungen ansehen."
-    },
-    "tileActions": {
-      "notfall": "Notfall öffnen",
-      "social-hub": "Nachrichten öffnen",
-      "audio": "Audio starten",
-      "news": "Nachrichten lesen",
-      "lotti-live": "Frage stellen",
-      "lexikon": "Bedeutung zeigen",
-      "sbb": "Verbindungen suchen",
-      "karte": "Karte anzeigen",
-      "video": "Sendungen ansehen"
     }
   },
   "topbar": {
@@ -203,7 +181,7 @@
     }
   },
   "audio": {
-    "title": "Audio & Musik",
+    "title": "Radio und Podcasts",
     "subtitle": "Radio, Sendungen und Hörbücher ruhig hören.",
     "tabs": {
       "radio": "Radio",
@@ -585,7 +563,7 @@
     }
   },
   "sbb": {
-    "title": "Zugverbindungen",
+    "title": "Fahrplan",
     "subtitle": "Verbindungen und Fahrpläne einfach prüfen.",
     "from": "Von",
     "to": "Nach",
@@ -628,7 +606,7 @@
     }
   },
   "lexikon": {
-    "title": "Wörter verstehen",
+    "title": "Lexikon",
     "subtitle": "Ein Begriff, eine einfache Erklärung.",
     "heading": "Was möchten Sie verstehen?",
     "body": "Geben Sie ein Wort ein. SeniorNett zeigt nur die Erklärung, keine Links nach draussen.",
