@@ -365,17 +365,17 @@ function formatTransferSummary(
 
 function formatMarkdownPlatformLabel(language: McpLanguage, platform?: string | null): string | null {
   const label = formatPlatformLabel(language, platform);
-  return label ? `\`${label}\`` : null;
+  return label || null;
 }
 
 function formatMarkdownTransferSummary(
   assessment: TransferAssessment,
   language: McpLanguage
 ): string {
-  const given = assessment.givenMinutes === null ? null : `\`${assessment.givenMinutes} ${language === "fr" ? "min" : "Min."}\``;
-  const required = assessment.requiredMinutes === null ? null : `\`${assessment.requiredMinutes} ${language === "fr" ? "min" : "Min."}\``;
-  const slack = assessment.slackMinutes === null ? null : `\`${assessment.slackMinutes >= 0 ? "+" : ""}${assessment.slackMinutes} ${language === "fr" ? "min" : "Min."}\``;
-  const walk = assessment.walkMinutes === null ? null : `\`${assessment.walkMinutes} ${language === "fr" ? "min à pied" : "Min. Fußweg"}\``;
+  const given = assessment.givenMinutes === null ? null : `${assessment.givenMinutes} ${language === "fr" ? "min" : "Min."}`;
+  const required = assessment.requiredMinutes === null ? null : `${assessment.requiredMinutes} ${language === "fr" ? "min" : "Min."}`;
+  const slack = assessment.slackMinutes === null ? null : `${assessment.slackMinutes >= 0 ? "+" : ""}${assessment.slackMinutes} ${language === "fr" ? "min" : "Min."}`;
+  const walk = assessment.walkMinutes === null ? null : `${assessment.walkMinutes} ${language === "fr" ? "min à pied" : "Min. Fußweg"}`;
   const tone = formatTransferTone(language, assessment.tone);
   const toneLabel = tone ? `*${tone}*` : null;
 
@@ -398,8 +398,6 @@ function formatMarkdownStationLine(
   platform?: string | null,
   direction?: string | null
 ): string {
-  const stationCode = `\`${station}\``;
-  const timeCode = `\`${time}\``;
   const platformCode = formatMarkdownPlatformLabel(language, platform);
   const directionLabel = direction ? ` *${language === "fr" ? "Direction" : "Richtung"} ${direction}*` : "";
   const heading = label === "departure"
@@ -408,7 +406,7 @@ function formatMarkdownStationLine(
   const betweenLabel = language === "fr" ? "à" : "um";
   const platformJoin = language === "fr" ? " sur " : " auf ";
 
-  return `- **${heading}:** ${stationCode} ${betweenLabel} ${timeCode}${platformCode ? `${platformJoin}${platformCode}` : ""}${directionLabel}`;
+  return `- **${heading}:** ${station} ${betweenLabel} ${time}${platformCode ? `${platformJoin}${platformCode}` : ""}${directionLabel}`;
 }
 
 function formatMarkdownLegSection(language: McpLanguage, leg: Leg): string[] {
@@ -440,9 +438,9 @@ function formatMarkdownTransferSection(
 
   return [
     language === "fr" ? "#### Correspondance" : "#### Umstieg",
-    `- **${placeLabel}:** \`${currentLeg.arrivalStation}\``,
-    `- **${fromLabel}:** \`${currentLeg.arrivalTime}\`${currentArrivalPlatform ? ` auf ${currentArrivalPlatform}` : ""}`,
-    `- **${toLabel}:** \`${nextLeg.departureTime}\`${nextDeparturePlatform ? ` auf ${nextDeparturePlatform}` : ""}`,
+    `- **${placeLabel}:** ${currentLeg.arrivalStation}`,
+    `- **${fromLabel}:** ${currentLeg.arrivalTime}${currentArrivalPlatform ? ` auf ${currentArrivalPlatform}` : ""}`,
+    `- **${toLabel}:** ${nextLeg.departureTime}${nextDeparturePlatform ? ` auf ${nextDeparturePlatform}` : ""}`,
     `- **${timeLabel}:** ${formatMarkdownTransferSummary(assessment, language)}`,
   ];
 }
@@ -669,17 +667,17 @@ export function buildTimetableDetailedAnswer(
   lines.push(summaryHeading);
   lines.push("");
   lines.push(language === "fr"
-    ? `- **Départ:** \`${connection.departure}\`${departurePlatform ? ` sur ${departurePlatform}` : ""}`
-    : `- **Abfahrt:** \`${connection.departure}\`${departurePlatform ? ` auf ${departurePlatform}` : ""}`);
+    ? `- **Départ:** ${connection.departure}${departurePlatform ? ` sur ${departurePlatform}` : ""}`
+    : `- **Abfahrt:** ${connection.departure}${departurePlatform ? ` auf ${departurePlatform}` : ""}`);
   lines.push(language === "fr"
-    ? `- **Arrivée:** \`${connection.arrival}\``
-    : `- **Ankunft:** \`${connection.arrival}\``);
+    ? `- **Arrivée:** ${connection.arrival}`
+    : `- **Ankunft:** ${connection.arrival}`);
   lines.push(language === "fr"
-    ? `- **Durée:** \`${durationLabel}\``
-    : `- **Fahrtzeit:** \`${durationLabel}\``);
+    ? `- **Durée:** ${durationLabel}`
+    : `- **Fahrtzeit:** ${durationLabel}`);
   lines.push(language === "fr"
-    ? `- **Correspondances:** \`${changesText}\``
-    : `- **Umstiege:** \`${changesText}\``);
+    ? `- **Correspondances:** ${changesText}`
+    : `- **Umstiege:** ${changesText}`);
 
   if (displayLegs.length > 0) {
     lines.push("");

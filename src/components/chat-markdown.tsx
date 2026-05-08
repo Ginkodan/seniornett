@@ -55,6 +55,20 @@ function renderStrong(text: string, prefix: string): React.ReactNode[] {
   return nodes;
 }
 
+function renderFieldLine(text: string, prefix: string): React.ReactNode | null {
+  const match = text.match(/^\*\*(.+?)\*\*:\s*(.+)$/);
+  if (!match) {
+    return null;
+  }
+
+  return (
+    <div key={prefix} className="lotti-markdown-field">
+      <strong className="lotti-markdown-field-label">{renderInline(match[1])}</strong>
+      <span className="lotti-markdown-field-value">{renderInline(match[2])}</span>
+    </div>
+  );
+}
+
 function renderInline(text: string): React.ReactNode[] {
   const stripped = stripMarkdownLinks(text);
   const parts = stripped.split(/(`[^`]+`)/g);
@@ -193,7 +207,7 @@ export function ChatMarkdown({ text, className }: ChatMarkdownProps) {
             <ListTag key={`${block.type}-${index}`} className="lotti-markdown-list">
               {block.items.map((item, itemIndex) => (
                 <li key={`${block.type}-${index}-${itemIndex}`}>
-                  {renderInline(item)}
+                  {renderFieldLine(item, `${block.type}-${index}-${itemIndex}`) ?? renderInline(item)}
                 </li>
               ))}
             </ListTag>

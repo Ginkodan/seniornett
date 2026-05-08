@@ -50,8 +50,8 @@ async function buildWeatherRequestViaModel(
   const prompt = buildWeatherRequestPrompt(message, history, language);
   const result = await inferStructuredJson(prompt, WeatherRequestSchema, {
     generation_options: {
-      max_new_tokens: 120,
-      temperature: 0,
+      max_new_tokens: 256,
+      temperature: 0.2,
       top_p: 1,
     },
   });
@@ -144,8 +144,8 @@ export const weatherTool: McpTool<WeatherToolInput, WeatherResult> = {
     const prompt = buildWeatherObservationPrompt(result, language, requestSummary);
     const modelResult = await inferStructuredJson(prompt, WeatherObservationSchema, {
       generation_options: {
-        max_new_tokens: 96,
-        temperature: 0,
+        max_new_tokens: 128,
+        temperature: 0.2,
         top_p: 1,
       },
     });

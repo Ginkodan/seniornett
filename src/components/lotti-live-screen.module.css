@@ -43,12 +43,20 @@
 
 .scope:global(.lotti-message.assistant), .scope :global(.lotti-message.assistant) {
   align-self: flex-start;
-  background: var(--paper-2);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, #fcfcfb 94%, white),
+    color-mix(in srgb, #f6f6f4 88%, var(--paper))
+  );
+  border-color: color-mix(in srgb, #d4d4cf 40%, transparent);
+  box-shadow: none;
 }
 
 .scope:global(.lotti-message.user), .scope :global(.lotti-message.user) {
   align-self: flex-end;
-  background: var(--card);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, #ffffff 95%, white),
+    color-mix(in srgb, #f8f8f7 88%, var(--paper))
+  );
 }
 
 .scope:global(.lotti-message.pending), .scope :global(.lotti-message.pending) {
@@ -68,11 +76,16 @@
   font-size: var(--fs-base);
   line-height: 1.7;
   color: var(--ink);
+  width: 100%;
 }
 
 .scope:global(.lotti-markdown), .scope :global(.lotti-markdown) {
   display: grid;
-  gap: 0.6rem;
+  gap: 0.8rem;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  padding: 0;
 }
 
 .scope:global(.lotti-markdown p), .scope :global(.lotti-markdown p) {
@@ -94,32 +107,72 @@
   margin: 0;
   line-height: 1.2;
   color: var(--ink);
+  letter-spacing: -0.02em;
 }
 
 .scope:global(.lotti-markdown h1), .scope :global(.lotti-markdown h1) {
-  font-size: 1.35rem;
-  font-weight: 800;
+  font-size: 2.05rem;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  line-height: 1.05;
+  margin-bottom: 0.15rem;
 }
 
 .scope:global(.lotti-markdown h2), .scope :global(.lotti-markdown h2) {
-  font-size: 1.12rem;
-  font-weight: 800;
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+  margin-top: 0.45rem;
+  margin-bottom: 0;
 }
 
 .scope:global(.lotti-markdown h3), .scope :global(.lotti-markdown h3) {
-  font-size: 1rem;
-  font-weight: 800;
+  font-size: 1.2rem;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  margin-top: 0.2rem;
+  margin-bottom: 0;
+  color: color-mix(in srgb, var(--ink) 90%, var(--card-edge));
+}
+
+.scope:global(.lotti-markdown-heading + .lotti-markdown-list), .scope :global(.lotti-markdown-heading + .lotti-markdown-list) {
+  margin-top: -0.15rem;
 }
 
 .scope:global(.lotti-markdown-list), .scope :global(.lotti-markdown-list) {
   margin: 0;
-  padding-left: 1.2rem;
+  padding-left: 0.2rem;
   display: grid;
   gap: 0.35rem;
 }
 
 .scope:global(.lotti-markdown-list li), .scope :global(.lotti-markdown-list li) {
   margin: 0;
+  padding: 0;
+}
+
+.scope:global(.lotti-markdown-field), .scope :global(.lotti-markdown-field) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: baseline;
+  padding: 0;
+}
+
+.scope:global(.lotti-markdown-field-label), .scope :global(.lotti-markdown-field-label) {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--ink);
+  white-space: normal;
+  opacity: 0.9;
+}
+
+.scope:global(.lotti-markdown-field-value), .scope :global(.lotti-markdown-field-value) {
+  min-width: 0;
+  font-size: 1rem;
 }
 
 .scope:global(.lotti-markdown-codeblock), .scope :global(.lotti-markdown-codeblock) {
@@ -135,12 +188,14 @@
 }
 
 .scope:global(.lotti-markdown code), .scope :global(.lotti-markdown code) {
-  padding: 0.08rem 0.35rem;
-  border-radius: 0.35rem;
-  background: color-mix(in srgb, var(--paper) 86%, var(--card));
-  border: 1px solid color-mix(in srgb, var(--card-edge) 55%, transparent);
+  padding: 0.04rem 0.24rem;
+  border-radius: 0.26rem;
+  background: color-mix(in srgb, #fafafa 96%, white);
+  border: 1px solid color-mix(in srgb, #d1d1cb 14%, transparent);
   font-family: "SFMono-Regular", ui-monospace, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", Menlo, Monaco, Consolas, monospace;
-  font-size: 0.95em;
+  font-size: 0.84em;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--ink) 92%, var(--card-edge));
 }
 
 .scope:global(.lotti-markdown strong), .scope :global(.lotti-markdown strong) {

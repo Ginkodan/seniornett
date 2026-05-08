@@ -25,6 +25,18 @@ export const timetablePrompt: McpPromptDefinition = {
       "N'invente pas de correspondances.",
     ],
   },
+  examples: {
+    de: [
+      "Kannst du mir eine Verbindung von Spiez nach Chur um 8 Uhr am Sonntag suchen?",
+      "Welche Verbindung gibt es heute von Bern nach Zürich um 17 Uhr?",
+      "Finde bitte den Fahrplan von Lausanne nach Genf morgen um 9 Uhr.",
+    ],
+    fr: [
+      "Peux-tu chercher une liaison de Spiez à Chur dimanche à 8h ?",
+      "Quelle correspondance y a-t-il aujourd'hui de Berne à Zurich à 17h ?",
+      "Trouve l'horaire de Lausanne à Genève demain à 9h.",
+    ],
+  },
 };
 
 export function buildTimetableRequestPrompt(

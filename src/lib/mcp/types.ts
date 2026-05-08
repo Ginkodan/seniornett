@@ -70,6 +70,7 @@ export interface McpPromptDefinition {
   title: Record<McpLanguage, string>;
   summary: Record<McpLanguage, string>;
   instructions: Record<McpLanguage, string[]>;
+  examples?: Record<McpLanguage, string[]>;
 }
 
 export interface McpToolPlan {

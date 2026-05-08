@@ -74,7 +74,7 @@ export function resolveWeatherLocation(message: string, history: Array<{ role: "
 export function buildWeatherContext(weather: WeatherResult, language: McpLanguage): string {
   const lines: string[] = [];
   lines.push(language === "fr" ? "## Aperçu météo" : "## Wetterübersicht");
-  lines.push(`- **${language === "fr" ? "Lieu" : "Ort"}:** \`${weather.city || (language === "fr" ? "inconnu" : "unbekannt")}\``);
+  lines.push(`- **${language === "fr" ? "Lieu" : "Ort"}:** ${weather.city || (language === "fr" ? "inconnu" : "unbekannt")}`);
 
   if (weather.error) {
     lines.push(`- **${language === "fr" ? "Erreur" : "Fehler"}:** ${weather.error}`);
@@ -86,13 +86,15 @@ export function buildWeatherContext(weather: WeatherResult, language: McpLanguag
 
   for (const day of weather.days.slice(0, 3)) {
     const precipitation = day.precipMm > 0
-      ? `\`${day.precipMm} mm\``
-      : `*${language === "fr" ? "sec" : "trocken"}*`;
+      ? `${day.precipMm} mm`
+      : language === "fr"
+        ? "sec"
+        : "trocken";
     const hourly = day.hourly?.length
-      ? ` - ${language === "fr" ? "courbes horaires" : "Zeitverläufe"}: \`${day.hourly.length}\``
+      ? `, ${language === "fr" ? "courbes horaires" : "Zeitverläufe"} ${day.hourly.length}`
       : "";
 
-    lines.push(`- **${day.dayLabel}:** \`${day.tempMax}° / ${day.tempMin}°\`, ${precipitation}${hourly}`);
+    lines.push(`- **${day.dayLabel}:** ${day.tempMax}° / ${day.tempMin}°, ${precipitation}${hourly}`);
   }
 
   return lines.join("\n");
@@ -123,11 +125,11 @@ export function buildWeatherAnswer(weather: WeatherResult, language: McpLanguage
     : language === "fr" ? "pas de neige" : "kein Schnee";
 
   const headline = language === "fr"
-    ? `# ${locationPart}${day.dayLabel}\n- **Températures:** \`${day.tempMax}° / ${day.tempMin}°\`\n- **Pluie:** ${rainPart}\n- **Neige:** ${snowPart}`
-    : `# ${locationPart}${day.dayLabel}\n- **Temperaturen:** \`${day.tempMax}° / ${day.tempMin}°\`\n- **Regen:** ${rainPart}\n- **Schnee:** ${snowPart}`;
+    ? `# ${locationPart}${day.dayLabel}\n- **Températures:** ${day.tempMax}° / ${day.tempMin}°\n- **Pluie:** ${rainPart}\n- **Neige:** ${snowPart}`
+    : `# ${locationPart}${day.dayLabel}\n- **Temperaturen:** ${day.tempMax}° / ${day.tempMin}°\n- **Regen:** ${rainPart}\n- **Schnee:** ${snowPart}`;
 
   return day.hourly?.length
-    ? `${headline}\n- **${language === "fr" ? "Zeitverläufe" : "Zeitverläufe"}:** \`${day.hourly.length}\``
+    ? `${headline}\n- **${language === "fr" ? "Zeitverläufe" : "Zeitverläufe"}:** ${day.hourly.length}`
     : headline;
 }
 

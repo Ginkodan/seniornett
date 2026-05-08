@@ -25,6 +25,18 @@ export const weatherPrompt: McpPromptDefinition = {
       "Si la réponse a besoin du détail, parle des valeurs journalières et des courbes disponibles.",
     ],
   },
+  examples: {
+    de: [
+      "Wie ist das Wetter am Sonntag in Spiez?",
+      "Brauche ich heute in Bern einen Regenschirm?",
+      "Wie warm wird es morgen in Zürich?",
+    ],
+    fr: [
+      "Quel temps fait-il dimanche à Spiez ?",
+      "Ai-je besoin d'un parapluie aujourd'hui à Berne ?",
+      "Quelle température fera demain à Zurich ?",
+    ],
+  },
 };
 
 export function buildWeatherRequestPrompt(message: string, history: Array<{ role: "user" | "assistant"; text: string }>, language: McpLanguage): string {

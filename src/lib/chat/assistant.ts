@@ -1,8 +1,6 @@
 import { normalizeLanguage } from "@/lib/i18n";
-import { MCP_TOOLS, buildConversationContext, buildMcpPromptCatalog, runConversation, inferStructuredJson } from "@/lib/mcp";
+import { MCP_TOOLS, buildConversationContext, buildMcpPlannerPromptCatalog, runConversation, inferStructuredJson } from "@/lib/mcp";
 import type { ChatHistoryEntry, McpConversationInput, McpToolObservation, McpToolPlan } from "@/lib/mcp";
-import { extractTimetableContext } from "@/lib/mcp/timetable";
-import { timetableTool } from "@/lib/mcp/timetable";
 import { inferText } from "@/lib/inference";
 import { z } from "zod";
 
@@ -25,10 +23,6 @@ const COPY = {
     ].join(" "),
     validation: "Schreib bitte zuerst eine Frage an Lotti.",
     fallbackGeneral: "Gerne. Ich helfe dir beim Formulieren, Antworten oder beim nächsten kleinen Schritt. Schreib mir einfach, was du brauchst.",
-    fallbackCall: "Gerne. Auf der Startseite kann ich dir als Nächstes auch eine einfache Kontaktliste zeigen. Für jetzt: Wenn du mir sagst, wen du anrufen möchtest, formuliere ich es Schritt für Schritt.",
-    fallbackNews: "Ich helfe gern. Öffne Nachrichten, dann siehst du die Meldungen ruhig und gut lesbar. Wenn du möchtest, erkläre ich dir auch eine einzelne Überschrift in einfachen Worten.",
-    fallbackPerson: "Ich bin eine KI und habe keinen echten Wohnort. Der warme Schweizer Hof-Ton ist mein Stil, damit sich das Gespräch freundlich und vertraut anfühlt. Ich helfe dir aber sehr gern konkret weiter.",
-    fallbackBreakfast: "Das klingt fein. Ich habe zwar keinen echten Hof oder eine echte Küche, aber ich helfe dir sehr gern mit einfachen Frühstücksideen. Möchtest du etwas Herzhaftes oder eher etwas Leichtes?",
     userLabel: "Nutzerin",
     assistantLabel: "Lotti",
   },
@@ -50,91 +44,69 @@ const COPY = {
     ].join(" "),
     validation: "Veuillez d'abord écrire une question à Lotti.",
     fallbackGeneral: "Avec plaisir. Je peux vous aider à formuler un message, à répondre ou à faire le prochain petit pas. Dites-moi simplement ce qu'il vous faut.",
-    fallbackCall: "Avec plaisir. Sur la page d'accueil, je peux aussi vous montrer ensuite une liste de contacts simple. Pour l'instant, dites-moi qui vous voulez appeler et je vous aiderai pas à pas.",
-    fallbackNews: "Je peux vous aider. Ouvrez les messages pour voir les nouvelles de manière calme et lisible. Si vous voulez, je peux aussi expliquer un titre en mots simples.",
-    fallbackPerson: "Je suis une IA et je n'ai pas de lieu de vie réel. Le ton chaleureux de la ferme suisse est simplement mon style, pour que la conversation reste douce et familière. Je peux cependant vous aider très concrètement.",
-    fallbackBreakfast: "C'est très bien. Je n'ai pas de vraie ferme ni de vraie cuisine, mais je peux volontiers vous proposer des idées de petit-déjeuner simples. Vous préférez quelque chose de salé ou de léger ?",
     userLabel: "Utilisateur",
     assistantLabel: "Lotti",
   },
 } as const;
 
 const GROUNDING_PATTERNS = [
-  /\b(komm|komm\s+vorbei|besuch\s+mich|besuche\s+mich|triff\s+mich|treffen\s+wir)\b/i,
-  /\b(hier\s+am\s+hof|bei\s+uns\s+am\s+hof|auf\s+meinem\s+hof|auf\s+unserem\s+hof)\b/i,
-  /\b(ich\s+wohne|mein\s+wohnort|wir\s+haben\s+hier|ich\s+habe\s+hier|unsere\s+kuehe|unsere\s+tiere)\b/i,
+  /\b(komm|besuch|triff|treffen|ich\s+wohne|mein\s+wohnort|wir\s+haben\s+hier|unsere\s+kuehe|unsere\s+tiere)\b/i,
 ];
 
-const KEYWORD_SETS = {
-  breakfast: ["fruehstueck", "frühstück", "essen", "kaffee"],
-  person: ["wohn", "wo wohn", "woher", "besuch", "treffen"],
-  call: ["anrufen", "telefon"],
-  news: ["news"],
-} as const;
-
-function hasAnyKeyword(message: string, keywords: readonly string[]): boolean {
-  const normalized = message.toLowerCase();
-  return keywords.some((keyword) => normalized.includes(keyword));
-}
-
-function fallbackReply(message: string, language: keyof typeof COPY): string {
-  if (hasAnyKeyword(message, KEYWORD_SETS.call)) {
-    return COPY[language].fallbackCall;
-  }
-
-  if (hasAnyKeyword(message, KEYWORD_SETS.news)) {
-    return COPY[language].fallbackNews;
-  }
-
-  return COPY[language].fallbackGeneral;
-}
-
-function groundedPersonaReply(message: string, language: keyof typeof COPY): string {
-  if (hasAnyKeyword(message, KEYWORD_SETS.breakfast)) {
-    return COPY[language].fallbackBreakfast;
-  }
-
-  if (hasAnyKeyword(message, KEYWORD_SETS.person)) {
-    return COPY[language].fallbackPerson;
-  }
-
-  return fallbackReply(message, language);
-}
-
-function sanitizeAssistantText(text: string, message: string, language: keyof typeof COPY): string {
+function sanitizeAssistantText(text: string, language: keyof typeof COPY): string {
   if (!text) return text;
 
-  let normalized = text.trim();
-
-  normalized = normalized.replace(/^Du bist Lotti\b/i, "Ich bin Lotti");
-  normalized = normalized.replace(/^Du bist\b/i, "Ich bin");
-  normalized = normalized.replace(/^Du\s+heisst\b/i, "Ich heisse");
-  normalized = normalized.replace(/^Du\s+h\w+\s+Lotti\b/i, "Ich heisse Lotti");
+  const normalized = text.trim();
 
   if (GROUNDING_PATTERNS.some((pattern) => pattern.test(normalized))) {
-    return groundedPersonaReply(message, language);
+    return COPY[language].fallbackGeneral;
   }
 
   return normalized;
 }
 
+function buildPlannerHistoryBlock(history: ChatHistoryEntry[], userLabel: string): string {
+  const userTurns = history
+    .filter((entry) => entry.role === "user")
+    .slice(-4)
+    .map((entry) => `${userLabel}: ${entry.text}`);
+
+  return userTurns.length > 0 ? `${userTurns.join("\n")}\n` : "";
+}
+
 function buildPlannerPrompt(input: McpConversationInput, trace: McpToolObservation[]): string {
   const context = buildConversationContext(input, trace);
-
+  const plannerHistoryBlock = buildPlannerHistoryBlock(input.history, input.userLabel);
   return [
     input.systemPrompt,
-    "Du bist ein MCP-ähnlicher Router für Lotti.",
+    input.language === "fr"
+      ? "Tu es un routeur MCP pour Lotti."
+      : "Du bist ein MCP-Router für Lotti.",
     "Wähle genau eine nächste Aktion oder 'none'.",
     "Antworte ausschließlich als JSON ohne Markdown oder Fließtext.",
     'Schema: {"tool":"datetime|weather|timetable|none","reason":"kurz"}',
-    "Wenn ein Werkzeug bereits genug Informationen geliefert hat, wähle 'none'.",
-    "Wenn mehrere Werkzeuge sinnvoll sind, wähle zuerst dasjenige, das die nächste Lücke schließt.",
-    "Verfügbare Werkzeuge:",
+    input.language === "fr"
+      ? "La dernière message de la personne est prioritaire."
+      : "Die letzte Nachricht der Person hat Priorität.",
+    input.language === "fr"
+      ? "Utilise l'historique seulement pour compléter des informations manquantes."
+      : "Nutze den Verlauf nur, um fehlende Informationen zu ergänzen.",
+    input.language === "fr"
+      ? "Ignore les anciennes réponses de Lotti comme signal principal pour le choix de l'outil."
+      : "Ignoriere frühere Lotti-Antworten als Hauptsignal für die Werkzeugwahl.",
+    input.language === "fr"
+      ? "Si la nouvelle message parle d'un autre sujet, choisis l'outil correspondant à cette nouvelle intention."
+      : "Wenn die neue Nachricht ein anderes Thema anspricht, wähle das Werkzeug für diese neue Absicht.",
+    input.language === "fr"
+      ? "Choisis weather pour la météo, datetime pour la date/heure, timetable pour les trajets."
+      : "Wähle weather für Wetter, datetime für Datum/Uhrzeit und timetable für Fahrplanfragen.",
     input.toolCatalogPrompt,
-    "Bisheriger Verlauf:",
+    input.language === "fr" ? "Historique récent des messages utilisateur:" : "Letzte Nutzer-Nachrichten:",
+    plannerHistoryBlock || (input.language === "fr" ? "Aucun" : "Keine"),
+    input.language === "fr" ? "Message actuel:" : "Aktuelle Nachricht:",
+    `${input.userLabel}: ${input.message}`,
+    "Bisheriger Verlauf der Werkzeuge:",
     context.observationBlock,
-    "Gespräch:",
-    `${context.historyBlock}${input.userLabel}: ${input.message}`,
   ].join("\n\n");
 }
 
@@ -185,54 +157,13 @@ function buildFinalAnswerPrompt(input: McpConversationInput, trace: McpToolObser
   ].join("\n\n");
 }
 
-function formatDeterministicTimetableReply(trace: McpToolObservation[]): string | null {
-  const lastTimetableObservation = [...trace].reverse().find((entry) => entry.toolName === "timetable" && entry.status === "ok");
-  if (!lastTimetableObservation) {
+function formatDeterministicToolReply(trace: McpToolObservation[]): string | null {
+  const lastStableObservation = [...trace].reverse().find((entry) => entry.status === "ok" || entry.status === "needs_user_input");
+  if (!lastStableObservation) {
     return null;
   }
 
-  return lastTimetableObservation.resultSummary.trim() || null;
-}
-
-async function runDirectTimetableLookup(
-  message: string,
-  history: ChatHistoryEntry[],
-  languageKey: "de" | "fr"
-): Promise<{ ok: boolean; text: string; source: string } | null> {
-  const context = extractTimetableContext(message, history);
-  if (!context.from || !context.to || !context.date || !context.time) {
-    return null;
-  }
-
-  const request = await timetableTool.buildRequest(message, history, languageKey, []);
-  if (!request.ok) {
-    return {
-      ok: false,
-      text: request.clarification,
-      source: "timetable-clarification",
-    };
-  }
-
-  const raw = await timetableTool.execute(request.args, languageKey);
-  const observation = await timetableTool.renderObservation(raw, languageKey, request.requestSummary);
-  return {
-    ok: true,
-    text: observation.resultSummary,
-    source: "timetable-direct",
-  };
-}
-
-function heuristicPlan(input: McpConversationInput): McpToolPlan {
-  if (hasAnyKeyword(input.message, ["wetter", "regen", "schnee", "wind", "temperatur", "vorhersage", "prognose", "météo", "pluie", "neige", "vent"])) {
-    return { tool: "weather" };
-  }
-  if (hasAnyKeyword(input.message, ["fahrplan", "verbindung", "verbindungen", "zug", "züge", "abfahrt", "ankunft", "train", "departure", "arrival", "horaire"])) {
-    return { tool: "timetable" };
-  }
-  if (hasAnyKeyword(input.message, ["uhr", "uhrzeit", "zeit", "datum", "heute", "jetzt", "wochentag", "date", "heure"])) {
-    return { tool: "datetime" };
-  }
-  return { tool: "none" };
+  return lastStableObservation.resultSummary.trim() || null;
 }
 
 async function requestPlan(input: McpConversationInput, trace: McpToolObservation[]): Promise<McpToolPlan> {
@@ -242,8 +173,8 @@ async function requestPlan(input: McpConversationInput, trace: McpToolObservatio
     const result = await Promise.race([
       inferStructuredJson(prompt, ToolPlanSchema, {
         generation_options: {
-          max_new_tokens: 64,
-          temperature: 0,
+          max_new_tokens: 512,
+          temperature: 0.2,
           top_p: 1,
         },
       }),
@@ -261,10 +192,10 @@ async function requestPlan(input: McpConversationInput, trace: McpToolObservatio
       };
     }
   } catch {
-    // fall back below
+    // fall through to no tool
   }
 
-  return heuristicPlan(input);
+  return { tool: "none" };
 }
 
 async function requestFinalAnswer(input: McpConversationInput, trace: McpToolObservation[]): Promise<string> {
@@ -272,12 +203,12 @@ async function requestFinalAnswer(input: McpConversationInput, trace: McpToolObs
   const hasTimetableObservation = trace.some((entry) => entry.toolName === "timetable" && entry.status === "ok");
   const generationOptions = hasTimetableObservation
     ? {
-        max_new_tokens: 120,
-        temperature: 0,
+        max_new_tokens: 256,
+        temperature: 0.1,
         top_p: 1,
       }
     : {
-        max_new_tokens: 220,
+        max_new_tokens: 512,
         temperature: 0.1,
         top_p: 0.7,
       };
@@ -318,43 +249,38 @@ export async function askCompanionMessage(
     systemPrompt: COPY[languageKey].systemPrompt,
     userLabel: COPY[languageKey].userLabel,
     assistantLabel: COPY[languageKey].assistantLabel,
-    toolCatalogPrompt: buildMcpPromptCatalog(languageKey),
+    toolCatalogPrompt: buildMcpPlannerPromptCatalog(languageKey),
     tools: [...MCP_TOOLS],
     maxToolUses: 10,
   };
 
   try {
-    const directTimetableReply = await runDirectTimetableLookup(trimmedMessage, history, languageKey);
-    if (directTimetableReply) {
-      return directTimetableReply;
-    }
-
     const orchestration = await runConversation(
       conversationInput,
       (trace) => requestPlan(conversationInput, trace),
       (trace) => requestFinalAnswer(conversationInput, trace)
     );
 
-    const timetableReply = formatDeterministicTimetableReply(orchestration.trace);
-    if (timetableReply) {
+    const directToolReply = formatDeterministicToolReply(orchestration.trace);
+    if (directToolReply) {
       return {
         ok: true,
-        text: timetableReply,
-        source: "timetable-deterministic",
+        text: directToolReply,
+        source: "tool-deterministic",
       };
     }
 
-    const sanitizedText = sanitizeAssistantText(orchestration.text, trimmedMessage, languageKey);
+    const sanitizedText = sanitizeAssistantText(orchestration.text, languageKey);
 
     return {
       ok: true,
-      text: sanitizedText || fallbackReply(trimmedMessage, languageKey),
+      text: sanitizedText || COPY[languageKey].fallbackGeneral,
       source: orchestration.trace.length > 0 ? "mcp" : "mcp-final",
     };
   } catch {
     return {
       ok: true,
-      text: fallbackReply(trimmedMessage, languageKey),
+      text: COPY[languageKey].fallbackGeneral,
       source: "fallback",
     };
   }

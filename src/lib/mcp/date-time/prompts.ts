@@ -23,6 +23,18 @@ export const dateTimePrompt: McpPromptDefinition = {
       "Donne la date et l'heure dans la langue de la conversation.",
     ],
   },
+  examples: {
+    de: [
+      "Wie spät ist es jetzt?",
+      "Welches Datum ist heute?",
+      "Was ist heute für ein Wochentag?",
+    ],
+    fr: [
+      "Quelle heure est-il maintenant ?",
+      "Quelle est la date aujourd'hui ?",
+      "Quel jour sommes-nous ?",
+    ],
+  },
 };
 
 export function buildDateTimeObservationPrompt(

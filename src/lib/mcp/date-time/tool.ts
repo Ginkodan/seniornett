@@ -63,8 +63,8 @@ export const dateTimeTool: McpTool<DateTimeToolInput, DateTimeToolRaw> = {
     const prompt = buildDateTimeObservationPrompt(result, language, requestSummary);
     const modelResult = await inferStructuredJson(prompt, DateTimeObservationSchema, {
       generation_options: {
-        max_new_tokens: 64,
-        temperature: 0,
+        max_new_tokens: 96,
+        temperature: 0.2,
         top_p: 1,
       },
     });
