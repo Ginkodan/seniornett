@@ -7,19 +7,14 @@ import type {
   McpToolObservation,
   McpToolRequestResolution,
 } from "../types";
-import { inferStructuredJson } from "../structured-json";
 import { buildDateTimeAnswer, shouldUseDateTimeTool } from "./resources";
-import { buildDateTimeObservationPrompt, dateTimePrompt } from "./prompts";
+import { dateTimePrompt } from "./prompts";
 
 type DateTimeToolInput = Record<string, never>;
 type DateTimeToolRaw = {
   nowIso: string;
 };
-
 const DateTimeRequestSchema = z.object({}).strict();
-const DateTimeObservationSchema = z.object({
-  summary: z.string().trim().min(1),
-}).strict();
 
 export function shouldUseDateTimeCapability(message: string): boolean {
   return shouldUseDateTimeTool(message);
@@ -65,19 +60,6 @@ export const dateTimeTool: McpTool<DateTimeToolInput, DateTimeToolRaw> = {
     return { nowIso: new Date().toISOString() };
   },
   async renderObservation(result: DateTimeToolRaw, language: McpLanguage, requestSummary: string): Promise<McpToolObservation> {
-    const deterministic = buildDateTimeObservation(result, language, requestSummary);
-    const prompt = buildDateTimeObservationPrompt(result, language, requestSummary);
-    const modelResult = await inferStructuredJson(prompt, DateTimeObservationSchema, {
-      generation_options: {
-        max_new_tokens: 96,
-        temperature: 0.2,
-        top_p: 1,
-      },
-    });
-
-    return {
-      ...deterministic,
-      resultSummary: modelResult.value?.summary || deterministic.resultSummary,
-    };
+    return buildDateTimeObservation(result, language, requestSummary);
   },
 };

@@ -1,7 +1,7 @@
 import type { WeatherResult } from "@/app/actions/weather";
 
+import { extractRelativeDayOffset } from "@/lib/date-utils";
 import type { McpLanguage } from "../types";
-import { extractRelativeDayOffset } from "../date-time/resources";
 
 export function shouldUseWeatherTool(message: string): boolean {
   return [

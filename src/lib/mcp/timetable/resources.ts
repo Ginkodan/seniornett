@@ -1,7 +1,10 @@
 import type { Leg, SearchResult, TransferAssessment } from "@/lib/sbb";
 
+import {
+  extractRelativeDayOffset,
+  resolveRelativeDateIso,
+} from "@/lib/date-utils";
 import type { McpLanguage } from "../types";
-import { extractRelativeDayOffset, resolveRelativeDateIso } from "../date-time/resources";
 
 const TIMETABLE_ROUTE_PATTERNS = [
   /\b(?:nach|to|à|vers)\s+(.+?)\s*\(\s*(?:von|from|ab|de|depuis)\s+(.+?)\s*\)(?=[?.!,]|$)/i,
@@ -139,15 +142,6 @@ function extractExplicitDate(message: string): string | null {
 }
 
 function extractExplicitTime(message: string): string | null {
-  if (/\b(?:jetzt|now|maintenant)\b/i.test(message)) {
-    return new Intl.DateTimeFormat("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hourCycle: "h23",
-      timeZone: "Europe/Zurich",
-    }).format(new Date());
-  }
-
   for (const pattern of TIMETABLE_TIME_PATTERNS) {
     const match = message.match(pattern);
     if (!match) continue;

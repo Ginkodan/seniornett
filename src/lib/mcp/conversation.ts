@@ -207,6 +207,9 @@ export function buildMcpPlannerPrompt(input: McpConversationInput, trace: McpToo
       ? "Si une demande contient un moment relatif comme maintenant ou aujourd'hui et qu'un autre outil a besoin d'une date ou heure exacte, utilise d'abord un outil capable de fournir le temps actuel."
       : "Wenn eine Anfrage einen relativen Zeitpunkt wie jetzt oder heute enthält und ein anderes Werkzeug ein exaktes Datum oder eine genaue Uhrzeit braucht, nutze zuerst ein Werkzeug für die aktuelle Zeit.",
     input.language === "fr"
+      ? "Si une demande n'indique pas explicitement la date ou l'heure mais qu'un outil en aval en a besoin, choisis d'abord l'outil d'heure."
+      : "Wenn eine Anfrage kein explizites Datum oder keine Uhrzeit nennt, ein nachgelagertes Werkzeug aber darauf angewiesen ist, wähle zuerst das Zeit-Werkzeug.",
+    input.language === "fr"
       ? "Ne répète pas un outil qui a déjà fourni assez d'informations, sauf si un autre outil en dépend clairement ou si la demande actuelle exige une nouvelle recherche."
       : "Wiederhole kein Werkzeug, das bereits genug Informationen geliefert hat, außer ein anderes Werkzeug hängt klar davon ab oder die aktuelle Anfrage verlangt eine neue Suche.",
     input.toolCatalogPrompt,
