@@ -17,10 +17,17 @@ type ChatMessage = {
   source?: string;
 };
 
+type UserLocation = {
+  latitude: number;
+  longitude: number;
+  accuracy?: number;
+};
+
 type AskLottiAction = (
   message: string,
   history: Array<{ role: ChatRole; text: string }>,
-  language?: string
+  language?: string,
+  runtime?: { location?: UserLocation }
 ) => Promise<{ ok: boolean; text: string; source: string }>;
 
 type LottiLiveScreenProps = {
@@ -32,6 +39,7 @@ export function LottiLiveScreen({ askLottiAction }: LottiLiveScreenProps) {
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
   const [draft, setDraft] = React.useState("");
   const [pending, setPending] = React.useState(false);
+  const [location, setLocation] = React.useState<UserLocation | undefined>();
   const listRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
@@ -41,6 +49,30 @@ export function LottiLiveScreen({ askLottiAction }: LottiLiveScreenProps) {
 
     listRef.current.scrollTop = listRef.current.scrollHeight;
   }, [messages, pending]);
+
+  React.useEffect(() => {
+    if (!("geolocation" in navigator)) {
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        });
+      },
+      () => {
+        setLocation(undefined);
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 5000,
+        maximumAge: 10 * 60 * 1000,
+      }
+    );
+  }, []);
 
   const submitQuestion = async () => {
     const text = draft.trim();
@@ -60,7 +92,7 @@ export function LottiLiveScreen({ askLottiAction }: LottiLiveScreenProps) {
 
     try {
       const history = messages.map(({ role, text }) => ({ role, text }));
-      const result = await askLottiAction(text, history, locale);
+      const result = await askLottiAction(text, history, locale, { location });
       setMessages((current) => [
         ...current,
         {

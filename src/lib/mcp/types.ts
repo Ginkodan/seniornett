@@ -11,6 +11,17 @@ export type McpToolName = string;
 
 export type McpToolStatus = "ok" | "needs_user_input" | "error";
 
+export type McpRuntimeLocation = {
+  latitude: number;
+  longitude: number;
+  accuracy?: number;
+  label?: string;
+};
+
+export type McpRuntimeContext = {
+  location?: McpRuntimeLocation;
+};
+
 export interface McpToolObservation {
   toolName: McpToolName;
   requestSummary: string;
@@ -32,6 +43,27 @@ export interface McpToolClarification {
 
 export type McpToolRequestResolution<TArgs> = McpToolRequest<TArgs> | McpToolClarification;
 
+export type McpToolContext = {
+  message: string;
+  history: ChatHistoryEntry[];
+  language: McpLanguage;
+  trace: McpToolObservation[];
+  runtime?: McpRuntimeContext;
+};
+
+export type McpSdkToolMetadata = {
+  description: string;
+  inputSchema?: z.ZodRawShape;
+  outputSchema?: z.ZodRawShape;
+  annotations?: {
+    title?: string;
+    readOnlyHint?: boolean;
+    destructiveHint?: boolean;
+    idempotentHint?: boolean;
+    openWorldHint?: boolean;
+  };
+};
+
 export interface McpTool<TArgs = unknown, TRaw = unknown> {
   id: string;
   toolName: McpToolName;
@@ -41,20 +73,12 @@ export interface McpTool<TArgs = unknown, TRaw = unknown> {
   examples?: Record<McpLanguage, string[]>;
   responseInstructions?: Record<McpLanguage, string[]>;
   replyMode?: "direct" | "synthesized";
-  canHandle?: (
-    message: string,
-    history: ChatHistoryEntry[],
-    language: McpLanguage,
-    trace: McpToolObservation[]
-  ) => boolean;
-  buildRequest: (
-    message: string,
-    history: ChatHistoryEntry[],
-    language: McpLanguage,
-    trace: McpToolObservation[]
-  ) => Promise<McpToolRequestResolution<TArgs>>;
-  execute: (args: TArgs, language: McpLanguage) => Promise<TRaw>;
-  renderObservation: (result: TRaw, language: McpLanguage, requestSummary: string) => Promise<McpToolObservation>;
+  sdk: McpSdkToolMetadata;
+  canHandle?: (context: McpToolContext) => boolean;
+  requires?: (context: McpToolContext) => McpToolName[];
+  buildRequest: (context: McpToolContext) => Promise<McpToolRequestResolution<TArgs>>;
+  execute: (args: TArgs, language: McpLanguage, context: McpToolContext) => Promise<TRaw>;
+  renderObservation: (result: TRaw, language: McpLanguage, requestSummary: string, context: McpToolContext) => Promise<McpToolObservation>;
 }
 
 export interface McpToolLike {
@@ -66,20 +90,12 @@ export interface McpToolLike {
   examples?: Record<McpLanguage, string[]>;
   responseInstructions?: Record<McpLanguage, string[]>;
   replyMode?: "direct" | "synthesized";
-  canHandle?: (
-    message: string,
-    history: ChatHistoryEntry[],
-    language: McpLanguage,
-    trace: McpToolObservation[]
-  ) => boolean;
-  buildRequest: (
-    message: string,
-    history: ChatHistoryEntry[],
-    language: McpLanguage,
-    trace: McpToolObservation[]
-  ) => Promise<McpToolRequestResolution<unknown>>;
-  execute: (args: unknown, language: McpLanguage) => Promise<unknown>;
-  renderObservation: (result: unknown, language: McpLanguage, requestSummary: string) => Promise<McpToolObservation>;
+  sdk: McpSdkToolMetadata;
+  canHandle?: (context: McpToolContext) => boolean;
+  requires?: (context: McpToolContext) => McpToolName[];
+  buildRequest: (context: McpToolContext) => Promise<McpToolRequestResolution<unknown>>;
+  execute: (args: unknown, language: McpLanguage, context: McpToolContext) => Promise<unknown>;
+  renderObservation: (result: unknown, language: McpLanguage, requestSummary: string, context: McpToolContext) => Promise<McpToolObservation>;
 }
 
 export interface McpPromptDefinition {
@@ -108,6 +124,7 @@ export interface McpConversationInput {
   toolCatalogPrompt?: string;
   tools: ReadonlyArray<McpToolLike>;
   maxToolUses?: number;
+  runtime?: McpRuntimeContext;
 }
 
 export interface McpConversationResult {

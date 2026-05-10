@@ -8,6 +8,7 @@ import type {
   McpTool,
   McpToolObservation,
   McpToolRequestResolution,
+  McpToolContext,
 } from "../types";
 import {
   buildWeatherAnswer,
@@ -115,10 +116,23 @@ export const weatherTool: McpTool<WeatherToolInput, WeatherResult> = {
   examples: weatherPrompt.examples,
   responseInstructions: weatherPrompt.responseInstructions,
   replyMode: weatherPrompt.replyMode,
-  canHandle(message: string): boolean {
-    return shouldUseWeatherCapability(message);
+  sdk: {
+    description: weatherPrompt.summary.de,
+    inputSchema: {
+      location: z.string().trim().min(1).describe("Ort für die Wetterabfrage"),
+      dayIndex: z.number().int().min(0).max(6).default(0).describe("0 für heute, 1 für morgen usw."),
+    },
+    annotations: {
+      title: weatherPrompt.title.de,
+      readOnlyHint: true,
+      openWorldHint: true,
+    },
   },
-  async buildRequest(message: string, history: ChatHistoryEntry[], language: McpLanguage): Promise<McpToolRequestResolution<WeatherToolInput>> {
+  canHandle(context: McpToolContext): boolean {
+    return shouldUseWeatherCapability(context.message);
+  },
+  async buildRequest(context: McpToolContext): Promise<McpToolRequestResolution<WeatherToolInput>> {
+    const { message, history, language } = context;
     const modelRequest = await buildWeatherRequestViaModel(message, history, language);
     if (modelRequest) {
       return modelRequest;

@@ -3,6 +3,21 @@ import type { McpToolObservation, McpToolPlan } from "./types";
 export type McpTestTraceEvent =
   | { type: "conversation-start"; message: string }
   | { type: "plan"; plan: McpToolPlan }
+  | {
+      type: "planner-debug";
+      source: "planner" | "deterministic-fallback";
+      selectedTool: string;
+      candidates: Array<{
+        toolName: string;
+        canHandle: boolean;
+        alreadyObserved: boolean;
+        requires: string[];
+      }>;
+      dependencyRewrite?: {
+        fromTool: string;
+        toTool: string;
+      };
+    }
   | { type: "request"; toolName: string; requestSummary: string; args: unknown }
   | { type: "observation"; observation: McpToolObservation }
   | { type: "error"; toolName: string; requestSummary: string; resultSummary: string };

@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 import type {
-  ChatHistoryEntry,
   McpLanguage,
   McpTool,
+  McpToolContext,
   McpToolObservation,
   McpToolRequestResolution,
 } from "../types";
@@ -44,15 +44,24 @@ export const dateTimeTool: McpTool<DateTimeToolInput, DateTimeToolRaw> = {
   examples: dateTimePrompt.examples,
   responseInstructions: dateTimePrompt.responseInstructions,
   replyMode: dateTimePrompt.replyMode,
-  canHandle(message: string, _history: ChatHistoryEntry[], _language: McpLanguage, trace: McpToolObservation[]): boolean {
-    return trace.length === 0 && shouldUseDateTimeCapability(message);
+  sdk: {
+    description: dateTimePrompt.summary.de,
+    inputSchema: {},
+    annotations: {
+      title: dateTimePrompt.title.de,
+      readOnlyHint: true,
+      idempotentHint: false,
+    },
   },
-  async buildRequest(_message: string, _history: ChatHistoryEntry[], language: McpLanguage): Promise<McpToolRequestResolution<DateTimeToolInput>> {
+  canHandle(context: McpToolContext): boolean {
+    return context.trace.length === 0 && shouldUseDateTimeCapability(context.message);
+  },
+  async buildRequest(context: McpToolContext): Promise<McpToolRequestResolution<DateTimeToolInput>> {
     DateTimeRequestSchema.parse({});
     return {
       ok: true,
       args: {},
-      requestSummary: buildDateTimeRequestSummary(language),
+      requestSummary: buildDateTimeRequestSummary(context.language),
     };
   },
   async execute(_args: DateTimeToolInput): Promise<DateTimeToolRaw> {

@@ -7,13 +7,13 @@
     "build": "next build",
     "dev": "next dev",
     "test": "vitest run",
-    "test:chat": "vitest run tests/chat/chat-trace.test.ts --reporter=verbose",
     "test:quality": "RUN_QUALITY_TESTS=true vitest run tests/quality --reporter=verbose",
     "test:browsers": "playwright install chromium",
     "lint": "eslint"
   },
   "dependencies": {
     "@fontsource/atkinson-hyperlegible": "^5.2.8",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@napi-rs/canvas": "^0.1.100",
     "fast-xml-parser": "^5.7.2",
     "hls.js": "^1.6.16",

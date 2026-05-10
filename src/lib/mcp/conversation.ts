@@ -4,6 +4,7 @@ import { z } from "zod";
 import type {
   McpConversationInput,
   McpConversationResult,
+  McpToolContext,
   McpToolLike,
   McpToolObservation,
   McpToolPlan,
@@ -11,9 +12,11 @@ import type {
 import { inferStructuredJson } from "./structured-json";
 import { recordMcpTestTrace } from "./test-trace";
 
-const FINAL_ANSWER_TIMEOUT_MS = 4000;
+const FINAL_ANSWER_TIMEOUT_MS = 12000;
 const MAX_HISTORY_TURNS_FOR_PROMPTS = 6;
 const TOOL_PLAN_TIMEOUT_MS = 2500;
+const DEFAULT_MAX_TOOL_USES = 16;
+const HARD_MAX_TOOL_USES = 24;
 
 const ToolPlanSchema = z
   .object({
@@ -22,6 +25,16 @@ const ToolPlanSchema = z
     reason: z.string().trim().optional(),
   })
   .strict();
+
+function buildToolContext(input: McpConversationInput, trace: McpToolObservation[]): McpToolContext {
+  return {
+    message: input.message,
+    history: input.history,
+    language: input.language,
+    trace,
+    runtime: input.runtime,
+  };
+}
 
 function buildHistoryBlock(history: McpConversationInput["history"], userLabel: string, assistantLabel: string): string {
   const turns = history.slice(-MAX_HISTORY_TURNS_FOR_PROMPTS).map((entry) => {
@@ -58,6 +71,22 @@ function buildPlannerHistoryBlock(history: McpConversationInput["history"], user
   return userTurns.length > 0 ? `${userTurns.join("\n")}\n` : "";
 }
 
+function buildRuntimeBlock(input: McpConversationInput): string {
+  const location = input.runtime?.location;
+  if (!location) {
+    return input.language === "fr" ? "Position navigateur: non disponible." : "Browser-Standort: nicht verfügbar.";
+  }
+
+  const parts = [
+    `lat=${location.latitude}`,
+    `lon=${location.longitude}`,
+    location.accuracy ? `accuracy=${Math.round(location.accuracy)}m` : null,
+    location.label ? `label=${location.label}` : null,
+  ].filter(Boolean);
+
+  return input.language === "fr" ? `Position navigateur: ${parts.join(", ")}.` : `Browser-Standort: ${parts.join(", ")}.`;
+}
+
 function buildObservationBlock(trace: McpToolObservation[], language: McpConversationInput["language"]): string {
   if (trace.length === 0) {
     return language === "fr" ? "Aucune observation MCP pour l'instant." : "Keine MCP-Beobachtungen bisher.";
@@ -81,6 +110,63 @@ function buildPayloadBlock(trace: McpToolObservation[], language: McpConversatio
   return payloadEntries.map((entry, index) => `#${index + 1} ${entry.toolName}: ${entry.payload}`).join("\n");
 }
 
+function hasObservation(trace: McpToolObservation[], toolName: string): boolean {
+  return trace.some((entry) => entry.toolName === toolName);
+}
+
+function resolvePipelinePlan(
+  input: McpConversationInput,
+  toolMap: Map<string, McpToolLike>,
+  trace: McpToolObservation[],
+  plan: McpToolPlan
+): { plan: McpToolPlan; dependencyRewrite?: { fromTool: string; toTool: string } } {
+  if (plan.tool === "none") {
+    return { plan };
+  }
+
+  const plannedTool = toolMap.get(plan.tool);
+  if (!plannedTool?.requires) {
+    return { plan };
+  }
+
+  const context = buildToolContext(input, trace);
+  const requiredTools = plannedTool.requires(context);
+  const nextRequiredTool = requiredTools.find((toolName) => toolMap.has(toolName) && !hasObservation(trace, toolName));
+
+  if (!nextRequiredTool) {
+    return { plan };
+  }
+
+  return {
+    plan: {
+      tool: nextRequiredTool,
+      reason: input.language === "fr"
+        ? `préparation nécessaire avant ${plannedTool.toolName}`
+        : `notwendige Vorbereitung vor ${plannedTool.toolName}`,
+    },
+    dependencyRewrite: {
+      fromTool: plannedTool.toolName,
+      toTool: nextRequiredTool,
+    },
+  };
+}
+
+function stableStringify(value: unknown): string {
+  if (value === null || typeof value !== "object") {
+    const primitive = JSON.stringify(value);
+    return primitive === undefined ? "undefined" : primitive;
+  }
+
+  if (Array.isArray(value)) {
+    return `[${value.map((entry) => stableStringify(entry)).join(",")}]`;
+  }
+
+  return `{${Object.entries(value as Record<string, unknown>)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, entry]) => `${JSON.stringify(key)}:${stableStringify(entry)}`)
+    .join(",")}}`;
+}
+
 export async function runConversation(
   input: McpConversationInput,
   planRequest: (trace: McpToolObservation[]) => Promise<McpToolPlan>,
@@ -89,19 +175,43 @@ export async function runConversation(
   const toolMap = new Map<string, McpToolLike>(input.tools.map((tool) => [tool.toolName, tool] as const));
   const trace: McpToolObservation[] = [];
   const plans: McpToolPlan[] = [];
-  const maxToolUses = Math.max(1, Math.min(10, input.maxToolUses ?? 10));
+  const executedRequestSignatures = new Set<string>();
+  const maxToolUses = Math.max(1, Math.min(HARD_MAX_TOOL_USES, input.maxToolUses ?? DEFAULT_MAX_TOOL_USES));
 
   recordMcpTestTrace({ type: "conversation-start", message: input.message });
 
   for (let index = 0; index < maxToolUses; index += 1) {
-    const plan = await Promise.race([
+    let plannerSource: "planner" | "deterministic-fallback" = "planner";
+    const planned = await Promise.race([
       planRequest(trace),
       new Promise<McpToolPlan>((_, reject) => {
         setTimeout(() => reject(new Error("Tool planning timed out")), TOOL_PLAN_TIMEOUT_MS);
       }),
-    ]);
+    ]).catch(() => {
+      plannerSource = "deterministic-fallback";
+      return requestDeterministicPlan(input, trace);
+    });
+    const resolvedPlan = resolvePipelinePlan(input, toolMap, trace, planned);
+    let plan = resolvedPlan.plan;
+    const plannedTool = plan.tool === "none" ? null : toolMap.get(plan.tool);
+    const context = buildToolContext(input, trace);
+    let canHandleRewrite: { fromTool: string; toTool: string } | undefined;
+    if (plannedTool?.canHandle && !plannedTool.canHandle(context)) {
+      const deterministic = requestDeterministicPlan(input, trace);
+      if (deterministic.tool !== "none") {
+        canHandleRewrite = { fromTool: plannedTool.toolName, toTool: deterministic.tool };
+        plan = deterministic;
+      }
+    }
     plans.push(plan);
     recordMcpTestTrace({ type: "plan", plan });
+    recordMcpTestTrace({
+      type: "planner-debug",
+      source: plannerSource,
+      selectedTool: plan.tool,
+      candidates: buildPlannerCandidates(input, trace),
+      dependencyRewrite: resolvedPlan.dependencyRewrite || canHandleRewrite,
+    });
 
     if (plan.tool === "none") {
       break;
@@ -121,7 +231,8 @@ export async function runConversation(
     }
 
     try {
-      const request = await tool.buildRequest(input.message, input.history, input.language, trace);
+      const context = buildToolContext(input, trace);
+      const request = await tool.buildRequest(context);
       if (!request.ok) {
         const observation: McpToolObservation = {
           toolName: tool.toolName,
@@ -134,16 +245,36 @@ export async function runConversation(
         break;
       }
 
+      const requestSignature = `${tool.toolName}:${stableStringify(request.args)}`;
+      if (executedRequestSignatures.has(requestSignature)) {
+        const observation: McpToolObservation = {
+          toolName: tool.toolName,
+          requestSummary: request.requestSummary,
+          resultSummary: input.language === "fr" ? "Cet outil a déjà été appelé avec les mêmes données." : "Dieses Werkzeug wurde bereits mit denselben Daten aufgerufen.",
+          status: "error",
+        };
+        trace.push(observation);
+        recordMcpTestTrace({ type: "observation", observation });
+        break;
+      }
+      executedRequestSignatures.add(requestSignature);
+
       recordMcpTestTrace({
         type: "request",
         toolName: tool.toolName,
         requestSummary: request.requestSummary,
         args: request.args,
       });
-      const rawResult = await tool.execute(request.args, input.language);
-      const observation = await tool.renderObservation(rawResult, input.language, request.requestSummary);
+
+      const executionContext = buildToolContext(input, trace);
+      const rawResult = await tool.execute(request.args, input.language, executionContext);
+      const observation = await tool.renderObservation(rawResult, input.language, request.requestSummary, executionContext);
       trace.push(observation);
       recordMcpTestTrace({ type: "observation", observation });
+
+      if (observation.status === "needs_user_input") {
+        break;
+      }
     } catch {
       const observation: McpToolObservation = {
         toolName: tool.toolName,
@@ -169,9 +300,14 @@ export async function runConversation(
       setTimeout(() => reject(new Error("Final answer timed out")), FINAL_ANSWER_TIMEOUT_MS);
     }),
   ]).catch(() => "");
+  const fallbackText = [...trace]
+    .reverse()
+    .find((entry) => (entry.status === "ok" || entry.status === "needs_user_input") && entry.resultSummary.trim())
+    ?.resultSummary
+    .trim();
 
   return {
-    text,
+    text: text || fallbackText || "",
     trace,
     plan: plans,
   };
@@ -194,15 +330,21 @@ export function buildMcpPlannerPrompt(input: McpConversationInput, trace: McpToo
       ? `Les outils disponibles sont: ${toolNames || "aucun"}. Tu peux aussi choisir 'none'.`
       : `Verfügbare Werkzeuge sind: ${toolNames || "keine"}. Du darfst auch 'none' wählen.`,
     input.language === "fr"
+      ? "Tu peux utiliser plusieurs outils l'un après l'autre. Choisis seulement le prochain outil utile."
+      : "Du darfst mehrere Werkzeuge nacheinander nutzen. Wähle immer nur das nächste sinnvolle Werkzeug.",
+    input.language === "fr"
       ? "Réponds uniquement en JSON, sans Markdown ni texte libre."
-      : "Antworte ausschließlich als JSON ohne Markdown oder Fließtext.",
+      : "Antworte ausschliesslich als JSON ohne Markdown oder Fliesstext.",
     input.language === "fr" ? 'Schéma: {"tool":"<tool-name>|none","reason":"court"}' : 'Schema: {"tool":"<tool-name>|none","reason":"kurz"}',
     input.language === "fr"
       ? "Le message actuel est prioritaire; utilise l'historique seulement pour compléter les informations manquantes."
       : "Die aktuelle Nachricht hat Priorität; nutze den Verlauf nur, um fehlende Informationen zu ergänzen.",
     input.language === "fr"
-      ? "Utilise les observations existantes pour décider si un autre outil est utile, si une clarification est nécessaire, ou si la réponse finale suffit."
-      : "Nutze vorhandene Werkzeugbeobachtungen, um zu entscheiden, ob ein weiteres Werkzeug hilft, eine Klärung nötig ist oder die finale Antwort reicht.",
+      ? "Utilise les observations structurées existantes comme entrée pour les outils suivants. Les outils ne s'appellent jamais entre eux."
+      : "Nutze vorhandene strukturierte Beobachtungen als Eingabe für nachfolgende Werkzeuge. Werkzeuge rufen sich nie gegenseitig auf.",
+    input.language === "fr"
+      ? "Pour une recherche locale avec coordonnées navigateur, résous d'abord les coordonnées en lieu, puis recherche sur le web."
+      : "Bei lokaler Websuche mit Browser-Koordinaten löse zuerst die Koordinaten zu einem Ort auf und suche danach im Web.",
     input.language === "fr"
       ? "Si une demande contient un moment relatif comme maintenant ou aujourd'hui et qu'un autre outil a besoin d'une date ou heure exacte, utilise d'abord un outil capable de fournir le temps actuel."
       : "Wenn eine Anfrage einen relativen Zeitpunkt wie jetzt oder heute enthält und ein anderes Werkzeug ein exaktes Datum oder eine genaue Uhrzeit braucht, nutze zuerst ein Werkzeug für die aktuelle Zeit.",
@@ -211,8 +353,10 @@ export function buildMcpPlannerPrompt(input: McpConversationInput, trace: McpToo
       : "Wenn eine Anfrage kein explizites Datum oder keine Uhrzeit nennt, ein nachgelagertes Werkzeug aber darauf angewiesen ist, wähle zuerst das Zeit-Werkzeug.",
     input.language === "fr"
       ? "Ne répète pas un outil qui a déjà fourni assez d'informations, sauf si un autre outil en dépend clairement ou si la demande actuelle exige une nouvelle recherche."
-      : "Wiederhole kein Werkzeug, das bereits genug Informationen geliefert hat, außer ein anderes Werkzeug hängt klar davon ab oder die aktuelle Anfrage verlangt eine neue Suche.",
+      : "Wiederhole kein Werkzeug, das bereits genug Informationen geliefert hat, ausser ein anderes Werkzeug hängt klar davon ab oder die aktuelle Anfrage verlangt eine neue Suche.",
     input.toolCatalogPrompt,
+    input.language === "fr" ? "Contexte runtime:" : "Runtime-Kontext:",
+    buildRuntimeBlock(input),
     input.language === "fr" ? "Historique récent des messages utilisateur:" : "Letzte Nutzer-Nachrichten:",
     plannerHistoryBlock || (input.language === "fr" ? "Aucun" : "Keine"),
     input.language === "fr" ? "Message actuel:" : "Aktuelle Nachricht:",
@@ -222,6 +366,38 @@ export function buildMcpPlannerPrompt(input: McpConversationInput, trace: McpToo
   ]
     .filter(Boolean)
     .join("\n\n");
+}
+
+function requestDeterministicPlan(input: McpConversationInput, trace: McpToolObservation[]): McpToolPlan {
+  const attemptedToolNames = new Set(trace.map((entry) => entry.toolName));
+  const context = buildToolContext(input, trace);
+  const hintedTool = input.tools.find((tool) => {
+    if (attemptedToolNames.has(tool.toolName)) {
+      return false;
+    }
+
+    return tool.canHandle?.(context) ?? false;
+  });
+
+  if (hintedTool) {
+    return {
+      tool: hintedTool.toolName,
+      reason: "deterministic tool hint",
+    };
+  }
+
+  return { tool: "none" };
+}
+
+function buildPlannerCandidates(input: McpConversationInput, trace: McpToolObservation[]) {
+  const attemptedToolNames = new Set(trace.map((entry) => entry.toolName));
+  const context = buildToolContext(input, trace);
+  return input.tools.map((tool) => ({
+    toolName: tool.toolName,
+    canHandle: tool.canHandle?.(context) ?? false,
+    alreadyObserved: attemptedToolNames.has(tool.toolName),
+    requires: tool.requires?.(context) ?? [],
+  }));
 }
 
 export async function requestMcpPlan(input: McpConversationInput, trace: McpToolObservation[]): Promise<McpToolPlan> {
@@ -244,7 +420,8 @@ export async function requestMcpPlan(input: McpConversationInput, trace: McpTool
 
     const requestedTool = result.value?.tool ?? result.value?.capability;
     if (requestedTool === "none") {
-      return { tool: "none", reason: result.value?.reason };
+      const deterministic = requestDeterministicPlan(input, trace);
+      return deterministic.tool === "none" ? { tool: "none", reason: result.value?.reason } : deterministic;
     }
 
     if (requestedTool && availableToolNames.has(requestedTool)) {
@@ -257,23 +434,7 @@ export async function requestMcpPlan(input: McpConversationInput, trace: McpTool
     // Fall through to deterministic tool hints when planning is unavailable.
   }
 
-  const attemptedToolNames = new Set(trace.map((entry) => entry.toolName));
-  const hintedTool = input.tools.find((tool) => {
-    if (attemptedToolNames.has(tool.toolName)) {
-      return false;
-    }
-
-    return tool.canHandle?.(input.message, input.history, input.language, trace) ?? false;
-  });
-
-  if (hintedTool) {
-    return {
-      tool: hintedTool.toolName,
-      reason: "deterministic tool hint",
-    };
-  }
-
-  return { tool: "none" };
+  return requestDeterministicPlan(input, trace);
 }
 
 function buildResponseInstructionBlock(tools: ReadonlyArray<McpToolLike>, trace: McpToolObservation[], language: McpConversationInput["language"]): string {
@@ -310,8 +471,13 @@ export function buildMcpFinalAnswerPrompt(input: McpConversationInput, trace: Mc
     input.language === "fr"
       ? "Les valeurs structurées sont la source de vérité. N'invente rien."
       : "Die strukturierten Werte sind die Wahrheit. Erfinde keine Fakten.",
+    input.language === "fr"
+      ? "Mentionne les sources comme noms ou domaines en texte, mais ne crée pas de liens cliquables."
+      : "Nenne Quellen als Namen oder Domains im Text, aber erstelle keine klickbaren Links.",
     responseInstructionBlock ? (input.language === "fr" ? "Règles de réponse des outils utilisés:" : "Antwortregeln der verwendeten Werkzeuge:") : "",
     responseInstructionBlock,
+    input.language === "fr" ? "Contexte runtime:" : "Runtime-Kontext:",
+    buildRuntimeBlock(input),
     input.language === "fr" ? "Observations MCP:" : "MCP-Verlauf:",
     context.observationBlock,
     input.language === "fr" ? "Valeurs structurées obligatoires:" : "Verbindliche strukturierte Werte:",
@@ -331,7 +497,7 @@ export async function requestMcpFinalAnswer(input: McpConversationInput, trace: 
   try {
     const result = await inferText(prompt, {
       generation_options: {
-        max_new_tokens: 512,
+        max_new_tokens: 768,
         temperature: 0.1,
         top_p: 0.7,
       },

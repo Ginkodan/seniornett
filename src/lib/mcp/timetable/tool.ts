@@ -1,9 +1,11 @@
+import { getZurichDateTimeParts } from "@/lib/date-utils";
 import type { SearchResult } from "@/lib/sbb";
+import { z } from "zod";
 
 import type {
-  ChatHistoryEntry,
   McpLanguage,
   McpTool,
+  McpToolContext,
   McpToolObservation,
   McpToolRequestResolution,
 } from "../types";
@@ -18,6 +20,7 @@ import {
 import { timetablePrompt } from "./prompts";
 
 const TIMETABLE_LOOKUP_TIMEOUT_MS = 8000;
+const RELATIVE_NOW_PATTERNS = /\b(?:jetzt|now|maintenant|nächste\s+(?:verbindung|zug|fahrt)|naechste\s+(?:verbindung|zug|fahrt)|nächster\s+zug|naechster\s+zug|next\s+(?:connection|train|departure)|first\s+available)\b/i;
 
 type TimetableToolInput = {
   from: string;
@@ -45,6 +48,24 @@ async function withTimetableTimeout<T>(operation: Promise<T>): Promise<T> {
       }, TIMETABLE_LOOKUP_TIMEOUT_MS);
     }),
   ]);
+}
+
+function readDateTimeObservation(context: McpToolContext): { dateIso: string; time24: string } | null {
+  const observation = [...context.trace].reverse().find((entry) => entry.toolName === "date_time" && entry.status === "ok" && entry.payload);
+  if (!observation?.payload) {
+    return null;
+  }
+
+  try {
+    const payload = JSON.parse(observation.payload) as { nowIso?: unknown };
+    if (typeof payload.nowIso !== "string") {
+      return null;
+    }
+
+    return getZurichDateTimeParts(new Date(payload.nowIso));
+  } catch {
+    return null;
+  }
 }
 
 function buildTimetableObservation(raw: TimetableToolRaw, language: McpLanguage, requestSummary: string): McpToolObservation {
@@ -130,38 +151,71 @@ export const timetableTool: McpTool<TimetableToolInput, TimetableToolRaw> = {
   examples: timetablePrompt.examples,
   responseInstructions: timetablePrompt.responseInstructions,
   replyMode: timetablePrompt.replyMode,
-  canHandle(message: string): boolean {
-    return shouldUseTimetableCapability(message);
+  sdk: {
+    description: timetablePrompt.summary.de,
+    inputSchema: {
+      from: z.string().trim().min(1).describe("Start-Haltestelle oder Adresse"),
+      to: z.string().trim().min(1).describe("Ziel-Haltestelle oder Adresse"),
+      date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).describe("Datum im Format YYYY-MM-DD"),
+      time: z.string().regex(/^\d{2}:\d{2}$/).describe("Zeit im Format HH:mm"),
+      isArrival: z.boolean().default(false).describe("true, wenn die Zeit eine Ankunftszeit ist"),
+    },
+    annotations: {
+      title: timetablePrompt.title.de,
+      readOnlyHint: true,
+      openWorldHint: true,
+    },
   },
-  async buildRequest(message: string, history: ChatHistoryEntry[], language: McpLanguage, trace: McpToolObservation[]): Promise<McpToolRequestResolution<TimetableToolInput>> {
-    void trace;
+  canHandle(context: McpToolContext): boolean {
+    return shouldUseTimetableCapability(context.message);
+  },
+  requires(context: McpToolContext): string[] {
+    if (!shouldUseTimetableCapability(context.message)) {
+      return [];
+    }
 
-    const context = extractTimetableContext(message, history);
+    const timetableContext = extractTimetableContext(context.message, context.history);
+    const hasDateTime = context.trace.some((entry) => entry.toolName === "date_time" && entry.status === "ok");
+    if ((!timetableContext.date || !timetableContext.time) && RELATIVE_NOW_PATTERNS.test(context.message) && !hasDateTime) {
+      return ["date_time"];
+    }
 
-    if (context.missing.length > 0 || !context.from || !context.to || !context.date || !context.time) {
+    return [];
+  },
+  async buildRequest(context: McpToolContext): Promise<McpToolRequestResolution<TimetableToolInput>> {
+    const timetableContext = extractTimetableContext(context.message, context.history);
+    const nowParts = readDateTimeObservation(context);
+
+    const date = timetableContext.date || (RELATIVE_NOW_PATTERNS.test(context.message) ? nowParts?.dateIso : null);
+    const time = timetableContext.time || (RELATIVE_NOW_PATTERNS.test(context.message) ? nowParts?.time24 : null);
+
+    if (timetableContext.missing.length > 0 || !timetableContext.from || !timetableContext.to || !date || !time) {
+      const missing = [...timetableContext.missing];
+      if (!date && !missing.includes("date")) missing.push("date");
+      if (!time && !missing.includes("time")) missing.push("time");
       return {
         ok: false,
-        clarification: buildTimetableClarification(language, context.missing),
+        clarification: buildTimetableClarification(context.language, missing),
       };
     }
 
     return {
       ok: true,
       args: {
-        from: context.from,
-        to: context.to,
-        date: context.date,
-        time: context.time,
-        isArrival: context.isArrival,
+        from: timetableContext.from,
+        to: timetableContext.to,
+        date,
+        time,
+        isArrival: timetableContext.isArrival,
       },
       requestSummary: buildTimetableRequestSummary(
         {
-          from: context.from,
-          to: context.to,
-          date: context.date,
-          time: context.time,
+          from: timetableContext.from,
+          to: timetableContext.to,
+          date,
+          time,
         },
-        language
+        context.language
       ),
     };
   },
@@ -171,7 +225,6 @@ export const timetableTool: McpTool<TimetableToolInput, TimetableToolRaw> = {
     return { request: args, result };
   },
   async renderObservation(result: TimetableToolRaw, language: McpLanguage, requestSummary: string): Promise<McpToolObservation> {
-    const deterministic = buildTimetableObservation(result, language, requestSummary);
-    return deterministic;
+    return buildTimetableObservation(result, language, requestSummary);
   },
 };

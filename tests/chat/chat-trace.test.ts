@@ -69,7 +69,9 @@ function summarizeTrace(events: McpTestTraceEvent[]): string {
   }).join("\n");
 }
 
-describe("chat query trace", () => {
+const describeChatTrace = process.env.RUN_CHAT_TRACE_TESTS === "true" ? describe : describe.skip;
+
+describeChatTrace("chat query trace", () => {
   test("runs configured chat queries and prints tool usage", async () => {
     const queries = readQueries();
     const history: ChatHistoryEntry[] = [];

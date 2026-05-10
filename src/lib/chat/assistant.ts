@@ -1,6 +1,6 @@
 import { normalizeLanguage } from "@/lib/i18n";
 import { MCP_TOOLS, buildMcpPlannerPromptCatalog, formatDeterministicMcpReply, runMcpConversation } from "@/lib/mcp";
-import type { ChatHistoryEntry, McpConversationInput } from "@/lib/mcp";
+import type { ChatHistoryEntry, McpConversationInput, McpRuntimeContext } from "@/lib/mcp";
 
 const COPY = {
   de: {
@@ -54,7 +54,16 @@ const GROUNDING_PATTERNS = [
 function sanitizeAssistantText(text: string, language: keyof typeof COPY): string {
   if (!text) return text;
 
-  const normalized = text.trim();
+  const normalized = text
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, "$1")
+    .replace(/https?:\/\/\S+/g, (url) => {
+      try {
+        return new URL(url).hostname.replace(/^www\./, "").replace(/[).,;:]+$/g, "");
+      } catch {
+        return "";
+      }
+    })
+    .trim();
 
   if (GROUNDING_PATTERNS.some((pattern) => pattern.test(normalized))) {
     return COPY[language].fallbackGeneral;
@@ -66,7 +75,8 @@ function sanitizeAssistantText(text: string, language: keyof typeof COPY): strin
 export async function askCompanionMessage(
   message: string,
   history: ChatHistoryEntry[] = [],
-  language?: string
+  language?: string,
+  runtime?: McpRuntimeContext
 ): Promise<{ ok: boolean; text: string; source: string }> {
   const trimmedMessage = (message || "").trim();
   const locale = normalizeLanguage(language);
@@ -89,7 +99,8 @@ export async function askCompanionMessage(
     assistantLabel: COPY[languageKey].assistantLabel,
     toolCatalogPrompt: buildMcpPlannerPromptCatalog(languageKey),
     tools: [...MCP_TOOLS],
-    maxToolUses: 10,
+    maxToolUses: 16,
+    runtime,
   };
 
   try {

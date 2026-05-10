@@ -18,7 +18,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-FROM node:20-alpine AS runner
+FROM mcr.microsoft.com/playwright:v1.59.1-noble AS runner
 WORKDIR /app
 
 ARG GIT_SHA=dev
@@ -29,7 +29,7 @@ ENV SENIORNETT_BUILD_SHA=${GIT_SHA}
 
 LABEL org.opencontainers.image.revision=${GIT_SHA}
 
-RUN addgroup -S nodejs && adduser -S nextjs -G nodejs
+RUN groupadd --system nodejs && useradd --system --gid nodejs nextjs
 RUN mkdir -p /app/.next
 
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./

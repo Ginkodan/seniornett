@@ -46,6 +46,16 @@ export function extractWeatherLocation(message: string): string | null {
     }
   }
 
+  const compact = trimmed
+    .replace(/\b(wetter|wetterbericht|prognose|vorhersage|regen|schnee|wind|temperatur|sonne|meteo|météo|pluie|neige|vent|température|prévision)\b/gi, " ")
+    .replace(/\b(heute|heut|morgen|tomorrow|today|demain|aujourd'hui)\b/gi, " ")
+    .replace(/[?.!,]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (compact) {
+    return compact;
+  }
+
   return null;
 }
 
