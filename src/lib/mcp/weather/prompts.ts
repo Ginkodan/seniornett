@@ -37,6 +37,19 @@ export const weatherPrompt: McpPromptDefinition = {
       "Quelle température fera demain à Zurich ?",
     ],
   },
+  responseInstructions: {
+    de: [
+      "Nenne nur Wetterwerte, die im Werkzeugresultat stehen.",
+      "Wenn ein Wetterwert fehlt, sage das knapp statt zu raten.",
+      "Nutze eine kompakte Markdown-Tabelle, wenn mehrere Tage oder Werte verglichen werden.",
+    ],
+    fr: [
+      "Ne donne que les valeurs météo présentes dans le résultat de l'outil.",
+      "Si une valeur manque, dis-le brièvement au lieu d'inventer.",
+      "Utilise un tableau Markdown compact quand plusieurs jours ou valeurs sont comparés.",
+    ],
+  },
+  replyMode: "direct",
 };
 
 export function buildWeatherRequestPrompt(message: string, history: Array<{ role: "user" | "assistant"; text: string }>, language: McpLanguage): string {
@@ -80,7 +93,7 @@ export function buildWeatherObservationPrompt(
       : "Du formulierst ein Wetterergebnis als kurzes, treues Markdown.",
     language === "fr" ? 'Réponds uniquement en JSON valide: {"summary":"..."}' : 'Antworte nur als gültiges JSON: {"summary":"..."}',
     language === "fr" ? "N'invente rien et garde les valeurs exactes." : "Erfinde nichts und behalte die Werte exakt bei.",
-    language === "fr" ? "Utilise des titres, des puces, du gras et du code inline si utile. Pas de liens." : "Nutze Überschriften, Listen, Fett und Inline-Code wenn sinnvoll. Keine Links.",
+    language === "fr" ? "Utilise des titres, des puces, des tableaux Markdown compacts, du gras et du code inline si utile. Pas de liens." : "Nutze Überschriften, Listen, kompakte Markdown-Tabellen, Fett und Inline-Code wenn sinnvoll. Keine Links.",
     `Données:\n${JSON.stringify({ requestSummary, result })}`,
   ].join("\n\n");
 }

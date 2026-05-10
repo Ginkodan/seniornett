@@ -83,6 +83,8 @@ export function buildWeatherContext(weather: WeatherResult, language: McpLanguag
 
   lines.push("");
   lines.push(language === "fr" ? "## Jours" : "## Tage");
+  lines.push(language === "fr" ? "| Jour | Température | Pluie | Détails |" : "| Tag | Temperatur | Regen | Details |");
+  lines.push("|---|---:|---:|---|");
 
   for (const day of weather.days.slice(0, 3)) {
     const precipitation = day.precipMm > 0
@@ -90,11 +92,9 @@ export function buildWeatherContext(weather: WeatherResult, language: McpLanguag
       : language === "fr"
         ? "sec"
         : "trocken";
-    const hourly = day.hourly?.length
-      ? `, ${language === "fr" ? "courbes horaires" : "Zeitverläufe"} ${day.hourly.length}`
-      : "";
+    const hourly = day.hourly?.length ? `${day.hourly.length} ${language === "fr" ? "courbes horaires" : "Zeitverläufe"}` : "-";
 
-    lines.push(`- **${day.dayLabel}:** ${day.tempMax}° / ${day.tempMin}°, ${precipitation}${hourly}`);
+    lines.push(`| **${day.dayLabel}** | ${day.tempMax}° / ${day.tempMin}° | ${precipitation} | ${hourly} |`);
   }
 
   return lines.join("\n");
@@ -125,11 +125,11 @@ export function buildWeatherAnswer(weather: WeatherResult, language: McpLanguage
     : language === "fr" ? "pas de neige" : "kein Schnee";
 
   const headline = language === "fr"
-    ? `# ${locationPart}${day.dayLabel}\n- **Températures:** ${day.tempMax}° / ${day.tempMin}°\n- **Pluie:** ${rainPart}\n- **Neige:** ${snowPart}`
-    : `# ${locationPart}${day.dayLabel}\n- **Temperaturen:** ${day.tempMax}° / ${day.tempMin}°\n- **Regen:** ${rainPart}\n- **Schnee:** ${snowPart}`;
+    ? `# ${locationPart}${day.dayLabel}\n| Valeur | Prévision |\n|---|---|\n| Températures | ${day.tempMax}° / ${day.tempMin}° |\n| Pluie | ${rainPart} |\n| Neige | ${snowPart} |`
+    : `# ${locationPart}${day.dayLabel}\n| Wert | Vorhersage |\n|---|---|\n| Temperaturen | ${day.tempMax}° / ${day.tempMin}° |\n| Regen | ${rainPart} |\n| Schnee | ${snowPart} |`;
 
   return day.hourly?.length
-    ? `${headline}\n- **${language === "fr" ? "Zeitverläufe" : "Zeitverläufe"}:** ${day.hourly.length}`
+    ? `${headline}\n| ${language === "fr" ? "Courbes horaires" : "Zeitverläufe"} | ${day.hourly.length} |`
     : headline;
 }
 

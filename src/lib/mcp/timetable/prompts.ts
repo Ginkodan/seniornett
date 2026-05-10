@@ -37,6 +37,23 @@ export const timetablePrompt: McpPromptDefinition = {
       "Trouve l'horaire de Lausanne à Genève demain à 9h.",
     ],
   },
+  responseInstructions: {
+    de: [
+      "Stelle keine Rückfrage, wenn eine passende Verbindung vorliegt.",
+      "Nutze eine kompakte Markdown-Tabelle, wenn Zeiten, Gleise oder Teilstrecken dadurch übersichtlicher werden.",
+      "Nutze keine zusätzlichen Erklärungen.",
+      "Nenne nur die tatsächlich gefundene Verbindung und keine vermuteten Alternativen.",
+      "Wenn eine Plattform vorhanden ist, erwähne sie als Gleis X; wenn nicht, lass sie weg.",
+    ],
+    fr: [
+      "Ne pose pas de question si une correspondance adaptée est disponible.",
+      "Utilise un tableau Markdown compact si les heures, quais ou étapes du trajet sont plus clairs ainsi.",
+      "N'ajoute pas d'explications supplémentaires.",
+      "Ne mentionne que la correspondance réellement trouvée, pas d'alternatives supposées.",
+      "Si un quai est disponible, mentionne-le comme voie X; sinon, omets-le.",
+    ],
+  },
+  replyMode: "direct",
 };
 
 export function buildTimetableRequestPrompt(

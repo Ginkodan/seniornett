@@ -35,6 +35,11 @@ export const dateTimePrompt: McpPromptDefinition = {
       "Quel jour sommes-nous ?",
     ],
   },
+  responseInstructions: {
+    de: ["Antworte kurz und nenne Datum oder Uhrzeit ohne zusätzliche Vermutungen."],
+    fr: ["Réponds brièvement et donne la date ou l'heure sans suppositions supplémentaires."],
+  },
+  replyMode: "direct",
 };
 
 export function buildDateTimeObservationPrompt(

@@ -38,6 +38,9 @@ export interface McpTool<TArgs = unknown, TRaw = unknown> {
   title: Record<McpLanguage, string>;
   summary: Record<McpLanguage, string>;
   instructions: Record<McpLanguage, string[]>;
+  examples?: Record<McpLanguage, string[]>;
+  responseInstructions?: Record<McpLanguage, string[]>;
+  replyMode?: "direct" | "synthesized";
   buildRequest: (
     message: string,
     history: ChatHistoryEntry[],
@@ -54,6 +57,9 @@ export interface McpToolLike {
   title: Record<McpLanguage, string>;
   summary: Record<McpLanguage, string>;
   instructions: Record<McpLanguage, string[]>;
+  examples?: Record<McpLanguage, string[]>;
+  responseInstructions?: Record<McpLanguage, string[]>;
+  replyMode?: "direct" | "synthesized";
   buildRequest: (
     message: string,
     history: ChatHistoryEntry[],
@@ -71,6 +77,8 @@ export interface McpPromptDefinition {
   summary: Record<McpLanguage, string>;
   instructions: Record<McpLanguage, string[]>;
   examples?: Record<McpLanguage, string[]>;
+  responseInstructions?: Record<McpLanguage, string[]>;
+  replyMode?: "direct" | "synthesized";
 }
 
 export interface McpToolPlan {
@@ -85,7 +93,7 @@ export interface McpConversationInput {
   systemPrompt: string;
   userLabel: string;
   assistantLabel: string;
-  toolCatalogPrompt: string;
+  toolCatalogPrompt?: string;
   tools: ReadonlyArray<McpToolLike>;
   maxToolUses?: number;
 }

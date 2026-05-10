@@ -32,7 +32,7 @@ const TIMETABLE_DATE_PATTERNS = [
 
 const TIMETABLE_TIME_NOISE_PATTERNS = [
   /\b(?:um|at)\s+\d{1,2}(?::\d{2}|\.\d{2})?\b/gi,
-  /\b(?:heute|today|aujourd'hui|morgen|tomorrow|demain|übermorgen|uebermorgen|in\s+\d+\s+tag(?:e|en)?|in\s+\d+\s+days?)\b/gi,
+  /\b(?:jetzt|now|maintenant|heute|today|aujourd'hui|morgen|tomorrow|demain|übermorgen|uebermorgen|in\s+\d+\s+tag(?:e|en)?|in\s+\d+\s+days?)\b/gi,
   /\b(?:in|für|fur)\s+(?:\d+|einem?|einer?|ein|zwei|drei|vier|fünf|funf|sechs|sieben|acht|neun|zehn)\s+(?:tag(?:e|en)?|days?)\b/gi,
 ];
 
@@ -103,6 +103,10 @@ function extractRouteFromText(message: string): { from?: string; to?: string } {
 }
 
 function extractExplicitDate(message: string): string | null {
+  if (/\b(?:jetzt|now|maintenant)\b/i.test(message)) {
+    return resolveRelativeDateIso(0);
+  }
+
   const relativeOffset = extractRelativeDayOffset(message);
   if (relativeOffset !== null) {
     return resolveRelativeDateIso(relativeOffset);
@@ -135,6 +139,15 @@ function extractExplicitDate(message: string): string | null {
 }
 
 function extractExplicitTime(message: string): string | null {
+  if (/\b(?:jetzt|now|maintenant)\b/i.test(message)) {
+    return new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+      timeZone: "Europe/Zurich",
+    }).format(new Date());
+  }
+
   for (const pattern of TIMETABLE_TIME_PATTERNS) {
     const match = message.match(pattern);
     if (!match) continue;
@@ -233,13 +246,13 @@ function parseClockMinutes(value: string): number | null {
 function scoreTimetableConnection(connection: SearchResult["connections"][number], requestedMinutes: number | null): number {
   const departureMinutes = parseClockMinutes(connection.departure);
   const durationMinutes = formatDurationMinutes(connection.duration);
-  const changesPenalty = connection.changes * 1000;
-  const durationPenalty = durationMinutes ?? 9999;
   const departurePenalty = requestedMinutes !== null && departureMinutes !== null
-    ? Math.max(0, departureMinutes - requestedMinutes)
+    ? departureMinutes >= requestedMinutes
+      ? departureMinutes - requestedMinutes
+      : 1440 + departureMinutes - requestedMinutes
     : 0;
 
-  return changesPenalty + durationPenalty * 10 + departurePenalty;
+  return departurePenalty * 100000 + connection.changes * 1000 + (durationMinutes ?? 9999);
 }
 
 function formatTransferTone(language: McpLanguage, tone: "tight" | "okay" | "plenty" | "unknown"): string {
@@ -490,7 +503,16 @@ export function extractTimetableContext(
     }
   }
 
-  const date = extractExplicitDate(message);
+  let date = extractExplicitDate(message);
+  if (!date) {
+    for (let i = history.length - 1; i >= 0; i -= 1) {
+      const entry = history[i];
+      if (entry.role !== "user") continue;
+      date = extractExplicitDate(entry.text);
+      if (date) break;
+    }
+  }
+
   let time = extractExplicitTime(message) ?? extractLooseTime(message);
 
   if (!time) {
@@ -606,15 +628,9 @@ export function buildTimetableAnswer(
     `# ${raw.result.from} → ${raw.result.to}`,
     "",
     language === "fr" ? "## Aperçu" : "## Überblick",
-    language === "fr"
-      ? `- **Départ:** \`${connection.departure}\`${platformText ? ` sur ${platformText}` : ""}`
-      : `- **Abfahrt:** \`${connection.departure}\`${platformText ? ` auf ${platformText}` : ""}`,
-    language === "fr"
-      ? `- **Arrivée:** \`${connection.arrival}\``
-      : `- **Ankunft:** \`${connection.arrival}\``,
-    language === "fr"
-      ? `- **Correspondances:** \`${changesText}\``
-      : `- **Umstiege:** \`${changesText}\``,
+    language === "fr" ? "| Départ | Arrivée | Correspondances |" : "| Abfahrt | Ankunft | Umstiege |",
+    "|---|---|---|",
+    `| ${connection.departure}${platformText ? ` ${language === "fr" ? "sur" : "auf"} ${platformText}` : ""} | ${connection.arrival} | ${changesText} |`,
   ].join("\n");
 }
 
@@ -666,18 +682,9 @@ export function buildTimetableDetailedAnswer(
   lines.push("");
   lines.push(summaryHeading);
   lines.push("");
-  lines.push(language === "fr"
-    ? `- **Départ:** ${connection.departure}${departurePlatform ? ` sur ${departurePlatform}` : ""}`
-    : `- **Abfahrt:** ${connection.departure}${departurePlatform ? ` auf ${departurePlatform}` : ""}`);
-  lines.push(language === "fr"
-    ? `- **Arrivée:** ${connection.arrival}`
-    : `- **Ankunft:** ${connection.arrival}`);
-  lines.push(language === "fr"
-    ? `- **Durée:** ${durationLabel}`
-    : `- **Fahrtzeit:** ${durationLabel}`);
-  lines.push(language === "fr"
-    ? `- **Correspondances:** ${changesText}`
-    : `- **Umstiege:** ${changesText}`);
+  lines.push(language === "fr" ? "| Départ | Arrivée | Durée | Correspondances |" : "| Abfahrt | Ankunft | Fahrtzeit | Umstiege |");
+  lines.push("|---|---|---|---|");
+  lines.push(`| ${connection.departure}${departurePlatform ? ` ${language === "fr" ? "sur" : "auf"} ${departurePlatform}` : ""} | ${connection.arrival} | ${durationLabel} | ${changesText} |`);
 
   if (displayLegs.length > 0) {
     lines.push("");

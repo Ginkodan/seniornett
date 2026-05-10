@@ -153,6 +153,43 @@
   padding: 0;
 }
 
+.scope:global(.lotti-markdown-table-wrap), .scope :global(.lotti-markdown-table-wrap) {
+  width: 100%;
+  overflow-x: auto;
+  border: var(--border-thin);
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--paper) 92%, white);
+}
+
+.scope:global(.lotti-markdown-table), .scope :global(.lotti-markdown-table) {
+  width: 100%;
+  min-width: 28rem;
+  border-collapse: collapse;
+  font-size: 0.96rem;
+  line-height: 1.45;
+}
+
+.scope:global(.lotti-markdown-table th),
+.scope:global(.lotti-markdown-table td),
+.scope :global(.lotti-markdown-table th),
+.scope :global(.lotti-markdown-table td) {
+  padding: 0.62rem 0.72rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid color-mix(in srgb, var(--card-edge) 18%, transparent);
+  white-space: normal;
+}
+
+.scope:global(.lotti-markdown-table th), .scope :global(.lotti-markdown-table th) {
+  font-weight: 850;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--paper-2) 78%, white);
+}
+
+.scope:global(.lotti-markdown-table tr:last-child td), .scope :global(.lotti-markdown-table tr:last-child td) {
+  border-bottom: 0;
+}
+
 .scope:global(.lotti-markdown-field), .scope :global(.lotti-markdown-field) {
   display: flex;
   flex-wrap: wrap;

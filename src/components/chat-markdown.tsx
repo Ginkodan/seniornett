@@ -10,6 +10,7 @@ type ChatMarkdownProps = {
 type Block =
   | { type: "heading"; level: number; text: string }
   | { type: "paragraph"; text: string }
+  | { type: "table"; headers: string[]; rows: string[][] }
   | { type: "list"; ordered: boolean; items: string[] }
   | { type: "code"; text: string };
 
@@ -90,6 +91,20 @@ function renderInline(text: string): React.ReactNode[] {
   return nodes;
 }
 
+function splitTableRow(line: string): string[] {
+  const trimmed = line.trim().replace(/^\|/, "").replace(/\|$/, "");
+  return trimmed.split("|").map((cell) => cell.trim());
+}
+
+function isTableSeparator(line: string): boolean {
+  const cells = splitTableRow(line);
+  return cells.length > 1 && cells.every((cell) => /^:?-{3,}:?$/.test(cell));
+}
+
+function isTableRow(line: string): boolean {
+  return line.includes("|") && splitTableRow(line).length > 1;
+}
+
 function parseBlocks(text: string): Block[] {
   const lines = text.replace(/\r\n/g, "\n").split("\n");
   const blocks: Block[] = [];
@@ -112,7 +127,8 @@ function parseBlocks(text: string): Block[] {
     list = null;
   };
 
-  for (const line of lines) {
+  for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
+    const line = lines[lineIndex];
     const trimmed = line.trim();
 
     if (trimmed.startsWith("```")) {
@@ -148,6 +164,26 @@ function parseBlocks(text: string): Block[] {
         level: heading[1].length,
         text: heading[2].trim(),
       });
+      continue;
+    }
+
+    const nextLine = lines[lineIndex + 1]?.trim() ?? "";
+    if (isTableRow(trimmed) && isTableSeparator(nextLine)) {
+      flushParagraph();
+      flushList();
+
+      const headers = splitTableRow(trimmed);
+      const rows: string[][] = [];
+      let rowIndex = lineIndex + 2;
+
+      while (rowIndex < lines.length && isTableRow(lines[rowIndex].trim())) {
+        const cells = splitTableRow(lines[rowIndex]);
+        rows.push(headers.map((_header, cellIndex) => cells[cellIndex] ?? ""));
+        rowIndex += 1;
+      }
+
+      blocks.push({ type: "table", headers, rows });
+      lineIndex = rowIndex - 1;
       continue;
     }
 
@@ -211,6 +247,33 @@ export function ChatMarkdown({ text, className }: ChatMarkdownProps) {
                 </li>
               ))}
             </ListTag>
+          );
+        }
+
+        if (block.type === "table") {
+          return (
+            <div key={`${block.type}-${index}`} className="lotti-markdown-table-wrap">
+              <table className="lotti-markdown-table">
+                <thead>
+                  <tr>
+                    {block.headers.map((header, headerIndex) => (
+                      <th key={`${block.type}-${index}-head-${headerIndex}`}>{renderInline(header)}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {block.rows.map((row, rowIndex) => (
+                    <tr key={`${block.type}-${index}-row-${rowIndex}`}>
+                      {block.headers.map((_header, cellIndex) => (
+                        <td key={`${block.type}-${index}-row-${rowIndex}-${cellIndex}`}>
+                          {renderInline(row[cellIndex] ?? "")}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           );
         }
 

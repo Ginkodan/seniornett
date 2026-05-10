@@ -46,6 +46,9 @@ export const dateTimeTool: McpTool<DateTimeToolInput, DateTimeToolRaw> = {
   title: dateTimePrompt.title,
   summary: dateTimePrompt.summary,
   instructions: dateTimePrompt.instructions,
+  examples: dateTimePrompt.examples,
+  responseInstructions: dateTimePrompt.responseInstructions,
+  replyMode: dateTimePrompt.replyMode,
   async buildRequest(_message: string, _history: ChatHistoryEntry[], language: McpLanguage): Promise<McpToolRequestResolution<DateTimeToolInput>> {
     DateTimeRequestSchema.parse({});
     return {

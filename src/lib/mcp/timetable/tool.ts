@@ -127,6 +127,9 @@ export const timetableTool: McpTool<TimetableToolInput, TimetableToolRaw> = {
   title: timetablePrompt.title,
   summary: timetablePrompt.summary,
   instructions: timetablePrompt.instructions,
+  examples: timetablePrompt.examples,
+  responseInstructions: timetablePrompt.responseInstructions,
+  replyMode: timetablePrompt.replyMode,
   async buildRequest(message: string, history: ChatHistoryEntry[], language: McpLanguage, trace: McpToolObservation[]): Promise<McpToolRequestResolution<TimetableToolInput>> {
     void trace;
 
