@@ -41,6 +41,12 @@ export interface McpTool<TArgs = unknown, TRaw = unknown> {
   examples?: Record<McpLanguage, string[]>;
   responseInstructions?: Record<McpLanguage, string[]>;
   replyMode?: "direct" | "synthesized";
+  canHandle?: (
+    message: string,
+    history: ChatHistoryEntry[],
+    language: McpLanguage,
+    trace: McpToolObservation[]
+  ) => boolean;
   buildRequest: (
     message: string,
     history: ChatHistoryEntry[],
@@ -60,6 +66,12 @@ export interface McpToolLike {
   examples?: Record<McpLanguage, string[]>;
   responseInstructions?: Record<McpLanguage, string[]>;
   replyMode?: "direct" | "synthesized";
+  canHandle?: (
+    message: string,
+    history: ChatHistoryEntry[],
+    language: McpLanguage,
+    trace: McpToolObservation[]
+  ) => boolean;
   buildRequest: (
     message: string,
     history: ChatHistoryEntry[],

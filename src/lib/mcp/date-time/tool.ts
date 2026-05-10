@@ -49,6 +49,9 @@ export const dateTimeTool: McpTool<DateTimeToolInput, DateTimeToolRaw> = {
   examples: dateTimePrompt.examples,
   responseInstructions: dateTimePrompt.responseInstructions,
   replyMode: dateTimePrompt.replyMode,
+  canHandle(message: string, _history: ChatHistoryEntry[], _language: McpLanguage, trace: McpToolObservation[]): boolean {
+    return trace.length === 0 && shouldUseDateTimeCapability(message);
+  },
   async buildRequest(_message: string, _history: ChatHistoryEntry[], language: McpLanguage): Promise<McpToolRequestResolution<DateTimeToolInput>> {
     DateTimeRequestSchema.parse({});
     return {

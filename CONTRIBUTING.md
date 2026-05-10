@@ -47,9 +47,8 @@ npm run build
 For UI-heavy changes, run the visual audit too:
 
 ```bash
-npm run visual:install
-npm run visual:audit
-npm run visual:report
+npm run test:browsers
+npm run test:quality
 ```
 
 ## Pull Requests

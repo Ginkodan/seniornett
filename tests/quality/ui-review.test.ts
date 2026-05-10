@@ -1,24 +1,24 @@
-import { chromium } from "@playwright/test";
+import { chromium, type Browser, type Page } from "@playwright/test";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { afterAll, beforeAll, describe, test } from "vitest";
+
 import {
   HOME_ROUTE,
   REVIEW_ROUTES,
   SECONDARY_TABLET_VIEWPORT,
   TABLET_LANDSCAPE_VIEWPORT,
   VISION_DEFICIENCIES,
-} from "./routes.mjs";
+  getQualityBaseUrl,
+  shouldRunQualityTests,
+  type ReviewRoute,
+} from "./routes";
 
-const baseUrl =
-  process.env.UI_REVIEW_BASE_URL ||
-  process.env.A11Y_BASE_URL ||
-  process.env.VISUAL_BASE_URL ||
-  "http://127.0.0.1:5176";
-
+const baseUrl = getQualityBaseUrl();
 const outputDir = path.join(process.cwd(), "reports/ui-review/after/tablet-landscape");
 const visionDir = path.join(process.cwd(), "reports/accessibility/screenshots/tablet-landscape");
 
-function isBenignConsoleError(text) {
+function isBenignConsoleError(text: string): boolean {
   return (
     text.includes("webpack-hmr") ||
     text.includes("WebSocket connection") ||
@@ -26,13 +26,13 @@ function isBenignConsoleError(text) {
   );
 }
 
-function isBenignPageError(text) {
+function isBenignPageError(text: string): boolean {
   return text.includes("Invalid or unexpected token");
 }
 
-async function loadRoute(page, route) {
-  const errors = [];
-  const pageErrors = [];
+async function loadRoute(page: Page, route: ReviewRoute): Promise<{ errors: string[]; pageErrors: string[] }> {
+  const errors: string[] = [];
+  const pageErrors: string[] = [];
 
   page.removeAllListeners("console");
   page.removeAllListeners("pageerror");
@@ -57,7 +57,7 @@ async function loadRoute(page, route) {
   return { errors, pageErrors };
 }
 
-async function runKeyboardProbe(page) {
+async function runKeyboardProbe(page: Page): Promise<void> {
   const sequence = [];
 
   for (let index = 0; index < 6; index += 1) {
@@ -95,7 +95,7 @@ async function runKeyboardProbe(page) {
   }
 }
 
-async function captureVisionVariants(page) {
+async function captureVisionVariants(page: Page): Promise<void> {
   const cdp = await page.context().newCDPSession(page);
   const routePrefix = "home--tablet-landscape";
 
@@ -115,9 +115,9 @@ async function captureVisionVariants(page) {
   await cdp.send("Emulation.setEmulatedVisionDeficiency", { type: "none" });
 }
 
-async function runSecondaryViewportCheck(browser) {
+async function runSecondaryViewportCheck(browser: Browser): Promise<Array<{ route: string; overflow: number }>> {
   const page = await browser.newPage({ viewport: SECONDARY_TABLET_VIEWPORT });
-  const issues = [];
+  const issues: Array<{ route: string; overflow: number }> = [];
 
   for (const route of REVIEW_ROUTES) {
     await page.goto(`${baseUrl}${route.path}`, { waitUntil: "domcontentloaded" });
@@ -134,71 +134,74 @@ async function runSecondaryViewportCheck(browser) {
   return issues;
 }
 
-async function main() {
-  await mkdir(outputDir, { recursive: true });
-  await mkdir(visionDir, { recursive: true });
+describe.skipIf(!shouldRunQualityTests())("quality: UI review", () => {
+  let browser: Browser;
 
-  const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage({ viewport: TABLET_LANDSCAPE_VIEWPORT });
-  const results = [];
+  beforeAll(async () => {
+    await mkdir(outputDir, { recursive: true });
+    await mkdir(visionDir, { recursive: true });
+    browser = await chromium.launch({ headless: true });
+  });
 
-  for (const route of REVIEW_ROUTES) {
-    const loadResult = await loadRoute(page, route);
-    await page.screenshot({
-      path: path.join(outputDir, `${route.name}.png`),
-      fullPage: true,
-    });
+  afterAll(async () => {
+    await browser?.close();
+  });
 
-    await runKeyboardProbe(page);
+  test("captures tablet screenshots and checks console, focus, and overflow", async () => {
+    const page = await browser.newPage({ viewport: TABLET_LANDSCAPE_VIEWPORT });
+    const results = [];
 
-    if (route.name === HOME_ROUTE.name) {
-      await captureVisionVariants(page);
+    for (const route of REVIEW_ROUTES) {
+      const loadResult = await loadRoute(page, route);
+      await page.screenshot({
+        path: path.join(outputDir, `${route.name}.png`),
+        fullPage: true,
+      });
+
+      await runKeyboardProbe(page);
+
+      if (route.name === HOME_ROUTE.name) {
+        await captureVisionVariants(page);
+      }
+
+      results.push({
+        route: route.path,
+        name: route.name,
+        viewport: TABLET_LANDSCAPE_VIEWPORT,
+        consoleErrors: loadResult.errors,
+        pageErrors: loadResult.pageErrors,
+        focusProbe: "passed",
+      });
     }
 
-    results.push({
-      route: route.path,
-      name: route.name,
+    await page.close();
+
+    const overflowIssues = await runSecondaryViewportCheck(browser);
+    const summary = {
+      baseUrl,
       viewport: TABLET_LANDSCAPE_VIEWPORT,
-      consoleErrors: loadResult.errors,
-      pageErrors: loadResult.pageErrors,
-      focusProbe: "passed",
-    });
-  }
+      secondaryViewport: SECONDARY_TABLET_VIEWPORT,
+      routes: results,
+      overflowIssues,
+    };
 
-  const overflowIssues = await runSecondaryViewportCheck(browser);
-  await browser.close();
+    await writeFile(path.join(outputDir, "summary.json"), JSON.stringify(summary, null, 2), "utf8");
 
-  const summary = {
-    baseUrl,
-    viewport: TABLET_LANDSCAPE_VIEWPORT,
-    secondaryViewport: SECONDARY_TABLET_VIEWPORT,
-    routes: results,
-    overflowIssues,
-  };
+    const hasConsoleErrors = results.some((entry) => entry.consoleErrors.length || entry.pageErrors.length);
+    const hasOverflowIssues = overflowIssues.length > 0;
 
-  await writeFile(path.join(outputDir, "summary.json"), JSON.stringify(summary, null, 2), "utf8");
+    if (hasConsoleErrors || hasOverflowIssues) {
+      const messages = [];
 
-  const hasConsoleErrors = results.some((entry) => entry.consoleErrors.length || entry.pageErrors.length);
-  const hasOverflowIssues = overflowIssues.length > 0;
+      if (hasConsoleErrors) {
+        messages.push("Console or page errors were found during UI review.");
+      }
 
-  if (hasConsoleErrors || hasOverflowIssues) {
-    const messages = [];
+      if (hasOverflowIssues) {
+        messages.push("Horizontal overflow was detected in the 1024x768 tablet check.");
+      }
 
-    if (hasConsoleErrors) {
-      messages.push("Console or page errors were found during UI review.");
+      throw new Error(messages.join(" "));
     }
-
-    if (hasOverflowIssues) {
-      messages.push("Horizontal overflow was detected in the 1024x768 tablet check.");
-    }
-
-    throw new Error(messages.join(" "));
-  }
-
-  console.log(`UI review complete for ${REVIEW_ROUTES.length} routes.`);
-}
-
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
+  });
 });

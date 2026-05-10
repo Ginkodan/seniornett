@@ -3,3 +3,4 @@ export * from "./structured-json";
 export * from "./conversation";
 export * from "./catalog";
 export * from "./registry";
+export * from "./test-trace";

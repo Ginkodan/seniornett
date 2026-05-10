@@ -43,7 +43,8 @@ Default app port: `5176`.
 The main review viewport is labeled `tablet-landscape` and uses `1180x820`.
 
 ```bash
-npm run ui:review
+npm run test:browsers
+npm run test:quality
 ```
 
 This command:
@@ -59,14 +60,14 @@ The before screenshots live in `reports/ui-review/before/tablet-landscape/`.
 ## Accessibility Audit
 
 ```bash
-npm run a11y:install
-npm run a11y:audit
+npm run test:browsers
+npm run test:quality
 ```
 
 You can point the audit at a running app:
 
 ```bash
-A11Y_BASE_URL=http://127.0.0.1:5176 npm run a11y:audit
+QUALITY_BASE_URL=http://127.0.0.1:3000 npm run test:quality
 ```
 
 Reports are written to:
@@ -119,10 +120,10 @@ No app or proxy code change is needed for ports in that range.
 
 ```bash
 # or, if you only need browsers installed
-npm run a11y:install
+npm run test:browsers
 
-# capture screenshots and run the review
-npm run ui:review
+# capture screenshots and run the review/audit
+npm run test:quality
 ```
 
 ## Output Locations
@@ -135,6 +136,6 @@ npm run ui:review
 
 ## Interpreting Failures
 
-- `ui:review` failures usually mean a route did not render, keyboard focus did not move, or the tablet layout overflowed horizontally.
-- `a11y:audit` failures with `serious` or `critical` impact need attention before release.
-- If the audit is pointed at a running app with `A11Y_BASE_URL`, make sure the server matches the code you want to check.
+- `test:quality` UI review failures usually mean a route did not render, keyboard focus did not move, or the tablet layout overflowed horizontally.
+- `test:quality` accessibility failures with `serious` or `critical` impact need attention before release.
+- If the audit is pointed at a running app with `QUALITY_BASE_URL`, make sure the server matches the code you want to check.

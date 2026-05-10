@@ -115,6 +115,9 @@ export const weatherTool: McpTool<WeatherToolInput, WeatherResult> = {
   examples: weatherPrompt.examples,
   responseInstructions: weatherPrompt.responseInstructions,
   replyMode: weatherPrompt.replyMode,
+  canHandle(message: string): boolean {
+    return shouldUseWeatherCapability(message);
+  },
   async buildRequest(message: string, history: ChatHistoryEntry[], language: McpLanguage): Promise<McpToolRequestResolution<WeatherToolInput>> {
     const modelRequest = await buildWeatherRequestViaModel(message, history, language);
     if (modelRequest) {

@@ -6,13 +6,11 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "lint": "eslint",
-    "ui:review": "node scripts/ui-review.mjs",
-    "a11y:install": "playwright install chromium",
-    "a11y:audit": "node scripts/a11y-audit.mjs",
-    "visual:install": "playwright install chromium",
-    "visual:audit": "npm run ui:review",
-    "visual:report": "npm run a11y:audit"
+    "test": "vitest run",
+    "test:chat": "vitest run tests/chat/chat-trace.test.ts --reporter=verbose",
+    "test:quality": "RUN_QUALITY_TESTS=true vitest run tests/quality --reporter=verbose",
+    "test:browsers": "playwright install chromium",
+    "lint": "eslint"
   },
   "dependencies": {
     "@fontsource/atkinson-hyperlegible": "^5.2.8",
@@ -42,6 +40,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.5"
   }
 }

@@ -9,6 +9,7 @@ import type {
   McpToolPlan,
 } from "./types";
 import { inferStructuredJson } from "./structured-json";
+import { recordMcpTestTrace } from "./test-trace";
 
 const FINAL_ANSWER_TIMEOUT_MS = 4000;
 const MAX_HISTORY_TURNS_FOR_PROMPTS = 6;
@@ -90,6 +91,8 @@ export async function runConversation(
   const plans: McpToolPlan[] = [];
   const maxToolUses = Math.max(1, Math.min(10, input.maxToolUses ?? 10));
 
+  recordMcpTestTrace({ type: "conversation-start", message: input.message });
+
   for (let index = 0; index < maxToolUses; index += 1) {
     const plan = await Promise.race([
       planRequest(trace),
@@ -98,6 +101,7 @@ export async function runConversation(
       }),
     ]);
     plans.push(plan);
+    recordMcpTestTrace({ type: "plan", plan });
 
     if (plan.tool === "none") {
       break;
@@ -105,37 +109,56 @@ export async function runConversation(
 
     const tool = toolMap.get(plan.tool);
     if (!tool) {
-      trace.push({
+      const observation: McpToolObservation = {
         toolName: plan.tool,
         requestSummary: plan.reason ? `Planner reason: ${plan.reason}` : "Planner selected an unavailable tool.",
         resultSummary: "The requested tool is not available.",
         status: "error",
-      });
+      };
+      trace.push(observation);
+      recordMcpTestTrace({ type: "observation", observation });
       break;
     }
 
     try {
       const request = await tool.buildRequest(input.message, input.history, input.language, trace);
       if (!request.ok) {
-        trace.push({
+        const observation: McpToolObservation = {
           toolName: tool.toolName,
           requestSummary: input.language === "fr" ? "La requête de l'outil n'a pas pu être résolue." : "Tool request could not be resolved.",
           resultSummary: request.clarification,
           status: "needs_user_input",
-        });
+        };
+        trace.push(observation);
+        recordMcpTestTrace({ type: "observation", observation });
         break;
       }
 
+      recordMcpTestTrace({
+        type: "request",
+        toolName: tool.toolName,
+        requestSummary: request.requestSummary,
+        args: request.args,
+      });
       const rawResult = await tool.execute(request.args, input.language);
       const observation = await tool.renderObservation(rawResult, input.language, request.requestSummary);
       trace.push(observation);
+      recordMcpTestTrace({ type: "observation", observation });
     } catch {
-      trace.push({
+      const observation: McpToolObservation = {
         toolName: tool.toolName,
         requestSummary: plan.reason ? `Planner reason: ${plan.reason}` : tool.title[input.language],
         resultSummary: input.language === "fr" ? "L'outil n'a pas pu être exécuté." : "Das Werkzeug konnte nicht ausgeführt werden.",
         status: "error",
+      };
+      trace.push(observation);
+      recordMcpTestTrace({
+        type: "error",
+        toolName: observation.toolName,
+        requestSummary: observation.requestSummary,
+        resultSummary: observation.resultSummary,
       });
+      recordMcpTestTrace({ type: "observation", observation });
       break;
     }
   }
@@ -217,18 +240,34 @@ export async function requestMcpPlan(input: McpConversationInput, trace: McpTool
     ])) as { value: z.infer<typeof ToolPlanSchema> | null; text: string };
 
     const requestedTool = result.value?.tool ?? result.value?.capability;
-    if (!requestedTool || requestedTool === "none") {
+    if (requestedTool === "none") {
       return { tool: "none", reason: result.value?.reason };
     }
 
-    if (availableToolNames.has(requestedTool)) {
+    if (requestedTool && availableToolNames.has(requestedTool)) {
       return {
         tool: requestedTool,
         reason: result.value?.reason,
       };
     }
   } catch {
-    // Fall through to a normal final answer when planning is unavailable.
+    // Fall through to deterministic tool hints when planning is unavailable.
+  }
+
+  const attemptedToolNames = new Set(trace.map((entry) => entry.toolName));
+  const hintedTool = input.tools.find((tool) => {
+    if (attemptedToolNames.has(tool.toolName)) {
+      return false;
+    }
+
+    return tool.canHandle?.(input.message, input.history, input.language, trace) ?? false;
+  });
+
+  if (hintedTool) {
+    return {
+      tool: hintedTool.toolName,
+      reason: "deterministic tool hint",
+    };
   }
 
   return { tool: "none" };
@@ -303,8 +342,12 @@ export async function requestMcpFinalAnswer(input: McpConversationInput, trace: 
 
 export function formatDeterministicMcpReply(tools: ReadonlyArray<McpToolLike>, trace: McpToolObservation[]): string | null {
   const toolMap = new Map(tools.map((tool) => [tool.toolName, tool] as const));
-  const lastStableObservation = [...trace].reverse().find((entry) => entry.status === "ok" || entry.status === "needs_user_input");
+  const lastStableObservation = trace.at(-1);
   if (!lastStableObservation) {
+    return null;
+  }
+
+  if (lastStableObservation.status !== "ok" && lastStableObservation.status !== "needs_user_input") {
     return null;
   }
 
