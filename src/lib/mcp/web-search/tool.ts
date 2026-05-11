@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { inferStructuredJson } from "../structured-json";
 import type { ChatHistoryEntry, McpLanguage, McpTool, McpToolContext, McpToolObservation, McpToolRequestResolution } from "../types";
+import { shouldUseNearbyPlaceTool } from "../nearby-place/prompts";
 import { isLocalWebSearchMessage, shouldUseWebSearchTool, webSearchPrompt } from "./prompts";
 import { buildWebSearchObservation, performWebSearch, type WebSearchInput, type WebSearchIntent, type WebSearchRaw } from "./resources";
 
@@ -22,6 +23,14 @@ type ResolvedPlace = {
   source: string | null;
 };
 
+type NearbyResolvedPlace = {
+  label: string | null;
+  resolvedPlace: string | null;
+  addressLine: string | null;
+  city: string | null;
+  source: string | null;
+};
+
 function normalizePlaceCandidate(value: string): string {
   const cleaned = value
     .replace(/\b(am|an|im|on|le|à)\s+(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|monday|tuesday|wednesday|thursday|friday|saturday|sunday|lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\b.*$/i, "")
@@ -37,7 +46,11 @@ function normalizePlaceCandidate(value: string): string {
   ]);
   const kept: string[] = [];
   for (const token of tokens) {
-    if (stopWords.has(token.toLowerCase()) && kept.length > 0) {
+    const lowerToken = token.toLowerCase();
+    if (stopWords.has(lowerToken) && kept.length > 0) {
+      break;
+    }
+    if (kept.length > 0 && /^[a-zäöüßà-ÿ]/.test(token) && !["am", "an", "der", "die", "das", "de", "du", "des", "la", "le", "les", "of", "and"].includes(lowerToken)) {
       break;
     }
     kept.push(token);
@@ -49,13 +62,18 @@ function normalizePlaceCandidate(value: string): string {
 
 function isNonPlacePhrase(value: string): boolean {
   if (/(nähe|naehe|near me|nearby)/i.test(value)) return true;
+  if (/\b(stromausfall|blackout|notfallplan|notvorrat|krisenfall|selbstvorsorge)\b/i.test(value)) return true;
   return /^(?:in\s+)?(?:der|die|dem|meiner?|deiner?|unserer?)?\s*(nähe|naehe)$|^(nearby|near me|hier|hierbei)$/i.test(value);
+}
+
+function isInformationalTopicMessage(value: string): boolean {
+  return /\b(stromausfall|blackout|notfallplan|notvorrat|krisenfall|selbstvorsorge|warnzeichen|telefonbetrug|betrug|phishing|rechte|flugverspätung|flugverspaetung|e-id|grippeimpfung|twint|falsche zahlung|patientenverfügung|patientenverfuegung|ahv-rente|ahv rente)\b/i.test(value);
 }
 
 function extractExplicitPlaceFromMessage(message: string): string | undefined {
   const patterns = [
     /\b(?:programm|spielplan|agenda|termine|veranstaltungen|events)\s+(?:vom|von|für|fuer|de|du|des)\s+([A-Za-zÄÖÜäöüßÀ-ÿ0-9'().-]+(?:\s+[A-Za-zÄÖÜäöüßÀ-ÿ0-9'().-]+){0,4})/i,
-    /\b(?:vom|von|für|fuer)\s+([A-Za-zÄÖÜäöüßÀ-ÿ0-9'().-]+(?:\s+[A-Za-zÄÖÜäöüßÀ-ÿ0-9'().-]+){0,4})/i,
+    /\b(?:vom|von)\s+([A-Za-zÄÖÜäöüßÀ-ÿ0-9'().-]+(?:\s+[A-Za-zÄÖÜäöüßÀ-ÿ0-9'().-]+){0,4})/i,
     /\b(?:in|bei|nahe|nähe|naehe|um)\s+([A-Za-zÄÖÜäöüßÀ-ÿ0-9'().-]+(?:\s+[A-Za-zÄÖÜäöüßÀ-ÿ0-9'().-]+){0,4})/i,
     /\b(?:à|a|près de)\s+([A-Za-zÀ-ÿ0-9'().-]+(?:\s+[A-Za-zÀ-ÿ0-9'().-]+){0,4})/i,
   ];
@@ -64,6 +82,7 @@ function extractExplicitPlaceFromMessage(message: string): string | undefined {
     const match = message.match(pattern);
     const raw = match?.[1];
     if (!raw) continue;
+    if (isNonPlacePhrase(raw)) continue;
     const value = normalizePlaceCandidate(raw);
     if (!value || isNonPlacePhrase(value)) continue;
     return value;
@@ -75,15 +94,28 @@ function extractExplicitPlaceFromMessage(message: string): string | undefined {
 function fallbackIntent(message: string): WebSearchIntent {
   if (/\b(notfallapotheke|pharmacie de garde)\b/i.test(message)) return "emergency_pharmacy";
   if (/(öffnungszeit(?:en)?|oeffnungszeit(?:en)?|\boffen\b|geöffnet|geoeffnet|\bhoraire\b|\bhoraires\b|\bouvert\b)/i.test(message)) return "opening_hours";
-  if (/\b(theater|oper|opernhaus|konzert|konzerte|veranstaltung|veranstaltungen|event|events|programm|spielplan|agenda|termine|museum|venue|lieu|opéra|concert)\b/i.test(message)) return "venue";
+  if (/\b(theater|oper|opernhaus|konzert|konzerte|veranstaltung|veranstaltungen|event|events|programm|spielplan|agenda|termine|museum|ausstellung|ausstellungen|venue|lieu|opéra|concert)\b/i.test(message)) return "venue";
+  if (isInformationalTopicMessage(message)) return "topic";
+  if (/\b(smartphone|handy|telefon|hörgerät|hoergeraet|batterietyp|batterie|batterien|app|apps|gerät|geraet|produkt)\b/i.test(message) && /\b(kaufen|bekomme|vergleich|vergleiche|empfehlenswert|empfehlung|test|beste|einfach(?:e|en|es)?)\b/i.test(message)) return "product";
   if (/\b(kaufen|bekomme|produkt|acheter|trouver|wo bekomme ich|wo finde ich)\b/i.test(message)) return "product";
-  if (/\b(abfuhr|abfuhrdaten|entsorgung|kehricht|abfall|sammlung|collecte|déchets|dechets|ordures)\b/i.test(message)) return "topic";
+  if (/\b(\w*abfuhr(?:daten)?|entsorgung|entsorge|entsorgen|kehricht|abfall|sammlung|papiersammlung|papier|karton|toilette|wc|collecte|déchets|dechets|ordures)\b/i.test(message)) return "local";
   if (isLocalWebSearchMessage(message)) return "local";
   return "topic";
 }
 
 function isLocalIntent(intent: WebSearchIntent): boolean {
-  return ["local", "opening_hours", "emergency_pharmacy", "venue", "product"].includes(intent);
+  return ["local", "opening_hours", "emergency_pharmacy", "venue"].includes(intent);
+}
+
+function productNeedsLocalContext(message: string): boolean {
+  return /\b(in der nähe|in der naehe|near me|nearby|bei mir|zu mir)\b/i.test(message) ||
+    /\bwo\s+(?:bekomme|kriege|finde)\s+ich\b/i.test(message) ||
+    /\bwo\s+kann\s+ich\b.*\bkaufen\b/i.test(message) ||
+    /\bkaufen\b.*\b(?:in|bei|nahe|nähe|naehe|près de)\b/i.test(message);
+}
+
+function isLocationAwareIntent(intent: WebSearchIntent, message: string): boolean {
+  return isLocalIntent(intent) || (intent === "product" && productNeedsLocalContext(message));
 }
 
 function buildClarification(language: McpLanguage): string {
@@ -116,8 +148,32 @@ function readResolvedPlace(context: McpToolContext): ResolvedPlace | null {
   }
 }
 
+function readNearbyPlace(context: McpToolContext): NearbyResolvedPlace | null {
+  const observation = [...context.trace].reverse().find((entry) => entry.toolName === "nearby_place" && entry.status === "ok" && entry.payload);
+  if (!observation?.payload) {
+    return null;
+  }
+
+  try {
+    const payload = JSON.parse(observation.payload) as Partial<NearbyResolvedPlace>;
+    return {
+      label: typeof payload.label === "string" ? payload.label : typeof payload.resolvedPlace === "string" ? payload.resolvedPlace : null,
+      resolvedPlace: typeof payload.resolvedPlace === "string" ? payload.resolvedPlace : null,
+      addressLine: typeof payload.addressLine === "string" ? payload.addressLine : null,
+      city: typeof payload.city === "string" ? payload.city : null,
+      source: typeof payload.source === "string" ? payload.source : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 function bestResolvedPlace(place: ResolvedPlace | null): string | undefined {
   return place?.label || place?.addressLine || place?.city || undefined;
+}
+
+function bestNearbyResolvedPlace(place: NearbyResolvedPlace | null): string | undefined {
+  return place?.label || place?.resolvedPlace || place?.addressLine || place?.city || undefined;
 }
 
 function buildRequestSummary(input: WebSearchInput, language: McpLanguage): string {
@@ -138,38 +194,55 @@ function isWeatherMessage(message: string): boolean {
 function refineIntent(message: string, intent: WebSearchIntent): WebSearchIntent {
   const lowered = message.toLowerCase();
   const asksForOpeningHours = /(öffnungszeit(?:en)?|oeffnungszeit(?:en)?|\boffen\b|geöffnet|geoeffnet|\bhoraire\b|\bhoraires\b|\bouvert\b|\bsonntag\b|\bmontag\b|\bdienstag\b|\bmittwoch\b|\bdonnerstag\b|\bfreitag\b|\bsamstag\b)/i.test(lowered);
-  const localBusiness = /\b(supermarkt|laden|geschäft|geschaeft|apotheke|pharmacie|bäckerei|baeckerei|boulangerie|museum|restaurant|markt|shop|magasin)\b/i.test(lowered);
+  const asksForEmergencyPharmacy = /\b(notfallapotheke|apothekennotdienst|notdienstapotheke|pharmacie de garde)\b/i.test(lowered);
 
-  if (/\b(notfallapotheke|pharmacie de garde)\b/i.test(lowered)) {
+  if (asksForEmergencyPharmacy) {
     return "emergency_pharmacy";
   }
 
-  if (asksForOpeningHours && localBusiness) {
+  if (asksForOpeningHours) {
     return "opening_hours";
   }
 
-  if (/\b(theater|oper|opernhaus|konzert|konzerte|veranstaltung|veranstaltungen|event|events|programm|spielplan|agenda|termine|musée|museum|opéra|concert)\b/i.test(lowered)) {
+  if (/\b(theater|oper|opernhaus|konzert|konzerte|veranstaltung|veranstaltungen|event|events|programm|spielplan|agenda|termine|musée|museum|ausstellung|ausstellungen|opéra|concert)\b/i.test(lowered)) {
     return "venue";
   }
 
-  if (intent === "emergency_pharmacy" && !/\b(notfallapotheke|pharmacie de garde)\b/i.test(lowered)) {
-    if (/\b(supermarkt|laden|geschäft|geschaeft|markt|shop|magasin)\b/i.test(lowered)) return "opening_hours";
+  if (isInformationalTopicMessage(lowered)) {
+    return "topic";
+  }
+
+  if (intent === "emergency_pharmacy" && !asksForEmergencyPharmacy) {
+    if (/\b(supermarkt|laden|geschäft|geschaeft|markt|shop|magasin|apotheke|pharmacie)\b/i.test(lowered)) return "opening_hours";
     if (/\b(apotheke|pharmacie)\b/i.test(lowered)) return "venue";
+    return fallbackIntent(message);
   }
 
   if (intent === "topic" && /\b(wo bekomme ich|wo finde ich|kaufen|produkt)\b/i.test(lowered)) {
     return "product";
   }
 
+  if (intent === "topic" && /\b(\w*abfuhr(?:daten)?|entsorgung|entsorge|entsorgen|kehricht|abfall|sammlung|papiersammlung|papier|karton|collecte|déchets|dechets|ordures)\b/i.test(lowered)) {
+    return "local";
+  }
+
+  if (intent === "topic" && /\b(smartphone|handy|telefon|hörgerät|hoergeraet|batterietyp|batterie|batterien|app|apps|gerät|geraet)\b/i.test(lowered) && /\b(vergleich|vergleiche|empfehlenswert|empfehlung|test|beste|einfach(?:e|en|es)?)\b/i.test(lowered)) {
+    return "product";
+  }
+
   return intent;
 }
 
-function includeLocationInSearch(intent: WebSearchIntent): boolean {
-  return isLocalIntent(intent);
+function includeLocationInSearch(intent: WebSearchIntent, message: string): boolean {
+  return isLocationAwareIntent(intent, message);
 }
 
 function hasDateTimeObservation(context: McpToolContext): boolean {
   return context.trace.some((entry) => entry.toolName === "datetime" && entry.status === "ok");
+}
+
+function hasNearbyPlaceObservation(context: McpToolContext): boolean {
+  return context.trace.some((entry) => entry.toolName === "nearby_place" && entry.status === "ok");
 }
 
 function needsCurrentTime(message: string): boolean {
@@ -180,7 +253,7 @@ async function buildRequestViaModel(context: McpToolContext): Promise<McpToolReq
   const { message, history, language, runtime } = context;
   const isFrench = language === "fr";
   const explicitPlace = extractExplicitPlaceFromMessage(message);
-  const resolvedPlace = explicitPlace || bestResolvedPlace(readResolvedPlace(context));
+  const resolvedPlace = explicitPlace || bestNearbyResolvedPlace(readNearbyPlace(context)) || bestResolvedPlace(readResolvedPlace(context));
   const prompt = [
     isFrench ? "Tu extrais une requête de recherche web en JSON." : "Du extrahierst eine Websuch-Anfrage als JSON.",
     "Return only valid JSON.",
@@ -226,8 +299,8 @@ async function buildRequestViaModel(context: McpToolContext): Promise<McpToolReq
   const args: WebSearchInput = {
     query,
     intent,
-    location: includeLocationInSearch(intent) && !explicitPlace ? runtime?.location : undefined,
-    resolvedPlace: includeLocationInSearch(intent) ? resolvedPlace : undefined,
+    location: includeLocationInSearch(intent, message) && !explicitPlace ? runtime?.location : undefined,
+    resolvedPlace: includeLocationInSearch(intent, message) ? resolvedPlace : undefined,
     maxResults: 6,
   };
 
@@ -277,14 +350,21 @@ export const webSearchTool: McpTool<WebSearchInput, WebSearchRaw> = {
     const intent = refineIntent(context.message, fallbackIntent(context.message));
     const hasLocation = Boolean(context.runtime?.location);
     const hasResolvedPlace = Boolean(bestResolvedPlace(readResolvedPlace(context)));
+    const hasNearbyResolvedPlace = Boolean(bestNearbyResolvedPlace(readNearbyPlace(context)));
     const hasExplicitPlace = Boolean(extractExplicitPlaceFromMessage(context.message));
     const required: string[] = [];
 
-    if (isLocalIntent(intent) && needsCurrentTime(context.message) && !hasDateTimeObservation(context)) {
+    const nearbyPlaceLookupNeeded = shouldUseNearbyPlaceTool(context.message) && isLocationAwareIntent(intent, context.message) && !hasExplicitPlace && !hasNearbyResolvedPlace;
+
+    if (nearbyPlaceLookupNeeded && !hasNearbyPlaceObservation(context)) {
+      required.push("nearby_place");
+    }
+
+    if (isLocationAwareIntent(intent, context.message) && needsCurrentTime(context.message) && !hasDateTimeObservation(context) && !nearbyPlaceLookupNeeded) {
       required.push("datetime");
     }
 
-    if (isLocalIntent(intent) && hasLocation && !hasResolvedPlace && !hasExplicitPlace) {
+    if (isLocationAwareIntent(intent, context.message) && hasLocation && !hasResolvedPlace && !hasExplicitPlace && !nearbyPlaceLookupNeeded) {
       required.push("coordinate_to_address");
     }
 
@@ -298,9 +378,9 @@ export const webSearchTool: McpTool<WebSearchInput, WebSearchRaw> = {
 
     const intent = refineIntent(context.message, fallbackIntent(context.message));
     const explicitPlace = extractExplicitPlaceFromMessage(context.message);
-    const resolvedPlace = explicitPlace || bestResolvedPlace(readResolvedPlace(context));
+    const resolvedPlace = explicitPlace || bestNearbyResolvedPlace(readNearbyPlace(context)) || bestResolvedPlace(readResolvedPlace(context));
 
-    if (isLocalIntent(intent) && !context.runtime?.location && !resolvedPlace && !/\b(in|bei|à|a|near|près)\b/i.test(context.message)) {
+    if (isLocationAwareIntent(intent, context.message) && !context.runtime?.location && !resolvedPlace && !/\b(in|bei|à|a|near|près)\b/i.test(context.message)) {
       return {
         ok: false,
         clarification: buildClarification(context.language),
@@ -310,8 +390,8 @@ export const webSearchTool: McpTool<WebSearchInput, WebSearchRaw> = {
     const args: WebSearchInput = {
       query: context.message,
       intent,
-      location: includeLocationInSearch(intent) && !explicitPlace ? context.runtime?.location : undefined,
-      resolvedPlace: includeLocationInSearch(intent) ? resolvedPlace : undefined,
+      location: includeLocationInSearch(intent, context.message) && !explicitPlace ? context.runtime?.location : undefined,
+      resolvedPlace: includeLocationInSearch(intent, context.message) ? resolvedPlace : undefined,
       maxResults: 6,
     };
 

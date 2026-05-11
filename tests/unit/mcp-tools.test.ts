@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { coordinateToAddressTool } from "@/lib/mcp/coordinate-to-address";
+import { nearbyPlaceTool } from "@/lib/mcp/nearby-place";
 import { _webSearchTestInternals, buildWebSearchObservation, type WebSearchRaw, type WebSearchResult } from "@/lib/mcp/web-search/resources";
 import { webSearchTool } from "@/lib/mcp/web-search";
 import type { McpToolContext } from "@/lib/mcp";
@@ -35,6 +36,30 @@ function coordinateObservationPayload() {
     displayName: "Bundesplatz, Bern, Verwaltungskreis Bern-Mittelland, Bern, Schweiz",
     source: "nominatim.openstreetmap.org",
     error: null,
+  });
+}
+
+function nearbyPlaceObservationPayload() {
+  return JSON.stringify({
+    searchTerm: "Migros Supermarkt",
+    resolvedPlace: "Migros-Supermarkt - Spiez - Terminus",
+    source: "nominatim.openstreetmap.org",
+    warning: null,
+    error: null,
+    results: [{
+      name: "Migros-Supermarkt - Spiez - Terminus",
+      addressLine: "Bahnhofstrasse 1, 3700 Spiez, Schweiz",
+      city: "Spiez",
+      postcode: "3700",
+      country: "Schweiz",
+      lat: 46.6882,
+      lon: 7.6791,
+      distanceMeters: 380,
+      displayName: "Migros-Supermarkt - Spiez - Terminus, Bahnhofstrasse 1, 3700 Spiez, Schweiz",
+      category: "shop",
+      type: "supermarket",
+      source: "nominatim.openstreetmap.org",
+    }],
   });
 }
 
@@ -117,8 +142,76 @@ describe("coordinate_to_address MCP", () => {
   });
 });
 
+describe("nearby_place MCP", () => {
+  let originalFetch: FetchMock;
+
+  beforeEach(() => {
+    originalFetch = globalThis.fetch;
+  });
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+    vi.restoreAllMocks();
+  });
+
+  test("prioritizes the nearest Migros supermarket over the restaurant page", async () => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = typeof input === "string" ? input : input.toString();
+      expect(url).toContain("nominatim.openstreetmap.org/search");
+      expect(url).toContain("Migros+Supermarkt");
+
+      return new Response(JSON.stringify([
+        {
+          name: "Migros Restaurant Spiez",
+          lat: "46.6880",
+          lon: "7.6788",
+          display_name: "Migros Restaurant Spiez, Spiez, Schweiz",
+          address: {
+            road: "Bahnhofstrasse",
+            city: "Spiez",
+            postcode: "3700",
+            country: "Schweiz",
+          },
+          class: "amenity",
+          type: "restaurant",
+        },
+        {
+          name: "Migros-Supermarkt - Spiez - Terminus",
+          lat: "46.6882",
+          lon: "7.6791",
+          display_name: "Migros-Supermarkt - Spiez - Terminus, Bahnhofstrasse 1, 3700 Spiez, Schweiz",
+          address: {
+            road: "Bahnhofstrasse",
+            house_number: "1",
+            city: "Spiez",
+            postcode: "3700",
+            country: "Schweiz",
+          },
+          class: "shop",
+          type: "supermarket",
+        },
+      ]), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }) as FetchMock;
+
+    const raw = await nearbyPlaceTool.execute({
+      query: "Welche Migros ist gerade am nächsten zu mir offen?",
+      latitude: 46.6885,
+      longitude: 7.6782,
+      accuracy: 35,
+    }, "de", baseContext());
+    const observation = await nearbyPlaceTool.renderObservation(raw, "de", "Nächsten Migros suchen", baseContext());
+
+    expect(raw.resolvedPlace).toBe("Migros-Supermarkt - Spiez - Terminus, Bahnhofstrasse 1, 3700 Spiez, Schweiz");
+    expect(observation.status).toBe("ok");
+    expect(observation.resultSummary).toContain("Migros-Supermarkt - Spiez - Terminus");
+  });
+});
+
 describe("web_search MCP", () => {
-  test("declares coordinate_to_address as a dependency for local browser searches", () => {
+  test("declares nearby_place as a dependency for local browser searches", () => {
     const context = baseContext({
       message: "Wann hat die Migros in der Nähe offen?",
       runtime: {
@@ -130,10 +223,26 @@ describe("web_search MCP", () => {
       },
     });
 
-    expect(webSearchTool.requires?.(context)).toEqual(["coordinate_to_address"]);
+    expect(webSearchTool.requires?.(context)).toEqual(["nearby_place"]);
   });
 
-  test("does not request coordinate_to_address after the orchestrator supplied a resolved place", () => {
+  test("prefers nearby_place before coordinate_to_address for nearest-place lookups", () => {
+    const context = baseContext({
+      message: "Welche Migros ist gerade am nächsten zu mir offen?",
+      runtime: {
+        location: {
+          latitude: 46.6885,
+          longitude: 7.6782,
+          accuracy: 35,
+        },
+      },
+    });
+
+    expect(coordinateToAddressTool.canHandle?.(context)).toBe(false);
+    expect(webSearchTool.requires?.(context)).toEqual(["nearby_place"]);
+  });
+
+  test("still requests nearby_place after a coordinate observation until the nearby place is resolved", () => {
     const context = baseContext({
       message: "Wann hat die Migros in der Nähe offen?",
       runtime: {
@@ -152,7 +261,7 @@ describe("web_search MCP", () => {
       }],
     });
 
-    expect(webSearchTool.requires?.(context)).toEqual([]);
+    expect(webSearchTool.requires?.(context)).toEqual(["nearby_place"]);
   });
 
   test("does not reverse geocode browser location for explicit address queries", () => {
@@ -168,6 +277,123 @@ describe("web_search MCP", () => {
     });
 
     expect(coordinateToAddressTool.canHandle?.(context)).toBe(false);
+  });
+
+  test("does not reverse geocode browser location for explicit city queries", () => {
+    const context = baseContext({
+      message: "Wo ist das nächste Museum in Spiez?",
+      runtime: {
+        location: {
+          latitude: 46.6885,
+          longitude: 7.6782,
+          label: "Spiez, Schweiz",
+        },
+      },
+    });
+
+    expect(coordinateToAddressTool.canHandle?.(context)).toBe(false);
+  });
+
+  test("reverse geocodes nearby product searches instead of treating product purpose as a place", async () => {
+    const context = baseContext({
+      message: "Wo bekomme ich Batterien für ein Hörgerät in der Nähe?",
+      runtime: {
+        location: {
+          latitude: 46.6885,
+          longitude: 7.6782,
+          label: "Spiez, Schweiz",
+        },
+      },
+    });
+
+    expect(coordinateToAddressTool.canHandle?.(context)).toBe(true);
+
+    const request = await webSearchTool.buildRequest(context);
+
+    expect(request.ok).toBe(true);
+    if (request.ok) {
+      expect(request.args).toMatchObject({
+        intent: "product",
+        location: {
+          latitude: 46.6885,
+          longitude: 7.6782,
+          label: "Spiez, Schweiz",
+        },
+      });
+      expect(request.args.resolvedPlace).toBeUndefined();
+    }
+  });
+
+  test("keeps explicit product-search cities separate from product terms", async () => {
+    const context = baseContext({
+      message: "Wo kann ich in Spiez lactosefreie Milch kaufen?",
+      runtime: {
+        location: {
+          latitude: 46.6885,
+          longitude: 7.6782,
+          label: "Bern, Schweiz",
+        },
+      },
+    });
+
+    const request = await webSearchTool.buildRequest(context);
+
+    expect(request.ok).toBe(true);
+    if (request.ok) {
+      expect(request.args).toMatchObject({
+        intent: "product",
+        resolvedPlace: "Spiez",
+      });
+      expect(request.args.location).toBeUndefined();
+    }
+  });
+
+  test("keeps informational preparedness lookups as topic searches", async () => {
+    const context = baseContext({
+      message: "Wo finde ich den aktuellen Notfallplan bei Stromausfall in der Schweiz?",
+      runtime: {
+        location: {
+          latitude: 46.6885,
+          longitude: 7.6782,
+          label: "Spiez, Schweiz",
+        },
+      },
+    });
+
+    expect(webSearchTool.requires?.(context)).toEqual([]);
+
+    const request = await webSearchTool.buildRequest(context);
+
+    expect(request.ok).toBe(true);
+    if (request.ok) {
+      expect(request.args).toMatchObject({ intent: "topic" });
+      expect(request.args.location).toBeUndefined();
+      expect(request.args.resolvedPlace).toBeUndefined();
+    }
+  });
+
+  test("does not add browser location to non-local product comparisons", async () => {
+    const context = baseContext({
+      message: "Vergleiche Hörgeräte Batterietyp 312 und 13",
+      runtime: {
+        location: {
+          latitude: 46.6885,
+          longitude: 7.6782,
+          label: "Spiez, Schweiz",
+        },
+      },
+    });
+
+    expect(webSearchTool.requires?.(context)).toEqual([]);
+
+    const request = await webSearchTool.buildRequest(context);
+
+    expect(request.ok).toBe(true);
+    if (request.ok) {
+      expect(request.args).toMatchObject({ intent: "product" });
+      expect(request.args.location).toBeUndefined();
+      expect(request.args.resolvedPlace).toBeUndefined();
+    }
   });
 
   test("builds a web request from the current message and previous coordinate observation", async () => {
@@ -238,6 +464,7 @@ describe("web_search MCP", () => {
 
     expect(query).toContain("Migros Öffnungszeiten");
     expect(query).toContain("Öffnungszeiten Adresse Telefon");
+    expect(query).toContain("Supermarkt Filiale");
     expect(query).toContain("Bern");
   });
 
@@ -332,6 +559,19 @@ describe("web_search MCP", () => {
     expect(query).not.toContain("Adresse offizieller Ort");
   });
 
+  test("enriches temporal event queries with schedule terms instead of address-only terms", () => {
+    const query = _webSearchTestInternals.buildSearchQuery({
+      query: "Welche Konzerte gibt es diese Woche in Thun?",
+      intent: "venue",
+      resolvedPlace: "Thun",
+      maxResults: 6,
+    }, "de");
+
+    expect(query).toContain("Programm Spielplan Veranstaltungen Termine");
+    expect(query).toContain("Thun");
+    expect(query).not.toContain("Adresse offizieller Ort");
+  });
+
   test("enriches collection schedule queries with calendar document terms", () => {
     const query = _webSearchTestInternals.buildSearchQuery({
       query: "Wann ist die nächste Abfuhr an der Examplefeldstrasse in Bern?",
@@ -341,6 +581,70 @@ describe("web_search MCP", () => {
 
     expect(query).toContain("Entsorgungskalender Abfuhrdaten PDF");
     expect(query).not.toContain("Adresse offizieller Ort");
+  });
+
+  test("enriches compound collection schedule words with calendar document terms", () => {
+    const query = _webSearchTestInternals.buildSearchQuery({
+      query: "Wann ist die nächste Kehrichtabfuhr an der Breitfeldstrasse in Bern?",
+      intent: "local",
+      resolvedPlace: "Bern",
+      maxResults: 6,
+    }, "de");
+
+    expect(query).toContain("Entsorgungskalender Abfuhrdaten PDF");
+    expect(query).toContain("Bern");
+  });
+
+  test("enriches disposal lookups without collection-calendar terms", () => {
+    const query = _webSearchTestInternals.buildSearchQuery({
+      query: "Wie entsorge ich alte Medikamente in Bern?",
+      intent: "local",
+      resolvedPlace: "Bern",
+      maxResults: 6,
+    }, "de");
+
+    expect(query).toContain("Entsorgung Abgabestelle offizieller Ort");
+    expect(query).toContain("Bern");
+    expect(query).not.toContain("Entsorgungskalender");
+  });
+
+  test("enriches non-local product comparisons without shopping-place terms", () => {
+    const query = _webSearchTestInternals.buildSearchQuery({
+      query: "Vergleiche Hörgeräte Batterietyp 312 und 13",
+      intent: "product",
+      maxResults: 6,
+    }, "de");
+
+    expect(query).toContain("Vergleich Test Empfehlung Preis");
+    expect(query).not.toContain("wo kaufen");
+    expect(query).not.toContain("Geschäft");
+  });
+
+  test("enriches local product searches with store terms", () => {
+    const query = _webSearchTestInternals.buildSearchQuery({
+      query: "Wo kann ich in Spiez lactosefreie Milch kaufen?",
+      intent: "product",
+      resolvedPlace: "Spiez",
+      maxResults: 6,
+    }, "de");
+
+    expect(query).toContain("laktosefrei");
+    expect(query).not.toContain("lactosefrei");
+    expect(query).toContain("Laden Geschäft Supermarkt Preis");
+    expect(query).toContain("Spiez");
+    expect(query).not.toContain("wo kaufen");
+  });
+
+  test("normalizes described hearing-aid battery searches to product terms", () => {
+    const query = _webSearchTestInternals.buildSearchQuery({
+      query: "Wo bekomme ich Batterien für ein Hörgerät in der Nähe?",
+      intent: "product",
+      resolvedPlace: "Spiez",
+      maxResults: 6,
+    }, "de");
+
+    expect(query).toContain("Hörgerätebatterien");
+    expect(query).toContain("Laden Geschäft Supermarkt Preis");
   });
 
   test("extracts dated programme rows for table-friendly answers", () => {

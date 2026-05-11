@@ -23,6 +23,16 @@ const DEFAULT_CASES: WebSearchTraceCase[] = [
   { query: "Wann ist die nächste Kehrichtabfuhr an der Breitfeldstrasse in Bern?", expectedIntent: "local" },
   { query: "Erkläre mir kurz, was eine Patientenverfügung in der Schweiz ist", expectedIntent: "topic" },
   { query: "Finde Infos zur AHV-Rente 2026 in der Schweiz", expectedIntent: "topic" },
+  { query: "Was kostet ein Halbtax-Abo 2026?", expectedIntent: "product" },
+  { query: "Finde aktuelle Informationen zur neuen E-ID in der Schweiz", expectedIntent: "topic" },
+  { query: "Welche Warnzeichen gibt es bei Telefonbetrug in der Schweiz?", expectedIntent: "topic" },
+  { query: "Wie entsorge ich alte Medikamente in Bern?", expectedIntent: "local" },
+  { query: "Ist die Grippeimpfung 2026 für Senioren in der Schweiz empfohlen?", expectedIntent: "topic" },
+  { query: "Welche einfachen Smartphones sind 2026 für Senioren empfehlenswert?", expectedIntent: "product" },
+  { query: "Vergleiche Hörgeräte Batterietyp 312 und 13", expectedIntent: "product" },
+  { query: "Welche Rechte habe ich bei einer Flugverspätung ab Zürich?", expectedIntent: "topic" },
+  { query: "Wie sicher ist Twint und was tun bei falscher Zahlung?", expectedIntent: "topic" },
+  { query: "Wo finde ich den aktuellen Notfallplan bei Stromausfall in der Schweiz?", expectedIntent: "topic" },
 ];
 
 function readCases(): WebSearchTraceCase[] {

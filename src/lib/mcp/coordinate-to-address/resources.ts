@@ -1,7 +1,12 @@
+import { chromium, type Browser } from "playwright";
+
 import type { McpLanguage, McpRuntimeLocation, McpToolObservation } from "../types";
 import { coordinateToAddressPrompt } from "./prompts";
 
 const NOMINATIM_TIMEOUT_MS = 6000;
+const BROWSER_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 SeniorNett/0.1 Chrome Safari";
+
+let browserPromise: Promise<Browser> | null = null;
 
 type NominatimReverseResponse = {
   display_name?: string;
@@ -33,6 +38,58 @@ function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number): Pr
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   return fetch(url, { ...init, signal: controller.signal }).finally(() => clearTimeout(timeout));
+}
+
+async function getBrowser(): Promise<Browser> {
+  if (!browserPromise) {
+    browserPromise = chromium.launch({
+      headless: true,
+      args: ["--disable-dev-shm-usage", "--no-sandbox"],
+    });
+  }
+
+  const browser = await browserPromise.catch((error) => {
+    browserPromise = null;
+    throw error;
+  });
+
+  if (!browser.isConnected()) {
+    browserPromise = null;
+    return getBrowser();
+  }
+
+  return browser;
+}
+
+async function fetchJsonViaBrowser(url: string, timeoutMs: number): Promise<NominatimReverseResponse> {
+  const browser = await getBrowser();
+  const context = await browser.newContext({
+    locale: "de-CH",
+    timezoneId: "Europe/Zurich",
+    userAgent: BROWSER_USER_AGENT,
+    viewport: { width: 1280, height: 900 },
+  });
+  const page = await context.newPage();
+
+  try {
+    const response = await page.goto(url, {
+      waitUntil: "domcontentloaded",
+      timeout: timeoutMs,
+    });
+
+    if (!response) {
+      throw new Error("No response");
+    }
+
+    if (!response.ok()) {
+      throw new Error(`HTTP ${response.status()}`);
+    }
+
+    return await response.json() as NominatimReverseResponse;
+  } finally {
+    await page.close().catch(() => undefined);
+    await context.close().catch(() => undefined);
+  }
 }
 
 function formatAddressLine(address: NominatimReverseResponse["address"]): string | null {
@@ -112,6 +169,23 @@ export async function reverseGeocode(input: CoordinateToAddressInput): Promise<C
       error: data.error,
     };
   } catch (error) {
+    try {
+      const data = await fetchJsonViaBrowser(`https://nominatim.openstreetmap.org/reverse?${params.toString()}`, NOMINATIM_TIMEOUT_MS);
+      const address = data.address;
+      const city = address?.city || address?.town || address?.village || address?.suburb || null;
+
+      return {
+        request: input,
+        label: formatLabel(data),
+        addressLine: formatAddressLine(address),
+        city,
+        postcode: address?.postcode || null,
+        country: address?.country || null,
+        displayName: data.display_name || null,
+        source: "nominatim.openstreetmap.org",
+        error: data.error,
+      };
+    } catch (browserError) {
     return {
       request: input,
       label: null,
@@ -121,8 +195,9 @@ export async function reverseGeocode(input: CoordinateToAddressInput): Promise<C
       country: null,
       displayName: null,
       source: "nominatim.openstreetmap.org",
-      error: error instanceof Error ? error.message : "Reverse geocoding failed",
+      error: browserError instanceof Error ? browserError.message : error instanceof Error ? error.message : "Reverse geocoding failed",
     };
+    }
   }
 }
 

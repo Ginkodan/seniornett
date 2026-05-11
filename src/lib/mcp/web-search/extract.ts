@@ -77,15 +77,24 @@ function extractDocumentFacts(text: string): WebSearchDocumentFact[] {
   const facts: WebSearchDocumentFact[] = [];
   const lines = normalized.split(/\n+/).map((line) => line.trim()).filter(Boolean);
 
+  const isMostlyNumeric = (value: string) => {
+    const compact = value.replace(/[^0-9]/g, "");
+    return compact.length >= 4 && compact.length >= value.replace(/\s+/g, "").length * 0.6;
+  };
+
   for (const line of lines) {
     const parts = splitRow(line);
     if (parts.length < 2) continue;
 
     for (let index = 0; index < parts.length - 1; index += 1) {
-      const label = parts[index];
-      const value = parts[index + 1];
+      const label = parts[index].replace(/\s+/g, " ").trim();
+      const value = parts[index + 1].replace(/\s+/g, " ").trim();
       if (!label || !value) continue;
       if (label.length > 80 || value.length > 160) continue;
+      if (/^(koordinaten?|coordinates?|coordonnées?)$/i.test(label)) continue;
+      if (/[°'""]/.test(label) || /[°'""]/.test(value)) continue;
+      if (isMostlyNumeric(label) && isMostlyNumeric(value)) continue;
+      if (label.length <= 2 && isMostlyNumeric(value)) continue;
       facts.push({ label, value, context: line });
     }
   }

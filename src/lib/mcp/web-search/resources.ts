@@ -4,7 +4,7 @@ import type { McpLanguage, McpToolObservation } from "../types";
 import { _documentLookupTestInternals } from "./document-lookup";
 import { _extractTestInternals, extractUsefulInfo, formatExtractedInfo, formatScheduleRows } from "./extract";
 import { webSearchPrompt } from "./prompts";
-import { buildSearchQuery } from "./query";
+import { buildSearchQuery, compactSearchPhrase, placeForSearch } from "./query";
 import { rankResults, scoreResult } from "./rank";
 import { cleanSearchTitle, domainFromUrl, normalizeContentText } from "./text";
 import type { WebSearchInput, WebSearchRaw, WebSearchResult } from "./types";
@@ -21,6 +21,10 @@ const PDF_PAGE_LIMIT = 12;
 let browserPromise: Promise<Browser> | null = null;
 let pdfjsModulePromise: Promise<typeof import("pdfjs-dist/legacy/build/pdf.mjs")> | null = null;
 
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function getBrowser(): Promise<Browser> {
   if (!browserPromise) {
     browserPromise = chromium.launch({
@@ -29,13 +33,23 @@ async function getBrowser(): Promise<Browser> {
     });
   }
 
-  return browserPromise;
+  const browser = await browserPromise.catch((error) => {
+    browserPromise = null;
+    throw error;
+  });
+
+  if (!browser.isConnected()) {
+    browserPromise = null;
+    return getBrowser();
+  }
+
+  return browser;
 }
 
 function unwrapSearchUrl(url: string): string {
   try {
     const parsed = new URL(url);
-    const startpageUrl = parsed.searchParams.get("url") || parsed.searchParams.get("u");
+    const startpageUrl = parsed.searchParams.get("url") || parsed.searchParams.get("u") || parsed.searchParams.get("uddg");
     return startpageUrl ? decodeURIComponent(startpageUrl) : url;
   } catch {
     return url;
@@ -49,10 +63,12 @@ function isDiscardableSearchResult(result: { title: string; url: string; domain?
   const snippet = (result.snippet || "").trim().toLowerCase();
 
   if (!title || !url) return true;
+  if (url === "browser_extension" || title === "browser extension") return true;
   if (url.startsWith("mailto:")) return true;
   if (title === "email us") return true;
   if (url.includes("subject=error") || snippet.includes("error getting results")) return true;
   if (domain.includes("startpage.com")) return true;
+  if (domain === "startmail.com" && (title.includes("startmail") || url.includes("startpage"))) return true;
   return false;
 }
 
@@ -68,6 +84,20 @@ function dedupeResults(results: WebSearchResult[]): WebSearchResult[] {
   }
 
   return kept;
+}
+
+function isBareDomainResult(result: WebSearchResult): boolean {
+  try {
+    const pathname = new URL(result.url).pathname;
+    return result.title === result.domain && !result.snippet && (!pathname || pathname === "/" || pathname === "");
+  } catch {
+    return result.title === result.domain && !result.snippet;
+  }
+}
+
+function shouldKeepSearchResult(input: WebSearchInput, result: WebSearchResult): boolean {
+  if (!isBareDomainResult(result)) return true;
+  return ["local", "opening_hours", "emergency_pharmacy", "venue", "product"].includes(input.intent);
 }
 
 function isPrivateHost(hostname: string): boolean {
@@ -89,6 +119,109 @@ function isSafeHttpUrl(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function alternateSearchQueries(input: WebSearchInput, language: McpLanguage, currentQuery: string): string[] {
+  const place = placeForSearch(input);
+  const compact = compactSearchPhrase(input.query);
+
+  if (input.intent === "emergency_pharmacy" && place) {
+    return language === "fr"
+      ? [
+          `pharmacie de garde ${place} téléphone`,
+          `service de garde pharmacie ${place}`,
+          `pharmacie urgence ${place}`,
+        ].filter((query) => query !== currentQuery)
+      : [
+          `Apotheken Notfalldienst ${place} Telefonnummer`,
+          `Dienstapotheke ${place}`,
+          `Notfallapotheke ${place}`,
+        ].filter((query) => query !== currentQuery);
+  }
+
+  if (input.intent === "opening_hours" && place) {
+    const subject = compact
+      .replace(new RegExp(`\\b${escapeRegExp(place)}\\b`, "i"), "")
+      .replace(/\b(öffnungszeiten?|oeffnungszeiten?|adresse|telefon)\b/gi, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (subject) {
+      const variants = language === "fr"
+        ? [
+            `${subject} ${place} horaires`,
+            `${subject} ${place} adresse téléphone`,
+            `${subject} magasin ${place}`,
+            /\bmigros\b/i.test(input.query) ? `${subject} ${place} supermarché filiale` : "",
+          ]
+        : [
+            `${subject} ${place} Öffnungszeiten`,
+            `${subject} ${place} Adresse Telefon`,
+            `${subject} Filiale ${place}`,
+            /\bmigros\b/i.test(input.query) ? `${subject} ${place} Supermarkt Filiale` : "",
+          ];
+      return variants.filter((query) => query !== currentQuery);
+    }
+  }
+
+  if (input.intent === "venue") {
+    const subject = compact
+      .replace(new RegExp(`\\b${escapeRegExp(place || "")}\\b`, "i"), "")
+      .replace(/\b(adresse|kontakt|standort|offiziell|offizieller ort|spielort)\b/gi, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    const venueBasis = subject || compact || input.query;
+    const variants = language === "fr"
+      ? [
+          `${venueBasis} ${place || ""} adresse contact`,
+          `${venueBasis} ${place || ""} lieu officiel`,
+          `${venueBasis} ${place || ""} horaires adresse`,
+        ]
+      : [
+          `${venueBasis} ${place || ""} Adresse Kontakt`,
+          `${venueBasis} ${place || ""} offizieller Ort`,
+          `${venueBasis} ${place || ""} Öffnungszeiten Adresse`,
+        ];
+
+    return variants.filter((query) => query && query !== currentQuery);
+  }
+
+  if (input.intent === "local" && /\b(\w*abfuhr(?:daten)?|entsorgungskalender|abfallkalender|kehricht|abfall|sammlung|papiersammlung|papier|karton)\b/i.test(input.query)) {
+    const subject = compact || input.query;
+    const variants = language === "fr"
+      ? [
+          `${subject} ${place || ""} calendrier collecte déchets officiel`,
+          `${place || ""} calendrier déchets adresse`.trim(),
+        ]
+      : [
+          `${subject} ${place || ""} Entsorgungskalender Abfuhrdaten PDF`,
+          `${place || ""} Abfallkalender Entsorgung Adresse`.trim(),
+        ];
+    return variants.filter((query) => query && query !== currentQuery);
+  }
+
+  if (input.intent !== "product") return [];
+
+  const withoutPlace = place ? compact.replace(new RegExp(`\\b${escapeRegExp(place)}\\b`, "i"), "").replace(/\s+/g, " ").trim() : compact;
+  if (!withoutPlace || withoutPlace === currentQuery) return [];
+
+  const variants = language === "fr"
+    ? [
+        `${withoutPlace} Suisse magasin prix`,
+        `${withoutPlace} Suisse acheter`,
+      ]
+    : [
+        `${withoutPlace} Schweiz Laden Supermarkt Preis`,
+        `${withoutPlace} Schweiz kaufen`,
+        place ? `${withoutPlace} Laden ${place}` : "",
+      ];
+
+  return variants.filter((query) => query && query !== currentQuery);
 }
 
 
@@ -133,10 +266,8 @@ async function extractPdfTextFromUrl(url: string): Promise<string> {
   return parts.join("\n").slice(0, MAX_MARKDOWN_CHARS);
 }
 
-async function createContext(input: WebSearchInput, language: McpLanguage): Promise<BrowserContext> {
-  const browser = await getBrowser();
-
-  return await browser.newContext({
+function buildContextOptions(input: WebSearchInput, language: McpLanguage): Parameters<Browser["newContext"]>[0] {
+  return {
     locale: language === "fr" ? "fr-CH" : "de-CH",
     timezoneId: "Europe/Zurich",
     geolocation: input.location
@@ -148,10 +279,22 @@ async function createContext(input: WebSearchInput, language: McpLanguage): Prom
     permissions: input.location ? ["geolocation"] : [],
     userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 SeniorNett/0.1 Chrome Safari",
     viewport: { width: 1280, height: 900 },
-  });
+  };
 }
 
-async function searchStartpage(context: BrowserContext, query: string, language: McpLanguage, maxResults: number) {
+async function createContext(input: WebSearchInput, language: McpLanguage): Promise<BrowserContext> {
+  const options = buildContextOptions(input, language);
+  const browser = await getBrowser();
+
+  try {
+    return await browser.newContext(options);
+  } catch {
+    browserPromise = null;
+    return await (await getBrowser()).newContext(options);
+  }
+}
+
+async function searchStartpage(context: BrowserContext, input: WebSearchInput, query: string, language: McpLanguage, maxResults: number) {
   const page = await context.newPage();
 
   const params = new URLSearchParams({
@@ -203,7 +346,110 @@ async function searchStartpage(context: BrowserContext, query: string, language:
       };
     })
     .filter((result) => !isDiscardableSearchResult(result))
-    .filter((result) => result.title !== result.domain || Boolean(result.snippet) || /\/[^/]+/.test(new URL(result.url).pathname))
+    .filter((result) => shouldKeepSearchResult(input, result))
+    .filter((result, index, results) => results.findIndex((entry) => entry.url.replace(/[#?].*$/, "") === result.url.replace(/[#?].*$/, "")) === index)
+    .slice(0, maxResults);
+}
+
+async function searchDuckDuckGo(context: BrowserContext, input: WebSearchInput, query: string, language: McpLanguage, maxResults: number) {
+  const page = await context.newPage();
+  const params = new URLSearchParams({
+    q: query,
+    kl: language === "fr" ? "ch-fr" : "ch-de",
+  });
+
+  await page.goto(`https://duckduckgo.com/html/?${params.toString()}`, {
+    waitUntil: "domcontentloaded",
+    timeout: SEARCH_TIMEOUT_MS,
+  });
+
+  const results = await page.$$eval("a[href]", (anchors) =>
+    anchors
+      .map((anchor) => {
+        const visibleText = (anchor as HTMLElement).innerText || anchor.textContent || "";
+        const title = visibleText.replace(/\s+/g, " ").trim();
+        const url = anchor.getAttribute("href") || "";
+        const container = anchor.closest(".result, .web-result, article, li, div");
+        const snippetEl = container?.querySelector<HTMLElement>(".result__snippet, .result__body, p");
+        const snippet = snippetEl?.textContent?.replace(/\s+/g, " ").trim() || "";
+
+        return { title, url, snippet };
+      })
+      .filter((entry) =>
+        entry.title &&
+        entry.url &&
+        !entry.url.startsWith("#") &&
+        !/^(images|videos|news|maps|shopping|settings)$/i.test(entry.title)
+      )
+  );
+
+  await page.close();
+
+  return results
+    .map((result) => {
+      const url = unwrapSearchUrl(result.url);
+      return {
+        ...result,
+        title: cleanSearchTitle(result.title, url),
+        url,
+        domain: domainFromUrl(url),
+      };
+    })
+    .filter((result) => isSafeHttpUrl(result.url))
+    .filter((result) => !isDiscardableSearchResult(result))
+    .filter((result) => shouldKeepSearchResult(input, result))
+    .filter((result, index, results) => results.findIndex((entry) => entry.url.replace(/[#?].*$/, "") === result.url.replace(/[#?].*$/, "")) === index)
+    .slice(0, maxResults);
+}
+
+async function searchBing(context: BrowserContext, input: WebSearchInput, query: string, language: McpLanguage, maxResults: number) {
+  const page = await context.newPage();
+  const params = new URLSearchParams({
+    q: query,
+    cc: "ch",
+    setlang: language === "fr" ? "fr-CH" : "de-CH",
+  });
+
+  await page.goto(`https://www.bing.com/search?${params.toString()}`, {
+    waitUntil: "domcontentloaded",
+    timeout: SEARCH_TIMEOUT_MS,
+  });
+
+  const results = await page.$$eval("li.b_algo a[href], h2 a[href], a[href]", (anchors) =>
+    anchors
+      .map((anchor) => {
+        const visibleText = (anchor as HTMLElement).innerText || anchor.textContent || "";
+        const title = visibleText.replace(/\s+/g, " ").trim();
+        const url = anchor.getAttribute("href") || "";
+        const container = anchor.closest("li.b_algo, article, li, div");
+        const snippetEl = container?.querySelector<HTMLElement>(".b_caption p, p");
+        const snippet = snippetEl?.textContent?.replace(/\s+/g, " ").trim() || "";
+
+        return { title, url, snippet };
+      })
+      .filter((entry) =>
+        entry.title &&
+        entry.url &&
+        !entry.url.startsWith("#") &&
+        !/^(images|videos|news|maps|shopping|settings)$/i.test(entry.title)
+      )
+  );
+
+  await page.close();
+
+  return results
+    .map((result) => {
+      const url = unwrapSearchUrl(result.url);
+      return {
+        ...result,
+        title: cleanSearchTitle(result.title, url),
+        url,
+        domain: domainFromUrl(url),
+      };
+    })
+    .filter((result) => isSafeHttpUrl(result.url))
+    .filter((result) => !isDiscardableSearchResult(result))
+    .filter((result) => shouldKeepSearchResult(input, result))
     .filter((result, index, results) => results.findIndex((entry) => entry.url.replace(/[#?].*$/, "") === result.url.replace(/[#?].*$/, "")) === index)
     .slice(0, maxResults);
 }
@@ -446,8 +692,36 @@ async function crawlResult(context: BrowserContext, result: WebSearchResult, inp
   }
 }
 
+function isBrowserBlockedContent(result: WebSearchResult): boolean {
+  const body = `${result.markdown || ""}\n${result.text || ""}`.toLowerCase();
+  if (!body.trim()) return false;
+
+  return [
+    /browser wechseln/,
+    /we do not support this browser/,
+    /this browser is not supported/,
+    /sicherheitsüberprüfung wird durchgeführt/,
+    /überprüfung erfolgreich\.? warten auf antwort/,
+    /please enable javascript/,
+  ].some((pattern) => pattern.test(body));
+}
+
+function hasUsefulSearchContent(result: WebSearchResult): boolean {
+  const extracted = result.extracted;
+  if (extracted) {
+    if (extracted.scheduleRows.length || extracted.documentFacts.length) return true;
+    if (extracted.openingHours.length || extracted.addresses.length || extracted.phones.length || extracted.emails.length) return true;
+  }
+
+  const body = `${result.markdown || ""}\n${result.text || ""}`.trim();
+  if (!body) return false;
+  if (isBrowserBlockedContent(result)) return false;
+  if (body.length < 40 && !result.snippet.trim()) return false;
+  return true;
+}
+
 export async function performWebSearch(input: WebSearchInput, language: McpLanguage): Promise<WebSearchRaw> {
-  const query = buildSearchQuery(input, language);
+  let query = buildSearchQuery(input, language);
   const searchedAt = new Date();
   const maxResults = Math.max(1, Math.min(MAX_RESULTS, input.maxResults ?? MAX_RESULTS));
   let context: BrowserContext;
@@ -466,8 +740,30 @@ export async function performWebSearch(input: WebSearchInput, language: McpLangu
   }
 
   try {
-    const searchResults = dedupeResults(await searchStartpage(context, query, language, maxResults).catch(() => []));
-    const warning = searchResults.length ? undefined : "startpage_empty";
+    const queries = [query, ...alternateSearchQueries(input, language, query)];
+    let searchResults: WebSearchResult[] = [];
+
+    for (let attempt = 0; attempt < 2 && !searchResults.length; attempt += 1) {
+      if (attempt > 0) {
+        await delay(1000);
+      }
+
+      for (const candidateQuery of queries) {
+        searchResults = dedupeResults(await searchStartpage(context, input, candidateQuery, language, maxResults).catch(() => []));
+        if (!searchResults.length) {
+          searchResults = dedupeResults(await searchDuckDuckGo(context, input, candidateQuery, language, maxResults).catch(() => []));
+        }
+        if (!searchResults.length) {
+          searchResults = dedupeResults(await searchBing(context, input, candidateQuery, language, maxResults).catch(() => []));
+        }
+        if (searchResults.length) {
+          query = candidateQuery;
+          break;
+        }
+      }
+    }
+
+    const warning = searchResults.length ? undefined : "search_empty";
     const crawled = await Promise.all(searchResults.slice(0, MAX_CRAWL_RESULTS).map((result) => crawlResult(context, result, input, searchedAt)));
 
     const merged = rankResults(input, searchResults.map((result) => crawled.find((entry) => entry.url === result.url) || result));
@@ -528,8 +824,22 @@ export function buildWebSearchAnswer(raw: WebSearchRaw, language: McpLanguage): 
     : null;
 
   const scheduleResults = raw.results.filter((result) => result.extracted?.scheduleRows.length);
+  const actionableResults = raw.results.filter((result) =>
+    Boolean(result.extracted?.openingHours.length || result.extracted?.addresses.length || result.extracted?.phones.length || result.extracted?.emails.length)
+  );
   const documentResults = raw.results.filter((result) => result.extracted?.documentFacts.length);
-  const displayResults = (scheduleResults.length ? scheduleResults : documentResults.length ? documentResults : raw.results).slice(0, 4);
+  const usefulResults = raw.results.filter(hasUsefulSearchContent);
+  const displayResults = (
+    scheduleResults.length
+      ? scheduleResults
+      : actionableResults.length
+        ? actionableResults
+        : documentResults.length
+          ? documentResults
+          : usefulResults.length
+            ? usefulResults
+            : raw.results
+  ).slice(0, 4);
   const lines = displayResults.map((result, index) => `## ${index + 1}. ${compactResult(result, language)}`);
 
   return [heading, sourceLine, placeLine, ...lines].filter(Boolean).join("\n\n");

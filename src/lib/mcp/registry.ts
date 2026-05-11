@@ -1,5 +1,6 @@
 import { coordinateToAddressTool } from "./coordinate-to-address";
 import { dateTimeTool } from "./date-time";
+import { nearbyPlaceTool } from "./nearby-place";
 import { timetableTool } from "./timetable";
 import { weatherTool } from "./weather";
 import { webSearchTool } from "./web-search";
@@ -11,6 +12,7 @@ export const MCP_TOOLS = [
   weatherTool,
   dateTimeTool,
   coordinateToAddressTool,
+  nearbyPlaceTool,
   webSearchTool,
   timetableTool,
 ] as const as readonly McpToolLike[];

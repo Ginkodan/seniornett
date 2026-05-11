@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { McpTool, McpToolContext, McpToolObservation, McpToolRequestResolution } from "../types";
+import { shouldUseNearbyPlaceTool } from "../nearby-place/prompts";
 import { coordinateToAddressPrompt } from "./prompts";
 import {
   buildCoordinateToAddressObservation,
@@ -16,7 +17,10 @@ function buildRequestSummary(input: CoordinateToAddressInput, language: "de" | "
 }
 
 function hasExplicitPlaceOrAddress(message: string): boolean {
-  return /\b(?:in|bei|an|auf|für|fuer|à|a|sur|près de)\s+(?:der|die|das|dem|den|le|la|l')?\s*[A-ZÄÖÜÀ-Ÿ][A-Za-zÄÖÜäöüßÀ-ÿ' -]*(?:strasse|straße|gasse|weg|platz|quai|rue|route|avenue|rain|allee|feld|\b[A-ZÄÖÜÀ-Ÿ][a-zäöüßà-ÿ]+)\b/.test(message);
+  return [
+    /\b(?:in|bei|an|auf|à|a|sur|près de)\s+(?!der\s+n(?:ä|ae)he|meiner\s+n(?:ä|ae)he|nearby|near\s+me\b)(?:(?:der|die|das|dem|den|le|la|l')\s+)?(?![Nn](?:ä|ae)he\b)[A-ZÄÖÜÀ-Ÿ][A-Za-zÄÖÜäöüßÀ-ÿ'().-]*(?:\s+[A-ZÄÖÜÀ-Ÿ]?[A-Za-zÄÖÜäöüßÀ-ÿ'().-]+){0,3}/,
+    /\b[A-ZÄÖÜÀ-Ÿ][A-Za-zÄÖÜäöüßÀ-ÿ'().-]*(?:strasse|straße|gasse|weg|platz|quai|rue|route|avenue|rain|allee|feld)\b/i,
+  ].some((pattern) => pattern.test(message));
 }
 
 export const coordinateToAddressTool: McpTool<CoordinateToAddressInput, CoordinateToAddressRaw> = {
@@ -45,6 +49,7 @@ export const coordinateToAddressTool: McpTool<CoordinateToAddressInput, Coordina
     const hasWebSearchObservation = context.trace.some((entry) => entry.toolName === "web_search");
     if (hasWebSearchObservation) return false;
     if (hasExplicitPlaceOrAddress(context.message)) return false;
+    if (shouldUseNearbyPlaceTool(context.message)) return false;
     return Boolean(context.runtime?.location) && /\b(in\s+der\s+nähe|in\s+der\s+naehe|nahe|nächste|naechste|bei\s+mir|hier|près|proche|nearby|closest)\b/i.test(context.message);
   },
   async buildRequest(context: McpToolContext): Promise<McpToolRequestResolution<CoordinateToAddressInput>> {
