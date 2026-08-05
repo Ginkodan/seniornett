@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SeniorNett – LiveKit Anruf-Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 2rem; max-width: 860px; }
+      label { display: block; margin: 0.5rem 0 0.2rem; font-weight: 600; }
+      input { padding: 0.5rem; width: 22rem; max-width: 100%; }
+      button { padding: 0.7rem 1.2rem; font-size: 1rem; margin-top: 1rem; cursor: pointer; }
+      #videos { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem; }
+      video { width: 380px; max-width: 100%; background: #111; border-radius: 12px; }
+      pre { background: #f4f4f4; padding: 0.75rem; border-radius: 8px; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <h1>LiveKit Anruf-Test</h1>
+    <p>Dev-only Testseite für Phase 4. Login → Call-Token → LiveKit-Room beitreten.</p>
+
+    <label>Username</label>
+    <input id="username" value="nina" />
+    <label>Pairing-Code</label>
+    <input id="code" value="NINA-CARE-2026" />
+    <label>Anrufen (Kontakt-User-ID)</label>
+    <input id="with" value="user-parent-001" />
+    <button id="join">Anruf starten &amp; beitreten</button>
+
+    <div id="videos"></div>
+    <h3>Log</h3>
+    <pre id="log"></pre>
+
+    <script>
+      const log = (m) => (document.getElementById("log").textContent += m + "\n");
+      const videos = document.getElementById("videos");
+
+      async function post(path, body, token) {
+        const headers = { "Content-Type": "application/json" };
+        if (token) headers.Authorization = "Bearer " + token;
+        const res = await fetch(path, { method: "POST", headers, body: JSON.stringify(body) });
+        if (!res.ok) throw new Error(path + " -> HTTP " + res.status + " " + (await res.text()));
+        return res.json();
+      }
+
+      function attach(track) {
+        const el = track.attach();
+        el.autoplay = true;
+        if (track.kind === "video") videos.appendChild(el);
+      }
+
+      document.getElementById("join").onclick = async () => {
+        try {
+          const username = document.getElementById("username").value.trim();
+          const code = document.getElementById("code").value.trim();
+          const withUser = document.getElementById("with").value.trim();
+
+          log("Login …");
+          const { token: session } = await post("/api/auth/login", { username, code });
+          log("Call-Token …");
+          const { token, url, room } = await post("/api/ext/calls/token", { with: withUser }, session);
+          log("Room: " + room + "  URL: " + url);
+
+          const lk = window.LivekitClient;
+          const livekitRoom = new lk.Room({ adaptiveStream: true, dynacast: true });
+          livekitRoom.on(lk.RoomEvent.TrackSubscribed, (track) => attach(track));
+          await livekitRoom.connect(url, token);
+          log("Verbunden mit Room als " + livekitRoom.localParticipant.identity);
+
+          await livekitRoom.localParticipant.enableCameraAndMicrophone();
+          livekitRoom.localParticipant.videoTrackPublications.forEach((p) => p.track && attach(p.track));
+          log("Kamera & Mikrofon aktiv. Warte auf Gegenstelle …");
+        } catch (e) {
+          log("FEHLER: " + (e && e.message ? e.message : e));
+        }
+      };
+    </script>
+  </body>
+</html>

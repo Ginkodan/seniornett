@@ -1,3 +1,6 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+DROP TABLE IF EXISTS user_credentials;
 DROP TABLE IF EXISTS table_chat_messages;
 DROP TABLE IF EXISTS table_chat_presence;
 DROP TABLE IF EXISTS table_chat_topics;
@@ -26,6 +29,15 @@ CREATE TABLE users (
   profile            JSONB       NOT NULL DEFAULT '{}',
   created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at         TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Pairing-code / password credentials for off-VPN clients (standalone caregiver
+-- app). secret_hash is a bcrypt hash produced by pgcrypto crypt()/gen_salt('bf');
+-- verified in-DB at login. On-VPN tablets do not use this — they auth by VPN IP.
+CREATE TABLE user_credentials (
+  user_id      TEXT        PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+  secret_hash  TEXT        NOT NULL,
+  updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE chat_relationships (
@@ -267,6 +279,11 @@ VALUES
     }'::jsonb
   );
 
+-- Dev pairing code for the standalone caregiver app. Login: username "nina".
+INSERT INTO user_credentials (user_id, secret_hash)
+VALUES
+  ('user-caregiver-001', crypt('NINA-CARE-2026', gen_salt('bf')));
+
 INSERT INTO chat_relationships (user_id, contact_user_id, label)
 VALUES
   ('user-parent-001', 'user-caregiver-001', 'Tochter & Betreuung'),
@@ -331,3 +348,42 @@ VALUES
   ('reisen', 'user-grandpa-001', 'Ich würde gern wieder ans Meer fahren.', NOW() - INTERVAL '20 minutes'),
   ('reisen', 'user-neighbor-001', 'Für mich wäre eine kurze Zugreise ideal.', NOW() - INTERVAL '18 minutes'),
   ('alltag', 'user-neighbor-002', 'Hat jemand ein gutes Rezept für einen einfachen Apfelkuchen?', NOW() - INTERVAL '15 minutes');
+
+-- Realtime: NOTIFY on the "chat_events" channel for every inserted message, from
+-- any path (tablet server actions OR the standalone app API). The SSE endpoint
+-- (/api/ext/stream) LISTENs and fans out filtered by recipient / topic membership.
+CREATE OR REPLACE FUNCTION notify_private_chat_event() RETURNS trigger AS $$
+BEGIN
+  PERFORM pg_notify('chat_events', json_build_object(
+    'scope', 'private',
+    'id', NEW.id::text,
+    'senderId', NEW.sender_user_id,
+    'recipientId', NEW.recipient_user_id,
+    'text', NEW.body,
+    'timestamp', NEW.created_at::text
+  )::text);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER chat_messages_notify
+  AFTER INSERT ON chat_messages
+  FOR EACH ROW EXECUTE FUNCTION notify_private_chat_event();
+
+CREATE OR REPLACE FUNCTION notify_table_chat_event() RETURNS trigger AS $$
+BEGIN
+  PERFORM pg_notify('chat_events', json_build_object(
+    'scope', 'table',
+    'id', NEW.id::text,
+    'topicId', NEW.topic_id,
+    'senderId', NEW.sender_user_id,
+    'text', NEW.body,
+    'timestamp', NEW.created_at::text
+  )::text);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER table_chat_messages_notify
+  AFTER INSERT ON table_chat_messages
+  FOR EACH ROW EXECUTE FUNCTION notify_table_chat_event();

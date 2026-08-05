@@ -36,6 +36,8 @@ services:
     working_dir: /app
     command: sh -c "npm install && npm run dev"
     environment:
+      # nginx proxies to app:5176; next dev defaults to 3000, so pin the port.
+      PORT: 5176
       DATABASE_URL: postgres://seniornett:seniornett_dev@postgres:5432/seniornett
       SENIORNETT_MEDIA_S3_ENDPOINT: http://garage:3900
       SENIORNETT_MEDIA_S3_REGION: garage
@@ -44,6 +46,13 @@ services:
       SENIORNETT_MEDIA_S3_SECRET_ACCESS_KEY: 8d5a5a0b3d8a4b0fbce97e62b4e9d7a6f1b3c2d4e5f60718293a4b5c6d7e8f90
       SENIORNETT_MEDIA_S3_FORCE_PATH_STYLE: "true"
       SENIORNETT_MEDIA_SEED_DIR: /seed/dummy-assets
+      # Off-VPN session auth (standalone caregiver app). Change the secret in prod.
+      SENIORNETT_AUTH_JWT_SECRET: dev-insecure-change-me-0123456789abcdef0123456789abcdef
+      SENIORNETT_APP_ALLOWED_ORIGINS: "*"
+      # LiveKit video. WS_URL is what the browser connects to (host loopback).
+      LIVEKIT_WS_URL: ws://localhost:7880
+      LIVEKIT_API_KEY: devkey
+      LIVEKIT_API_SECRET: devsecret_change_me_in_prod_0123456789abcdef
     depends_on:
       postgres:
         condition: service_healthy
@@ -89,6 +98,16 @@ services:
       - ./docker/identity-api:/srv
     expose:
       - "3001"
+
+  livekit:
+    image: livekit/livekit-server:v1.8.0
+    command: ["--config", "/etc/livekit.yaml"]
+    volumes:
+      - ./docker/livekit/livekit.yaml:/etc/livekit.yaml:ro
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882/udp"
 
   proxy:
     image: nginx:alpine

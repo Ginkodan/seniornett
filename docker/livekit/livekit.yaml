@@ -1,0 +1,12 @@
+port: 7880
+rtc:
+  tcp_port: 7881
+  # Single UDP mux port (instead of a wide range) — keeps docker port mapping simple.
+  udp_port: 7882
+  # Dev: same-host browser <-> server, no external/NAT addressing needed.
+  use_external_ip: false
+keys:
+  # Dev credentials only. Override in prod via env/secret and a real key.
+  devkey: devsecret_change_me_in_prod_0123456789abcdef
+logging:
+  level: info

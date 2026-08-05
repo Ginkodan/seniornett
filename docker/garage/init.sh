@@ -19,7 +19,7 @@ if [ -n "$NODE_ID" ]; then
 fi
 
 garage -c "$CONFIG_FILE" bucket create "$BUCKET_NAME" || true
-garage -c "$CONFIG_FILE" key import --yes "$ACCESS_KEY_ID" "$SECRET_ACCESS_KEY" -n "$KEY_NAME"
-garage -c "$CONFIG_FILE" bucket allow --read --write --owner "$BUCKET_NAME" --key "$KEY_NAME"
+garage -c "$CONFIG_FILE" key import --yes "$ACCESS_KEY_ID" "$SECRET_ACCESS_KEY" -n "$KEY_NAME" || true
+garage -c "$CONFIG_FILE" bucket allow --read --write --owner "$BUCKET_NAME" --key "$KEY_NAME" || true
 
 echo "Garage bootstrap complete."

@@ -105,7 +105,7 @@ function parseContactProfile(input: unknown): ChatContactProfile {
   };
 }
 
-async function isAllowedContact(userId: string, contactUserId: string): Promise<boolean> {
+export async function isAllowedContact(userId: string, contactUserId: string): Promise<boolean> {
   const { rows } = await getPool().query<{ ok: boolean }>(
     `SELECT TRUE AS ok
      FROM chat_relationships
