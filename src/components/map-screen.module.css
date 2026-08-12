@@ -34,6 +34,42 @@
   display: flex;
   gap: 0.75rem;
   align-items: center;
+  flex-wrap: wrap;
+}
+
+.scope:global(.map-mode-btn), .scope :global(.map-mode-btn) {
+  width: 3.5rem;
+  height: 3.5rem;
+  border: var(--border-thin);
+  border-radius: var(--radius);
+  background: rgba(255, 253, 248, 0.94);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 0 0 color-mix(in srgb, var(--ink) 72%, transparent);
+  transition: background 120ms ease, color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+.scope:global(.map-mode-btn:hover), .scope :global(.map-mode-btn:hover) {
+  background: var(--paper);
+}
+
+.scope:global(.map-mode-btn.active), .scope :global(.map-mode-btn.active) {
+  background: color-mix(in srgb, var(--ink) 10%, var(--paper));
+  color: var(--ink);
+  box-shadow: 0 1px 0 0 color-mix(in srgb, var(--ink) 35%, transparent);
+}
+
+.scope:global(.map-mode-btn.route.active), .scope :global(.map-mode-btn.route.active),
+.scope:global(.map-mode-btn.clear), .scope :global(.map-mode-btn.clear) {
+  background: color-mix(in srgb, var(--ink) 8%, var(--paper));
+}
+
+.scope:global(.map-mode-btn:focus-visible), .scope :global(.map-mode-btn:focus-visible) {
+  outline: var(--focus-ring);
+  outline-offset: 3px;
 }
 
 .scope:global(.map-toggle-btn), .scope :global(.map-toggle-btn) {
@@ -130,27 +166,244 @@
   display: none;
 }
 
-/* Map search overlay */
 .scope:global(.map-search), .scope :global(.map-search) {
   position: absolute;
   top: 1.25rem;
   right: 1.25rem;
   z-index: 700;
-  width: clamp(17rem, 38%, 24rem);
-  display: grid;
-  gap: 0.75rem;
+  width: min(24rem, calc(100vw - 2.5rem));
+  max-height: calc(100dvh - var(--topbar-height) - 2.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  align-items: stretch;
+  box-sizing: border-box;
+  padding: 0.75rem;
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 253, 248, 0.93);
+  box-shadow: 0 4px 0 0 var(--ink);
+  backdrop-filter: blur(8px);
 }
 
-.scope:global(.map-search-bar), .scope :global(.map-search-bar) {
+.scope:global(.map-search.route-open), .scope :global(.map-search.route-open) {
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+.scope:global(.map-search-row), .scope :global(.map-search-row) {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  height: 4.25rem;
-  padding: 0 0.85rem;
+  gap: 0.75rem;
+  flex: 0 0 auto;
+}
+
+.scope:global(.map-search-row > .map-search-bar), .scope :global(.map-search-row > .map-search-bar) {
+  flex: 1;
+  min-width: 0;
+}
+
+.scope:global(.map-search-row > .map-route-field.start), .scope :global(.map-search-row > .map-route-field.start) {
+  flex: 1;
+  min-width: 0;
+}
+
+.scope:global(.map-search-row > .map-route-start-bar), .scope :global(.map-search-row > .map-route-start-bar) {
+  flex: 1;
+  min-width: 0;
+}
+
+.scope:global(.map-route-head), .scope :global(.map-route-head) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+  align-items: start;
+}
+
+/* Route planner overlay */
+.scope:global(.map-routing-panel), .scope :global(.map-routing-panel) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.65rem 0.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  width: 100%;
+  min-height: 0;
+  align-items: start;
+}
+
+.scope:global(.map-route-field), .scope :global(.map-route-field) {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.3rem 0.7rem;
+  padding: 0.75rem 0.85rem;
   background: rgba(255, 253, 248, 0.97);
   border: var(--border);
   border-radius: var(--radius);
   box-shadow: 0 2px 0 0 var(--ink);
+  width: 100%;
+}
+
+.scope:global(.map-route-point-btn), .scope :global(.map-route-point-btn) {
+  width: 3.75rem;
+  height: 3.75rem;
+  border: var(--border);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 0 0 var(--ink);
+}
+
+.scope:global(.map-route-point-btn.active), .scope :global(.map-route-point-btn.active) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.scope:global(.map-route-input-shell), .scope :global(.map-route-input-shell) {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.scope:global(.map-route-input-shell span), .scope :global(.map-route-input-shell span) {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ink-3);
+  line-height: 1.2;
+}
+
+.scope:global(.map-route-input), .scope :global(.map-route-input) {
+  width: 100%;
+}
+
+.scope:global(.map-route-drawer), .scope :global(.map-route-drawer) {
+  width: 4.75rem;
+  min-width: 4.75rem;
+  height: 4.25rem;
+  min-height: 4.25rem;
+  align-self: start;
+  justify-self: end;
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.scope:global(.map-route-start-bar), .scope :global(.map-route-start-bar) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.scope:global(.map-route-end-bar), .scope :global(.map-route-end-bar) {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.scope:global(.map-route-spacer), .scope :global(.map-route-spacer) {
+  grid-column: 2;
+  grid-row: 2;
+  width: 4.75rem;
+  min-width: 4.75rem;
+  height: 4.25rem;
+}
+
+.scope:global(.map-route-start-bar), .scope :global(.map-route-start-bar),
+.scope:global(.map-route-end-bar), .scope :global(.map-route-end-bar) {
+  width: 100%;
+}
+
+.scope:global(.map-input-prefix), .scope :global(.map-input-prefix) {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.scope:global(.map-input-prefix.place), .scope :global(.map-input-prefix.place) {
+  color: var(--ink-3);
+  background: color-mix(in srgb, var(--ink) 5%, var(--paper));
+}
+
+.scope:global(.map-input-prefix.start), .scope :global(.map-input-prefix.start) {
+  color: var(--paper);
+  background: color-mix(in srgb, var(--ink) 68%, var(--paper));
+}
+
+.scope:global(.map-route-point-btn:focus-visible), .scope :global(.map-route-point-btn:focus-visible) {
+  outline: var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.scope:global(.map-route-field.active), .scope :global(.map-route-field.active) {
+  background: var(--paper);
+  border-color: color-mix(in srgb, var(--ink) 26%, transparent);
+}
+
+.scope:global(.map-route-field svg), .scope :global(.map-route-field svg) {
+  grid-row: 1 / span 2;
+}
+
+.scope:global(.map-route-field span), .scope :global(.map-route-field span) {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ink-3);
+  line-height: 1.2;
+}
+
+.scope:global(.map-route-field strong), .scope :global(.map-route-field strong) {
+  font-size: var(--fs-base);
+  line-height: 1.3;
+}
+
+.scope:global(.map-routing-header), .scope :global(.map-routing-header) {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.scope:global(.map-routing-header strong), .scope :global(.map-routing-header strong) {
+  font-size: var(--fs-base);
+  line-height: 1.2;
+}
+
+.scope:global(.map-routing-header span), .scope :global(.map-routing-header span) {
+  color: var(--ink-3);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.scope:global(.map-routing-status), .scope :global(.map-routing-status) {
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+.scope:global(.map-routing-status.error), .scope :global(.map-routing-status.error) {
+  color: #9a1f1f;
+}
+
+.scope:global(.map-routing-summary), .scope :global(.map-routing-summary) {
+  display: grid;
+  gap: 0.3rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.scope:global(.map-routing-footer), .scope :global(.map-routing-footer) {
+  color: var(--ink-3);
+  font-size: 0.94rem;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
 .scope:global(.map-search-icon), .scope :global(.map-search-icon) {
@@ -174,6 +427,24 @@
   color: var(--ink-3);
 }
 
+.scope:global(.map-search-bar), .scope :global(.map-search-bar) {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 4.25rem;
+  padding: 0 0.85rem;
+  background: rgba(255, 253, 248, 0.97);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 0 0 var(--ink);
+  width: 100%;
+}
+
+.scope:global(.map-search-bar.route-mode), .scope :global(.map-search-bar.route-mode) {
+  border-color: color-mix(in srgb, var(--ink) 28%, transparent);
+  background: var(--paper);
+}
+
 .scope:global(.map-search-clear), .scope :global(.map-search-clear) {
   flex-shrink: 0;
   display: flex;
@@ -192,7 +463,7 @@
 }
 
 .scope:global(.map-search-results), .scope :global(.map-search-results) {
-  margin-top: 0.5rem;
+  margin: 0;
   padding: 0;
   list-style: none;
   background: rgba(255, 253, 248, 0.97);
@@ -200,7 +471,13 @@
   border-radius: var(--radius);
   box-shadow: 0 2px 0 0 var(--ink);
   overflow-y: auto;
-  max-height: 20rem;
+  max-height: min(18rem, calc(100dvh - 24rem));
+  width: 100%;
+  min-height: 0;
+}
+
+.scope:global(.map-routing-panel .map-search-results), .scope :global(.map-routing-panel .map-search-results) {
+  max-height: min(16rem, calc(100dvh - 28rem));
 }
 
 .scope:global(.map-search-result-item), .scope :global(.map-search-result-item) {

@@ -26,3 +26,9 @@ Prio 2
 - [x] Lotti agent capabilities
 - [ ] Hilfsangebote (Einkaufen etc.)
 - [ ] Rezepte
+
+### Track
+
+- readd the second wanderwege map layer
+- zoom to current location on init
+- move osm & logic to shared lib (sbb & map are using it)
