@@ -44,6 +44,20 @@ function summarizeTrace(events: McpTestTraceEvent[]): string {
       return `${index + 1}. plan: ${event.plan.tool}${event.plan.reason ? ` (${event.plan.reason})` : ""}`;
     }
 
+    if (event.type === "planner-debug") {
+      return [
+        `${index + 1}. planner-debug: source=${event.source}, selected=${event.selectedTool}`,
+        event.dependencyRewrite
+          ? `   dependency-rewrite: ${event.dependencyRewrite.fromTool} -> ${event.dependencyRewrite.toTool}`
+          : null,
+        "   candidates:",
+        ...event.candidates.map(
+          (candidate) =>
+            `   - ${candidate.toolName}: canHandle=${candidate.canHandle}, alreadyObserved=${candidate.alreadyObserved}, requires=${candidate.requires.join(",") || "-"}`,
+        ),
+      ].filter(Boolean).join("\n");
+    }
+
     if (event.type === "request") {
       return [
         `${index + 1}. request: ${event.toolName}`,

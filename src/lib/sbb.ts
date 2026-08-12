@@ -838,7 +838,7 @@ async function loadSwissGtfsTransferDataset(): Promise<SwissGtfsTransferDataset 
       const zipPath = await ensureSwissGtfsZipOnDisk();
       if (!zipPath) return null;
 
-      const zip = await JSZip.loadAsync(await readFile(zipPath));
+      const zip = await JSZip.loadAsync(await readFile(/* turbopackIgnore: true */ zipPath));
       const stopsFile = zip.file("stops.txt");
       const transfersFile = zip.file("transfers.txt");
       if (!stopsFile || !transfersFile) return null;
