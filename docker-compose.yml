@@ -100,7 +100,8 @@ services:
       - "3001"
 
   livekit:
-    image: livekit/livekit-server:v1.8.0
+    # v1.9+ required: livekit-client >=2.14 signals on /rtc/v1, which 1.8 lacks.
+    image: livekit/livekit-server:v1.9.11
     command: ["--config", "/etc/livekit.yaml"]
     volumes:
       - ./docker/livekit/livekit.yaml:/etc/livekit.yaml:ro

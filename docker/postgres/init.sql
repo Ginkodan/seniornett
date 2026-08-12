@@ -279,10 +279,12 @@ VALUES
     }'::jsonb
   );
 
--- Dev pairing code for the standalone caregiver app. Login: username "nina".
+-- Dev pairing codes for the standalone caregiver app. Logins: "nina" and
+-- "heidi" (the second account lets both ends of chat/calls be tested locally).
 INSERT INTO user_credentials (user_id, secret_hash)
 VALUES
-  ('user-caregiver-001', crypt('NINA-CARE-2026', gen_salt('bf')));
+  ('user-caregiver-001', crypt('NINA-CARE-2026', gen_salt('bf'))),
+  ('user-parent-001', crypt('HEIDI-TEST-2026', gen_salt('bf')));
 
 INSERT INTO chat_relationships (user_id, contact_user_id, label)
 VALUES
